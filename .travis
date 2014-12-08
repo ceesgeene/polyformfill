@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+- '0.11'
+- '0.10'
+env:
+  global:
+    - secure: uIW4rSQhjUw/FEQbETsldAFo55Olan4xW9EWcpTAyznpssmvLl+dF1lonTNETF5FCd5SAaiuhm7Tf9C4LgEJHENbou6TttPeGfaaXG7ZLVPKqyMQr/2o2pLIr8BzGQfefqtQqtn84Mz1LT7DxtMjJ2IVFC0ZUHSqK6L+4dukquU=
+    - secure: KXq1aLFdE3jxVz7P13kqzI66vzlrEUxPXBuzPXafzPXoyyofLsJlB+x28npZPHB/VKKBCxREIe3ahQlhDxEbXdYhf558k9Z5bVy0uaU/370yM8CL+IwQNRV5IAePwcqcmhWX1OmVD1gp4UXO4mkpNn7fEuiDLkTRKFzDwRYAtSs=
+notifications:
+  email: false
+before_script: npm install -g karma-cli
+addons:
+  sauce_connect: true
