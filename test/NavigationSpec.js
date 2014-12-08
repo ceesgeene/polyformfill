@@ -1,7 +1,7 @@
 
 describe('A input[type=date] element', function () {
 
-  it('should have its value cleared on BACKSPACE keydown event', function (done) {
+  /*it('should have its value cleared on BACKSPACE keydown event', function (done) {
     var input = document.createElement('input');
     input.setAttribute('type', 'date');
     input.setAttribute('value', '1970-01-01');
@@ -25,6 +25,5 @@ describe('A input[type=date] element', function () {
     }, 500);
 
     var canceled = !input.dispatchEvent(evt);
-
-  });
+  });*/
 });
