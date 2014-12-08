@@ -1,4 +1,6 @@
-
-.idea
-node_modules
+*~
+.idea/
+bower_components/
+node_modules/
+npm-debug.log
 sauce.json
