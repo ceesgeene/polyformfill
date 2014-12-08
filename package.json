@@ -1,0 +1,34 @@
+{
+  "name": "polyfill-input-datetime",
+  "version": "1.0.0",
+  "description": "Polyfill script for HTML5 date/time input elements",
+  "main": "polyfill-input-datetime.js",
+  "scripts": {
+    "test": "karma start karma.conf.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceesgeene/polyfill-input-datetime.git"
+  },
+  "author": {
+    "name": "Cees Geene",
+    "email": "ceesgeene@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ceesgeene/polyfill-input-datetime/issues"
+  },
+  "homepage": "https://github.com/ceesgeene/polyfill-input-datetime",
+  "devDependencies": {
+    "gulp": "^3.8.10",
+    "gulp-rename": "^1.2.0",
+    "gulp-sourcemaps": "^1.2.8",
+    "gulp-uglify": "^1.0.2",
+    "jasmine-core": "^2.1.3",
+    "karma": "^0.12.28",
+    "karma-jasmine": "^0.3.2",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-firefox-launcher": "^0.1.3",
+    "karma-ie-launcher": "^0.1.5"
+  }
+}
