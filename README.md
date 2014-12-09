@@ -1,4 +1,4 @@
-polyfill-input-datetime
+polyformfill
 =======================
 
-Polyfill script for HTML5 date/time input elements
+Polyfill script for HTML5 form elements.
