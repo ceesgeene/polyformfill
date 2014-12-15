@@ -1,5 +1,10 @@
-// Karma configuration
+'use strict';
 
+/* global module */
+
+/**
+ * Karma configuration for local development.
+ */
 module.exports = function(config) {
   config.set({
 
@@ -14,8 +19,12 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'src/*.js',
-      'test/*.js'
+      'test/helpers/*.js',
+      'src/**/!(base).js',
+      'src/base.js',
+      'test/**/*.js',
+
+      {pattern: 'test/popup.html', watched: true, served: true, included: false}
     ],
 
 
@@ -55,8 +64,16 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'Firefox', 'IE'],
+    browsers: ['Chrome_lang_af', 'Firefox', 'IE'],
 
+    // South Africa uses ISO 8601 for date and time representation. And while chrome localizes date input elements using
+    // the browser language this makes testing easier.
+    customLaunchers: {
+      Chrome_lang_af: {
+        base: 'Chrome',
+        flags: ['--lang=af-ZA']
+      }
+    },
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
