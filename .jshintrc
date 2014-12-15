@@ -1,0 +1,23 @@
+{
+  "passfail": false,
+
+  "noempty": true,
+  "undef": true,
+  "unused": true,
+  "strict": true,
+
+  "browser": true,
+  "node": true,
+
+  "validthis": true,
+  "curly": true,
+  "eqeqeq": true,
+  "latedef": "nofunc",
+  "trailing": true,
+  "white": false,
+  "indent": 2,
+
+  "maxparams": 3,
+  "maxdepth": 3,
+  "maxcomplexity": 10
+}

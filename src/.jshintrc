@@ -1,0 +1,11 @@
+{
+  "extends": "../.jshintrc",
+
+  "browser": true,
+  "node": false,
+
+  "validthis": true,
+
+  "globalstrict": true,
+  "camelcase": true
+}
