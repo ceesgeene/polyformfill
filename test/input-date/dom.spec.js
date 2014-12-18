@@ -1,5 +1,7 @@
 'use strict';
 
+/* global describe, expect, it */
+
 describe('The DOM interface of input[type=date] elements', function () {
 
   describe('input.type property', function () {
@@ -51,10 +53,9 @@ describe('The DOM interface of input[type=date] elements', function () {
       input.value = '123456-01-01';
       expect(input.value).toBe('123456-01-01');
 
-      // Max date FF can handle. Chrome can handle one day more.
-      // Also see http://ecma-international.org/ecma-262/5.1/#sec-15.9.1.1
-      input.value = '275760-09-12';
-      expect(input.value).toBe('275760-09-12');
+      // Max date.
+      input.value = '275760-09-13';
+      expect(input.value).toBe('275760-09-13');
     });
     it('should not accept assignments with an invalid date', function () {
       var input;
@@ -96,9 +97,57 @@ describe('The DOM interface of input[type=date] elements', function () {
 
       input = document.createElement('input');
       input.setAttribute('type', 'date');
-      input.value = '1970-01-01';
 
+      input.value = '1970-01-01';
       expect(input.valueAsDate instanceof Date).toBeTruthy();
+    });
+  });
+
+  describe('input.valueAsNumber property', function () {
+
+    it('should return an integer for input elements with type=date and a valid date value', function () {
+      var input;
+
+      input = document.createElement('input');
+      input.setAttribute('type', 'date');
+
+      input.setAttribute('value', '1970-01-01');
+      expect(input.valueAsNumber).toBe(0);
+
+      input.value = '1970-01-01';
+      expect(input.valueAsNumber).toBe(0);
+
+      input.value = '0001-01-01';
+      expect(input.valueAsNumber).toBe(-62135596800000);
+
+      // Max date.
+      input.value = '275760-09-13';
+      expect(input.valueAsNumber).toBe(8640000000000000);
+    });
+
+    it('should return NaN for input elements with type=date and an invalid date value', function () {
+      var input;
+
+      input = document.createElement('input');
+      input.setAttribute('type', 'date');
+
+      input.value = '1 January 1970';
+      expect(input.valueAsNumber).toBeNaN();
+
+      input.value = 0;
+      expect(input.valueAsNumber).toBeNaN();
+
+      input.value = '1';
+      expect(input.valueAsNumber).toBeNaN();
+
+      input.value = '01-01-01';
+      expect(input.valueAsNumber).toBeNaN();
+
+      input.value = '101-01-01';
+      expect(input.valueAsNumber).toBeNaN();
+
+      input.value = '275760-09-14';
+      expect(input.valueAsNumber).toBeNaN();
     });
   });
 
