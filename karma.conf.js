@@ -36,14 +36,19 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      'src/**/*.js': ['coverage']
     },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['progress', 'coverage'],
 
+    coverageReporter: {
+      type : 'lcov',
+      dir : 'coverage/'
+    },
 
     // web server port
     port: 9876,
@@ -64,14 +69,14 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome_lang_af', 'Firefox', 'IE'],
+    browsers: ['Chrome_lang_svSE', 'Firefox', 'IE'],
 
-    // South Africa uses ISO 8601 for date and time representation. And while chrome localizes date input elements using
+    // Sweden uses ISO 8601 for date and time representation. And while chrome localizes date input elements using
     // the browser language this makes testing easier.
     customLaunchers: {
-      Chrome_lang_af: {
+      Chrome_lang_svSE: {
         base: 'Chrome',
-        flags: ['--lang=af-ZA']
+        flags: ['--lang=sv-SE']
       }
     },
 
