@@ -12,7 +12,7 @@ gulp.task('default', function () {
 });
 
 gulp.task('compress', function () {
-  gulp.src(['src/polyformfill.js.prefix', 'src/**/*.js', 'src/polyformfill.js.suffix'])
+  gulp.src(['src/polyformfill.js.prefix', 'src/**/base.js', 'src/**/*.js', 'src/polyformfill.js.suffix'])
     .pipe(concat('polyformfill.js'))
     .pipe(replace("'use strict';", ''))
     .pipe(uglify({
