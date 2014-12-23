@@ -32,10 +32,24 @@ describe('The DOM interface of input[type=date] elements', function () {
   });
 
   describe('input.value property', function () {
+
+    it('should accept an empty string to clear the value', function () {
+      var input, initialValue = '1970-01-01';
+
+      input = document.createElement('input');
+      input.setAttribute('type', 'date');
+      input.setAttribute('value', initialValue);
+
+      expect(input.value).toBe(initialValue);
+
+      input.value = '';
+      expect(input.value).toBe('');
+    });
+
     it('should return a valid full-date as defined in RFC 3339', function () {
       var input;
 
-      input= document.createElement('input');
+      input = document.createElement('input');
       input.setAttribute('type', 'date');
 
       input.value = '1970-01-01';
@@ -56,11 +70,14 @@ describe('The DOM interface of input[type=date] elements', function () {
       // Max date.
       input.value = '275760-09-13';
       expect(input.value).toBe('275760-09-13');
+
+      input.value = '';
+      expect(input.value).toBe('');
     });
     it('should not accept assignments with an invalid date', function () {
       var input;
 
-      input= document.createElement('input');
+      input = document.createElement('input');
       input.setAttribute('type', 'date');
 
       input.value = '1 January 1970';
@@ -79,6 +96,9 @@ describe('The DOM interface of input[type=date] elements', function () {
       expect(input.value).toBe('');
 
       input.value = '275760-09-14';
+      expect(input.value).toBe('');
+
+      input.value = '1970-02-31';
       expect(input.value).toBe('');
     });
   });
@@ -100,6 +120,16 @@ describe('The DOM interface of input[type=date] elements', function () {
 
       input.value = '1970-01-01';
       expect(input.valueAsDate instanceof Date).toBeTruthy();
+    });
+
+    it('should return null for input elements with type=date and an invalid date value', function () {
+      var input;
+
+      input = document.createElement('input');
+      input.setAttribute('type', 'date');
+
+      input.value = '1970-02-31';
+      expect(input.valueAsDate).toBe(null);
     });
   });
 
