@@ -4,6 +4,8 @@
   "browser": true,
   "node": false,
 
+  "maxstatements": 10,
+
   "validthis": true,
 
   "globalstrict": true,
