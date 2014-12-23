@@ -16,6 +16,7 @@
   "trailing": true,
   "white": false,
   "indent": 2,
+  "quotmark": "single",
 
   "maxparams": 3,
   "maxdepth": 3,
