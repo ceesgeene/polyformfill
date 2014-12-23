@@ -21,6 +21,7 @@ module.exports = function(config) {
     files: [
       'test/helpers/*.js',
       'src/**/!(base).js',
+      'src/*/base.js',
       'src/base.js',
       'test/**/*.js',
 
@@ -69,7 +70,13 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome_lang_svSE', 'Firefox', 'IE'],
+    browsers: [
+      'Chrome_lang_svSE',
+      'Firefox',
+      'IE'
+      , 'IE10'
+      , 'IE9'
+    ],
 
     // Sweden uses ISO 8601 for date and time representation. And while chrome localizes date input elements using
     // the browser language this makes testing easier.
@@ -77,6 +84,14 @@ module.exports = function(config) {
       Chrome_lang_svSE: {
         base: 'Chrome',
         flags: ['--lang=sv-SE']
+      },
+      IE10: {
+        base: 'IE',
+        'x-ua-compatible': 'IE=EmulateIE10'
+      },
+      IE9: {
+        base: 'IE',
+        'x-ua-compatible': 'IE=EmulateIE9'
       }
     },
 
