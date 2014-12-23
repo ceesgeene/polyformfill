@@ -3,8 +3,10 @@
 /* global module */
 
 /**
+ * @file
  * Karma configuration for local development.
  */
+
 module.exports = function(config) {
   config.set({
 

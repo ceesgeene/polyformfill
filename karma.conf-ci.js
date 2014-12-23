@@ -1,3 +1,12 @@
+'use strict';
+
+/* global module, require, process */
+
+/**
+ * @file
+ * Karma configuration for Travis.
+ */
+
 var fs = require('fs');
 
 module.exports = function(config) {
@@ -55,8 +64,13 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'src/*.js',
-      'test/*.js'
+      'test/helpers/*.js',
+      'src/**/!(base).js',
+      'src/*/base.js',
+      'src/base.js',
+      'test/**/*.js',
+
+      {pattern: 'test/popup.html', watched: true, served: true, included: false}
     ],
 
 
@@ -76,7 +90,7 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     sauceLabs: {
-      testName: 'polyfill=input-datetime'
+      testName: 'polyformfill'
     },
     captureTimeout: 120000,
     customLaunchers: customLaunchers,
