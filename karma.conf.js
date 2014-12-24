@@ -80,11 +80,11 @@ module.exports = function(config) {
       , 'IE9'
     ],
 
-    // Sweden uses ISO 8601 for date and time representation. And while chrome localizes date input elements using
-    // the browser language this makes testing easier.
     customLaunchers: {
       Chrome_lang_svSE: {
         base: 'Chrome',
+        // Sweden uses ISO 8601 for date and time representation. And while chrome localizes date input elements using
+        // the browser language this makes testing easier.
         flags: ['--lang=sv-SE']
       },
       IE10: {

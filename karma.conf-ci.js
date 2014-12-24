@@ -27,7 +27,12 @@ module.exports = function(config) {
     sl_chrome: {
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: '39'
+      version: '39',
+      // Sweden uses ISO 8601 for date and time representation. And while chrome localizes date input elements using
+      // the browser language this makes testing easier.
+      chromeOptions: {
+        args: ['--lang=sv-SE']
+      }
     },
     sl_firefox: {
       base: 'SauceLabs',
