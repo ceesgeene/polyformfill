@@ -1,0 +1,36 @@
+{
+  "name": "polyformfill",
+  "main": "polyformfill.js",
+  "version": "0.1.0",
+  "description": "Polyfill script for HTML5 form elements",
+  "keywords": [
+    "html",
+    "html5",
+    "form",
+    "input",
+    "date",
+    "time",
+    "datetime",
+    "polyfill",
+    "shim",
+    "browser"
+  ],
+  "authors": [
+    {
+      "name": "Cees Geene",
+      "email": "ceesgeene@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/ceesgeene/polyformfill",
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "gulpfile.js",
+    "karma.*.js",
+    "node_modules",
+    "package.json",
+    "src",
+    "test"
+  ]
+}

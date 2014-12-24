@@ -1,6 +1,6 @@
 {
   "name": "polyformfill",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Polyfill script for HTML5 form elements",
   "main": "polyformfill.js",
   "scripts": {
