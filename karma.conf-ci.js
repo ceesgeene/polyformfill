@@ -32,7 +32,8 @@ module.exports = function(config) {
       // the browser language this makes testing easier.
       chromeOptions: {
         args: ['--lang=sv-SE']
-      }
+      },
+      platform: 'WINDOWS'
     },
     sl_firefox: {
       base: 'SauceLabs',
