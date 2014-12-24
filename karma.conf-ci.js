@@ -33,7 +33,7 @@ module.exports = function(config) {
       chromeOptions: {
         args: ['--lang=sv-SE']
       },
-      platform: 'WINDOWS'
+      platform: 'Windows 7'
     },
     sl_firefox: {
       base: 'SauceLabs',
