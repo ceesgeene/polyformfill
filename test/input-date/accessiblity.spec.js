@@ -1,8 +1,16 @@
 'use strict';
 
-/* global describe, expect, it */
+/* global afterEach, beforeEach, describe, expect, it */
 
 describe('An accessible input[type=date] element', function () {
+  var originalTimeout;
+  beforeEach(function() {
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+  });
+  afterEach(function() {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+  });
 
   describe('can be navigated using the arrow keys', function () {
     var w;
