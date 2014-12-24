@@ -1,6 +1,5 @@
 {
   "name": "polyformfill",
-  "main": "polyformfill.js",
   "version": "0.1.0",
   "description": "Polyfill script for HTML5 form elements",
   "keywords": [
@@ -23,6 +22,7 @@
   ],
   "license": "MIT",
   "homepage": "https://github.com/ceesgeene/polyformfill",
+  "main": "polyformfill.js",
   "ignore": [
     "**/.*",
     "bower_components",
