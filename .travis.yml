@@ -3,8 +3,8 @@ node_js:
 - '0.10'
 env:
   global:
-    - secure: uIW4rSQhjUw/FEQbETsldAFo55Olan4xW9EWcpTAyznpssmvLl+dF1lonTNETF5FCd5SAaiuhm7Tf9C4LgEJHENbou6TttPeGfaaXG7ZLVPKqyMQr/2o2pLIr8BzGQfefqtQqtn84Mz1LT7DxtMjJ2IVFC0ZUHSqK6L+4dukquU=
-    - secure: KXq1aLFdE3jxVz7P13kqzI66vzlrEUxPXBuzPXafzPXoyyofLsJlB+x28npZPHB/VKKBCxREIe3ahQlhDxEbXdYhf558k9Z5bVy0uaU/370yM8CL+IwQNRV5IAePwcqcmhWX1OmVD1gp4UXO4mkpNn7fEuiDLkTRKFzDwRYAtSs=
+    - secure: eTTvdO6T70nLwdhIFXuo58nWavBL1896CeGrUtj697BuS7zCirJZhS8p/BG7v53nOBL1Wa8dPE/vTdowWuCp5XqToOH7FeIMEETIEdhLSLcYE1u/FYC1XssOpEVFkfscZ0yW6tmYmoc0pxn30L98LdPO4xUM4w8h1xq7QwDZzso=
+    - secure: jD8xcL4DJDrgUag6nXNQf1VZJ+ym89rnGHT5Z++GV/8DHVFG+gSaFduE1g8FBa7TwzDwLIq9YU52JsuUFb+j8g34BJ72LYdv2WZzKtpmGbGIAmqZvP/FqQstSaoJkOW0hu1K7UbU5cjQ9ZZq6+JpLuLQVtMHbaAuSkFUSbJW0i4=
 notifications:
   email: false
 before_script: npm install -g karma-cli
