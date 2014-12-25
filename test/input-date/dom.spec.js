@@ -181,4 +181,41 @@ describe('The DOM interface of input[type=date] elements', function () {
     });
   });
 
+  describe('input.stepUp() method', function () {
+    it('for elements without step, min and max attributes should increase the value by one day', function () {
+      var input;
+
+      input = document.createElement('input');
+      input.setAttribute('type', 'date');
+      input.setAttribute('value', '1970-01-01');
+
+      input.stepUp();
+      expect(input.value).toBe('1970-01-02');
+
+      input.stepUp(8);
+      expect(input.value).toBe('1970-01-10');
+
+      input.stepUp(22);
+      expect(input.value).toBe('1970-02-01');
+    });
+  });
+
+  describe('input.stepDown() method', function () {
+    it('for elements without step, min and max attributes should decrease the value by one day', function () {
+      var input;
+
+      input = document.createElement('input');
+      input.setAttribute('type', 'date');
+      input.setAttribute('value', '1970-01-10');
+
+      input.stepDown();
+      expect(input.value).toBe('1970-01-09');
+
+      input.stepDown(8);
+      expect(input.value).toBe('1970-01-01');
+
+      input.stepDown(20);
+      expect(input.value).toBe('1969-12-12');
+    });
+  });
 });
