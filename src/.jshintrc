@@ -1,0 +1,13 @@
+{
+  "extends": "../.jshintrc",
+
+  "browser": true,
+  "node": false,
+
+  "maxstatements": 10,
+
+  "validthis": true,
+
+  "globalstrict": true,
+  "camelcase": true
+}
