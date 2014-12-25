@@ -143,19 +143,48 @@ function setValue(value) {
  * @link http://www.w3.org/TR/html/forms.html#dom-input-stepup
  */
 function stepUp(n) {
-  var attr = this.getAttribute(INPUT_ATTR_TYPE);
+  var allowedValueStep, delta, value;
 
-  if (attr === 'date') {
+  if (this.getAttribute(INPUT_ATTR_TYPE) === 'date') {
     n = n || 1;
+    allowedValueStep = getAllowedValueStep(this, 1, INPUT_DATE_STEP_SCALE_FACTOR);
+    if (allowedValueStep === null) {
+      throw new InvalidStateError();
+    }
 
+    value = this.valueAsNumber;
+
+    delta = allowedValueStep * n;
+
+    value += delta;
+
+    this.valueAsNumber = value;
   }
 }
 
 function stepDown(n) {
-  var attr = this.getAttribute(INPUT_ATTR_TYPE);
+  n = n || 1;
+  stepUp.call(this, -n);
+}
 
-  if (attr === 'date') {
-    n = n || 1;
+function getAllowedValueStep(el, defaultStep, stepScaleFactor) {
+  defaultStep = defaultStep || 1;
+  var step;
 
+  if (el.hasAttribute('step')) {
+    step = el.getAttribute('step');
+
+    if (step === 'any') {
+      return null;
+    }
+    step = parseInt(step, 10);
+    if (step < 1) {
+      step = defaultStep;
+    }
   }
+  else {
+    step = defaultStep;
+  }
+
+  return step * stepScaleFactor;
 }
