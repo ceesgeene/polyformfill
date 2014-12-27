@@ -1,5 +1,13 @@
 'use strict';
 
+/**
+ * @file
+ * Initialization code for input elements of type date and code shared between the optional features (dom, accessibility, etc).
+ *
+ * @see {@link http://www.w3.org/TR/html-markup/input.date.html|input type=date - date input control}
+ * @see {@link http://www.w3.org/TR/html/forms.html#date-state-(type=date)|HTML5 - 4.10.5.1.7 Date state (type=date)}
+ */
+
 /** @const */
 var DATECOMPONENT_YEAR = 1,
   DATECOMPONENT_MONTH = 2,
@@ -22,29 +30,16 @@ var INPUT_DATE_DAY_MAX = 31;
 
 var rfc3999FullDateRegExp = /^([0-9]{4,})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
 
-var inputDateNativeValueGetter;
-var inputDateNativeValueSetter;
 
 var inputDateValueFormatter;
 var inputDateFormatOrderGetter;
 var inputDateFormatSeparatorGetter;
 
 function initInputDate() {
-  inputDateNativeValueGetter = inputDateGetValueProperty;
-  inputDateNativeValueSetter = inputDateSetValueProperty;
 
   inputDateValueFormatter = inputDateFuzzyRfc3339ValueFormatter;
   inputDateFormatOrderGetter = inputDateRfc3339FormatOrder;
   inputDateFormatSeparatorGetter = inputDateRfc3339FormatSeparator;
-}
-
-function inputDateGetValueProperty() {
-  return this.value;
-}
-
-function inputDateSetValueProperty(value) {
-  this.value = value;
-  return this.value;
 }
 
 function inputDateSetDateComponents(input, year, month, day) {
@@ -54,7 +49,7 @@ function inputDateSetDateComponents(input, year, month, day) {
     day: day
   };
 
-  inputDateNativeValueSetter.call(input, inputDateValueFormatter(input, year, month, day));
+  inputDomOriginalValueSetter.call(input, inputDateValueFormatter(input, year, month, day));
 }
 
 function inputDateGetDateComponents(input) {

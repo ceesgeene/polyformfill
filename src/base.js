@@ -6,14 +6,15 @@ var testInput = document.createElement('input');
 var INPUT_ATTR_TYPE = 'type';
 
 if (!('valueAsDate' in testInput)) {
+  initInput();
+
   initInputDate();
-  if (typeof initDom !== 'undefined') {
-    initDom();
-  }
+
   //
   initAccessibility();
   initLocalization();
   if (typeof initNormalization !== 'undefined') {
     initNormalization();
   }
+  initInputTime();
 }

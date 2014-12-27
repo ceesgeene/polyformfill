@@ -52,14 +52,14 @@ function onKeydownHandleNavigation(evt) {
         }
 
         if (evt.shiftKey) {
-          if (getSelectedDateComponentNumber(inputDateNativeValueGetter.call(el), selectionStart, selectionEnd, inputDateFormatSeparatorGetter(el)) !== 0) {
+          if (getSelectedDateComponentNumber(inputDomOriginalValueGetter.call(el), selectionStart, selectionEnd, inputDateFormatSeparatorGetter(el)) !== 0) {
             inputDateSelectPreviousDateComponent(el, selectionStart, selectionEnd);
           }
           else {
             return;
           }
         }
-        else if (getSelectedDateComponentNumber(inputDateNativeValueGetter.call(el), selectionStart, selectionEnd, inputDateFormatSeparatorGetter(el)) !== 2) {
+        else if (getSelectedDateComponentNumber(inputDomOriginalValueGetter.call(el), selectionStart, selectionEnd, inputDateFormatSeparatorGetter(el)) !== 2) {
           inputDateSelectNextDateComponent(el, selectionStart, selectionEnd);
         }
         else {
@@ -115,7 +115,7 @@ function onKeyPressHandleUserInput(evt) {
       var selectionStart = el.selectionStart;
       var selectNext = false;
 
-      var value = inputDateNativeValueGetter.call(el),
+      var value = inputDomOriginalValueGetter.call(el),
         dateComponents = inputDateGetDateComponents(el),
 
         dateComponentsOrder = inputDateFormatOrderGetter(el),
@@ -159,7 +159,7 @@ function onKeyPressHandleUserInput(evt) {
       }
 
       inputDateSetDateComponents(el, dateComponents.year, dateComponents.month, dateComponents.day);
-      value = inputDateNativeValueGetter.call(el);
+      value = inputDomOriginalValueGetter.call(el);
 
       if (selectNext) {
         var selection = getDateComponentRange(value, selectionStart, dateComponentSeparator);
@@ -183,12 +183,12 @@ function onFocusHandleInputSelection(evt) {
   el = evt.target;
 
   if (el instanceof HTMLInputElement && el.getAttribute(INPUT_ATTR_TYPE) === 'date') {
-    value = inputDateNativeValueGetter.call(el);
+    value = inputDomOriginalValueGetter.call(el);
     dateComponentSeparator = inputDateFormatSeparatorGetter(el);
 
     if (!value) {
       inputDateSetDateComponents(el, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
-      value = inputDateNativeValueGetter.call(el);
+      value = inputDomOriginalValueGetter.call(el);
       selectionStart = 0;
     }
     else {
@@ -241,7 +241,7 @@ function getSelectedDateComponent(value, selectionStart, selectionEnd, dateCompo
 }
 
 function inputDateClearDateComponent(input, selectionStart, selectionEnd) {
-  var value = inputDateNativeValueGetter.call(input),
+  var value = inputDomOriginalValueGetter.call(input),
     dateComponents = inputDateGetDateComponents(input),
     dateComponentsOrder = inputDateFormatOrderGetter(input),
     dateComponentSeparator = inputDateFormatSeparatorGetter(input),
@@ -262,12 +262,12 @@ function inputDateClearDateComponent(input, selectionStart, selectionEnd) {
   }
 
   inputDateSetDateComponents(input, dateComponents.year, dateComponents.month, dateComponents.day);
-  value = inputDateNativeValueGetter.call(input);
+  value = inputDomOriginalValueGetter.call(input);
   input.setSelectionRange.apply(input, getDateComponentRange(value, selectionStart, dateComponentSeparator));
 }
 
 function inputDateNormalizeSelectedComponent(input, selectionStart, selectionEnd) {
-  var value = inputDateNativeValueGetter.call(input),
+  var value = inputDomOriginalValueGetter.call(input),
     dateComponents = inputDateGetDateComponents(input),
     dateComponentsOrder = inputDateFormatOrderGetter(input),
     dateComponentSeparator = inputDateFormatSeparatorGetter(input),
@@ -298,7 +298,7 @@ function inputDateNormalizeSelectedComponent(input, selectionStart, selectionEnd
 }
 
 function inputDateSelectPreviousDateComponent(input, selectionStart, selectionEnd) {
-  var value = inputDateNativeValueGetter.call(input),
+  var value = inputDomOriginalValueGetter.call(input),
     dateComponentSeparator = inputDateFormatSeparatorGetter(input);
 
   if (selectionStart !== 0) {
@@ -312,7 +312,7 @@ function inputDateSelectPreviousDateComponent(input, selectionStart, selectionEn
 }
 
 function inputDateSelectNextDateComponent(input, selectionStart, selectionEnd) {
-  var value = inputDateNativeValueGetter.call(input),
+  var value = inputDomOriginalValueGetter.call(input),
     dateComponentSeparator = inputDateFormatSeparatorGetter(input);
 
   if (selectionEnd === 0) {
@@ -331,7 +331,7 @@ function inputDateSelectNextDateComponent(input, selectionStart, selectionEnd) {
 }
 
 function inputDateIncreaseDateComponent(input, selectionStart, selectionEnd, amount) {
-  var value = inputDateNativeValueGetter.call(input),
+  var value = inputDomOriginalValueGetter.call(input),
     dateComponents = inputDateGetDateComponents(input),
     dateComponentsOrder = inputDateFormatOrderGetter(input),
     dateComponentSeparator = inputDateFormatSeparatorGetter(input),
@@ -370,6 +370,6 @@ function inputDateIncreaseDateComponent(input, selectionStart, selectionEnd, amo
   }
 
   inputDateSetDateComponents(input, dateComponents.year, dateComponents.month, dateComponents.day);
-  value = inputDateNativeValueGetter.call(input);
+  value = inputDomOriginalValueGetter.call(input);
   input.setSelectionRange.apply(input, getDateComponentRange(value, selectionStart, dateComponentSeparator));
 }

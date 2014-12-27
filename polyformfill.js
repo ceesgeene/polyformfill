@@ -3,15 +3,17 @@
   var testInput = document.createElement("input");
   var INPUT_ATTR_TYPE = "type";
   if (!("valueAsDate" in testInput)) {
+    initInput();
     initInputDate();
-    if (typeof initDom !== "undefined") {
-      initDom();
-    }
     initAccessibility();
     initLocalization();
     if (typeof initNormalization !== "undefined") {
       initNormalization();
     }
+    initInputTime();
+  }
+  function initInput() {
+    initInputDom();
   }
   var DATECOMPONENT_YEAR = 1, DATECOMPONENT_MONTH = 2, DATECOMPONENT_DAY = 4;
   var INPUT_DATE_YEAR_EMPTY = 0, INPUT_DATE_MONTH_EMPTY = -1, INPUT_DATE_DAY_EMPTY = 0;
@@ -22,24 +24,13 @@
   var INPUT_DATE_DAY_MIN = 1;
   var INPUT_DATE_DAY_MAX = 31;
   var rfc3999FullDateRegExp = /^([0-9]{4,})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-  var inputDateNativeValueGetter;
-  var inputDateNativeValueSetter;
   var inputDateValueFormatter;
   var inputDateFormatOrderGetter;
   var inputDateFormatSeparatorGetter;
   function initInputDate() {
-    inputDateNativeValueGetter = inputDateGetValueProperty;
-    inputDateNativeValueSetter = inputDateSetValueProperty;
     inputDateValueFormatter = inputDateFuzzyRfc3339ValueFormatter;
     inputDateFormatOrderGetter = inputDateRfc3339FormatOrder;
     inputDateFormatSeparatorGetter = inputDateRfc3339FormatSeparator;
-  }
-  function inputDateGetValueProperty() {
-    return this.value;
-  }
-  function inputDateSetValueProperty(value) {
-    this.value = value;
-    return this.value;
   }
   function inputDateSetDateComponents(input, year, month, day) {
     input.__polyformfillInputDate = {
@@ -47,7 +38,7 @@
       month: month,
       day: day
     };
-    inputDateNativeValueSetter.call(input, inputDateValueFormatter(input, year, month, day));
+    inputDomOriginalValueSetter.call(input, inputDateValueFormatter(input, year, month, day));
   }
   function inputDateGetDateComponents(input) {
     if (input.__polyformfillInputDate === undefined) {
@@ -133,6 +124,204 @@
     }
     return date;
   }
+  function initInputTime() {}
+  var inputDomOriginalTypeGetter, inputDomOriginalValueGetter, inputDomOriginalValueSetter, inputDomOriginalStepUp, inputDomOriginalStepDown;
+  function initInputDom() {
+    var originalTypeDescriptor, originalValueDescriptor;
+    if (HTMLInputElement && Object.isExtensible(HTMLInputElement.prototype)) {
+      originalTypeDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "type");
+      if (originalTypeDescriptor === undefined) {
+        originalTypeDescriptor = Object.getOwnPropertyDescriptor(testInput, "type");
+      }
+      inputDomOriginalTypeGetter = originalTypeDescriptor.get;
+      if (originalTypeDescriptor.configurable) {
+        Object.defineProperty(HTMLInputElement.prototype, "type", {
+          get: inputDomTypeGet
+        });
+      }
+      originalValueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+      if (originalValueDescriptor.configurable) {
+        Object.defineProperty(HTMLInputElement.prototype, "value", {
+          get: inputDomValueGet,
+          set: inputDomValueSet
+        });
+        inputDomOriginalValueGetter = originalValueDescriptor.get;
+        inputDomOriginalValueSetter = originalValueDescriptor.set;
+      }
+      Object.defineProperty(HTMLInputElement.prototype, "valueAsNumber", {
+        get: inputDomValueAsNumberGet,
+        set: inputDomValueAsNumberSet
+      });
+      Object.defineProperty(HTMLInputElement.prototype, "valueAsDate", {
+        get: inputDomValueAsDateGet,
+        set: inputDomValueAsDateSet
+      });
+      inputDomOriginalStepUp = HTMLInputElement.prototype.stepUp;
+      HTMLInputElement.prototype.stepUp = inputDomStepUp;
+      inputDomOriginalStepDown = HTMLInputElement.prototype.stepDown;
+      HTMLInputElement.prototype.stepDown = inputDomStepDown;
+    }
+  }
+  function inputDomException(code, message) {
+    return new Error(message);
+  }
+  function inputDomTypeGet() {
+    var attr, type = inputDomOriginalTypeGetter.call(this);
+    if (type === "text") {
+      attr = this.getAttribute(INPUT_ATTR_TYPE);
+      switch (attr) {
+       case "date":
+       case "time":
+        return attr;
+
+       default:
+        return type;
+      }
+    }
+    return type;
+  }
+  function inputDomValueGet() {
+    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
+    switch (inputType) {
+     case "date":
+      return inputDateValueGet(this);
+
+     case "time":
+      return inputTimeValueGet(this);
+
+     default:
+      return inputDomOriginalValueGetter.call(this);
+    }
+  }
+  function inputDomValueSet(value) {
+    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
+    switch (inputType) {
+     case "date":
+      return inputDateValueSet(this, value);
+
+     case "time":
+      return inputTimeValueSet(this, value);
+
+     default:
+      return inputDomOriginalValueSetter.call(this);
+    }
+  }
+  function inputDomValueAsNumberGet() {
+    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
+    switch (inputType) {
+     case "date":
+     case "time":
+      return inputDomValueAsNumberGetFromDate.call(this);
+
+     default:
+      return inputDomOriginalValueSetter.call(this);
+    }
+  }
+  function inputDomValueAsNumberGetFromDate() {
+    var date = inputDomValueAsDateGet.call(this);
+    if (date) {
+      return date.getTime();
+    }
+    return NaN;
+  }
+  function inputDomValueAsNumberSet(value) {
+    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
+    switch (inputType) {
+     case "date":
+     case "time":
+      inputDomValueAsNumberSetFromDate.call(this, value);
+      break;
+
+     default:
+      inputDomOriginalValueSetter.call(this);
+      break;
+    }
+  }
+  function inputDomValueAsNumberSetFromDate(value) {
+    var date = new Date(value);
+    if (date) {
+      inputDomValueAsDateSet.call(this, date);
+    }
+  }
+  function inputDomValueAsDateGet() {
+    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
+    switch (inputType) {
+     case "date":
+      return inputDateValueAsDateGet(this);
+
+     case "time":
+      return inputTimeValueAsDateGet(this);
+
+     default:
+      return null;
+    }
+  }
+  function inputDomValueAsDateSet(value) {
+    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
+    if (value instanceof Date) {}
+    switch (inputType) {
+     case "date":
+      return inputDateValueAsDateSet(this, value);
+
+     case "time":
+      return inputTimeValueAsDateSet(this, value);
+
+     default:
+      return inputDomOriginalValueSetter.call(this, value);
+    }
+  }
+  function inputDomStepUp(n) {
+    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
+    n = n || 1;
+    switch (inputType) {
+     case "date":
+     case "time":
+      return inputDomStepUpOrDown(this, n, INPUT_DATE_STEP_SCALE_FACTOR);
+
+     default:
+      return inputDomOriginalStepUp.call(this, n);
+    }
+  }
+  function inputDomStepDown(n) {
+    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
+    n = n || 1;
+    switch (inputType) {
+     case "date":
+     case "time":
+      return inputDomStepUpOrDown(this, -n, INPUT_DATE_STEP_SCALE_FACTOR);
+
+     default:
+      return inputDomOriginalStepUp.call(this, n);
+    }
+  }
+  function inputDomStepUpOrDown(element, n, stepScaleFactor) {
+    var allowedValueStep, delta, value;
+    allowedValueStep = inputDomGetAllowedValueStep(element, 1, stepScaleFactor);
+    if (allowedValueStep === null) {
+      throw inputDomException(DOMException.INVALID_STATE_ERR);
+    }
+    value = element.valueAsNumber;
+    delta = allowedValueStep * n;
+    value += delta;
+    element.valueAsNumber = value;
+  }
+  function inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor) {
+    defaultStep = defaultStep || 1;
+    var step;
+    if (element.hasAttribute("step")) {
+      step = element.getAttribute("step");
+      if (step === "any") {
+        return null;
+      }
+      step = parseInt(step, 10);
+      if (step < 1) {
+        step = defaultStep;
+      }
+    } else {
+      step = defaultStep;
+    }
+    return step * stepScaleFactor;
+  }
   function initAccessibility() {
     window.addEventListener("keydown", onKeydownHandleNavigation);
     window.addEventListener("keypress", onKeyPressHandleUserInput);
@@ -165,13 +354,13 @@
           return;
         }
         if (evt.shiftKey) {
-          if (getSelectedDateComponentNumber(inputDateNativeValueGetter.call(el), selectionStart, selectionEnd, inputDateFormatSeparatorGetter(el)) !== 0) {
+          if (getSelectedDateComponentNumber(inputDomOriginalValueGetter.call(el), selectionStart, selectionEnd, inputDateFormatSeparatorGetter(el)) !== 0) {
             inputDateSelectPreviousDateComponent(el, selectionStart, selectionEnd);
           } else {
             return;
           }
         } else {
-          if (getSelectedDateComponentNumber(inputDateNativeValueGetter.call(el), selectionStart, selectionEnd, inputDateFormatSeparatorGetter(el)) !== 2) {
+          if (getSelectedDateComponentNumber(inputDomOriginalValueGetter.call(el), selectionStart, selectionEnd, inputDateFormatSeparatorGetter(el)) !== 2) {
             inputDateSelectNextDateComponent(el, selectionStart, selectionEnd);
           } else {
             return;
@@ -216,7 +405,7 @@
       if (evt.charCode > 47 && evt.charCode < 58) {
         var selectionStart = el.selectionStart;
         var selectNext = false;
-        var value = inputDateNativeValueGetter.call(el), dateComponents = inputDateGetDateComponents(el), dateComponentsOrder = inputDateFormatOrderGetter(el), dateComponentSeparator = inputDateFormatSeparatorGetter(el), dateComponent = getSelectedDateComponent(value, selectionStart, el.selectionEnd, dateComponentsOrder, dateComponentSeparator);
+        var value = inputDomOriginalValueGetter.call(el), dateComponents = inputDateGetDateComponents(el), dateComponentsOrder = inputDateFormatOrderGetter(el), dateComponentSeparator = inputDateFormatSeparatorGetter(el), dateComponent = getSelectedDateComponent(value, selectionStart, el.selectionEnd, dateComponentsOrder, dateComponentSeparator);
         switch (dateComponent) {
          case DATECOMPONENT_YEAR:
           dateComponents.year = parseInt((dateComponents.year + evt.key).substr(-6), 10);
@@ -254,7 +443,7 @@
           return;
         }
         inputDateSetDateComponents(el, dateComponents.year, dateComponents.month, dateComponents.day);
-        value = inputDateNativeValueGetter.call(el);
+        value = inputDomOriginalValueGetter.call(el);
         if (selectNext) {
           var selection = getDateComponentRange(value, selectionStart, dateComponentSeparator);
           inputDateSelectNextDateComponent(el, selection[0], selection[1]);
@@ -272,11 +461,11 @@
     }
     el = evt.target;
     if (el instanceof HTMLInputElement && el.getAttribute(INPUT_ATTR_TYPE) === "date") {
-      value = inputDateNativeValueGetter.call(el);
+      value = inputDomOriginalValueGetter.call(el);
       dateComponentSeparator = inputDateFormatSeparatorGetter(el);
       if (!value) {
         inputDateSetDateComponents(el, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
-        value = inputDateNativeValueGetter.call(el);
+        value = inputDomOriginalValueGetter.call(el);
         selectionStart = 0;
       } else {
         selectionStart = el.selectionStart;
@@ -317,7 +506,7 @@
     return dateComponentsOrder[getSelectedDateComponentNumber(value, selectionStart, selectionEnd, dateComponentSeparator)];
   }
   function inputDateClearDateComponent(input, selectionStart, selectionEnd) {
-    var value = inputDateNativeValueGetter.call(input), dateComponents = inputDateGetDateComponents(input), dateComponentsOrder = inputDateFormatOrderGetter(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input), dateComponent = getSelectedDateComponent(value, selectionStart, selectionEnd, dateComponentsOrder, dateComponentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), dateComponents = inputDateGetDateComponents(input), dateComponentsOrder = inputDateFormatOrderGetter(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input), dateComponent = getSelectedDateComponent(value, selectionStart, selectionEnd, dateComponentsOrder, dateComponentSeparator);
     switch (dateComponent) {
      case DATECOMPONENT_YEAR:
       dateComponents.year = INPUT_DATE_YEAR_EMPTY;
@@ -335,11 +524,11 @@
       return;
     }
     inputDateSetDateComponents(input, dateComponents.year, dateComponents.month, dateComponents.day);
-    value = inputDateNativeValueGetter.call(input);
+    value = inputDomOriginalValueGetter.call(input);
     input.setSelectionRange.apply(input, getDateComponentRange(value, selectionStart, dateComponentSeparator));
   }
   function inputDateNormalizeSelectedComponent(input, selectionStart, selectionEnd) {
-    var value = inputDateNativeValueGetter.call(input), dateComponents = inputDateGetDateComponents(input), dateComponentsOrder = inputDateFormatOrderGetter(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input), dateComponent = getSelectedDateComponent(value, selectionStart, selectionEnd, dateComponentsOrder, dateComponentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), dateComponents = inputDateGetDateComponents(input), dateComponentsOrder = inputDateFormatOrderGetter(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input), dateComponent = getSelectedDateComponent(value, selectionStart, selectionEnd, dateComponentsOrder, dateComponentSeparator);
     switch (dateComponent) {
      case DATECOMPONENT_YEAR:
       if (dateComponents.year > INPUT_DATE_YEAR_MAX) {
@@ -367,7 +556,7 @@
     }
   }
   function inputDateSelectPreviousDateComponent(input, selectionStart, selectionEnd) {
-    var value = inputDateNativeValueGetter.call(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input);
+    var value = inputDomOriginalValueGetter.call(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input);
     if (selectionStart !== 0) {
       selectionStart = value.substring(0, selectionStart - 2).lastIndexOf(dateComponentSeparator);
       selectionStart = selectionStart < 1 ? 0 : selectionStart + 1;
@@ -376,7 +565,7 @@
     }
   }
   function inputDateSelectNextDateComponent(input, selectionStart, selectionEnd) {
-    var value = inputDateNativeValueGetter.call(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input);
+    var value = inputDomOriginalValueGetter.call(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input);
     if (selectionEnd === 0) {
       selectionEnd = value.indexOf(dateComponentSeparator);
     }
@@ -390,7 +579,7 @@
     }
   }
   function inputDateIncreaseDateComponent(input, selectionStart, selectionEnd, amount) {
-    var value = inputDateNativeValueGetter.call(input), dateComponents = inputDateGetDateComponents(input), dateComponentsOrder = inputDateFormatOrderGetter(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input), dateComponent = getSelectedDateComponent(value, selectionStart, selectionEnd, dateComponentsOrder, dateComponentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), dateComponents = inputDateGetDateComponents(input), dateComponentsOrder = inputDateFormatOrderGetter(input), dateComponentSeparator = inputDateFormatSeparatorGetter(input), dateComponent = getSelectedDateComponent(value, selectionStart, selectionEnd, dateComponentsOrder, dateComponentSeparator);
     switch (dateComponent) {
      case DATECOMPONENT_YEAR:
       dateComponents.year = dateComponents.year + amount;
@@ -429,146 +618,30 @@
       return;
     }
     inputDateSetDateComponents(input, dateComponents.year, dateComponents.month, dateComponents.day);
-    value = inputDateNativeValueGetter.call(input);
+    value = inputDomOriginalValueGetter.call(input);
     input.setSelectionRange.apply(input, getDateComponentRange(value, selectionStart, dateComponentSeparator));
   }
-  var nativeTypeDescriptor, nativeValueDescriptor, nativeStepUp, nativeStepDown;
   var INPUT_DATE_STEP_SCALE_FACTOR = 864e5;
-  function initDom() {
-    if (HTMLInputElement && Object.isExtensible(HTMLInputElement)) {
-      Object.defineProperty(HTMLInputElement.prototype, "valueAsDate", {
-        get: getValueAsDate,
-        set: setValueAsDate
-      });
-      Object.defineProperty(HTMLInputElement.prototype, "valueAsNumber", {
-        get: getValueAsNumber,
-        set: setValueAsNumber
-      });
-      nativeTypeDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, INPUT_ATTR_TYPE);
-      if (nativeTypeDescriptor === undefined) {
-        nativeTypeDescriptor = Object.getOwnPropertyDescriptor(testInput, INPUT_ATTR_TYPE);
-      }
-      if (nativeTypeDescriptor.configurable) {
-        Object.defineProperty(HTMLInputElement.prototype, INPUT_ATTR_TYPE, {
-          get: getType
-        });
-      }
-      nativeValueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
-      if (nativeValueDescriptor.configurable) {
-        Object.defineProperty(HTMLInputElement.prototype, "value", {
-          get: getValue,
-          set: setValue
-        });
-      }
-      inputDateNativeValueGetter = nativeValueDescriptor.get;
-      inputDateNativeValueSetter = nativeValueDescriptor.set;
-      nativeStepUp = HTMLInputElement.prototype.stepUp;
-      HTMLInputElement.prototype.stepUp = stepUp;
-      nativeStepDown = HTMLInputElement.prototype.stepDown;
-      HTMLInputElement.prototype.stepDown = stepDown;
-    }
+  function inputDateValueGet(element) {
+    return inputDateGetRfc3339(element);
   }
-  function getValueAsDate() {
-    if (this.getAttribute(INPUT_ATTR_TYPE) === "date") {
-      return inputDateGetDate(this);
-    }
-    return null;
-  }
-  function setValueAsDate(value) {
-    if (this.getAttribute(INPUT_ATTR_TYPE) === "date" && value instanceof Date) {
-      inputDateSetDateComponents(this, value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
-    }
-  }
-  function getValueAsNumber() {
+  function inputDateValueSet(element, value) {
     var date;
-    if (this.getAttribute(INPUT_ATTR_TYPE) === "date") {
-      date = inputDateGetDate(this);
-      if (date) {
-        return date.getTime();
-      }
+    if (value !== "") {
+      date = getDateFromRfc3339FullDateString(value);
     }
-    return NaN;
-  }
-  function setValueAsNumber(value) {
-    var date;
-    if (this.getAttribute(INPUT_ATTR_TYPE) === "date") {
-      date = new Date(0);
-      date.setTime(value);
-      if (date) {
-        inputDateSetDateComponents(this, date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-      } else {
-        inputDateSetDateComponents(this, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
-      }
-      return value;
-    }
-  }
-  function getType() {
-    var attr, type = nativeTypeDescriptor.get.call(this);
-    if (type === "text") {
-      attr = this.getAttribute(INPUT_ATTR_TYPE);
-      if (attr === "date") {
-        return attr;
-      }
-    }
-    return type;
-  }
-  function getValue() {
-    if (this.getAttribute(INPUT_ATTR_TYPE) === "date") {
-      return inputDateGetRfc3339(this);
+    if (date) {
+      inputDateSetDateComponents(element, date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
     } else {
-      return nativeValueDescriptor.get.call(this);
-    }
-  }
-  function setValue(value) {
-    var date;
-    if (this.getAttribute(INPUT_ATTR_TYPE) === "date") {
-      if (value !== "") {
-        date = getDateFromRfc3339FullDateString(value);
-      }
-      if (date) {
-        inputDateSetDateComponents(this, date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-      } else {
-        inputDateSetDateComponents(this, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
-      }
-    } else {
-      return nativeValueDescriptor.set.call(this, value);
+      inputDateSetDateComponents(element, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
     }
     return value;
   }
-  function stepUp(n) {
-    var allowedValueStep, delta, value;
-    if (this.getAttribute(INPUT_ATTR_TYPE) === "date") {
-      n = n || 1;
-      allowedValueStep = getAllowedValueStep(this, 1, INPUT_DATE_STEP_SCALE_FACTOR);
-      if (allowedValueStep === null) {
-        throw new InvalidStateError();
-      }
-      value = this.valueAsNumber;
-      delta = allowedValueStep * n;
-      value += delta;
-      this.valueAsNumber = value;
-    }
+  function inputDateValueAsDateGet(element) {
+    return inputDateGetDate(element);
   }
-  function stepDown(n) {
-    n = n || 1;
-    stepUp.call(this, -n);
-  }
-  function getAllowedValueStep(el, defaultStep, stepScaleFactor) {
-    defaultStep = defaultStep || 1;
-    var step;
-    if (el.hasAttribute("step")) {
-      step = el.getAttribute("step");
-      if (step === "any") {
-        return null;
-      }
-      step = parseInt(step, 10);
-      if (step < 1) {
-        step = defaultStep;
-      }
-    } else {
-      step = defaultStep;
-    }
-    return step * stepScaleFactor;
+  function inputDateValueAsDateSet(element, value) {
+    inputDateSetDateComponents(element, value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
   }
   function initLocalization() {
     inputDateValueFormatter = inputDateLocalizedValueFormatter;
@@ -684,5 +757,26 @@
     }
     evt.preventDefault();
     return false;
+  }
+  function inputTimeValueGet(element) {
+    return inputTimeGetRfc3339(element);
+  }
+  function inputTimeValueSet(element, value) {
+    var date;
+    if (value !== "") {
+      date = getDateFromRfc3339FullDateString(value);
+    }
+    if (date) {
+      inputTimeSetDateComponents(element, date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+    } else {
+      inputTimeSetDateComponents(element, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
+    }
+    return value;
+  }
+  function inputTimeValueAsDateGet(element) {
+    return inputTimeGetDate(element);
+  }
+  function inputTimeValueAsDateSet(element, value) {
+    inputTimeSetDateComponents(element, value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
   }
 })(window, document);
