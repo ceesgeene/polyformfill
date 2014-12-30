@@ -5,32 +5,60 @@
  * Dom interface polyfill code for input elements of type time.
  */
 
-function inputTimeValueGet(element) {
-  return inputTimeGetRfc3339(element);
-}
+/**
+ *
+ * @param element
+ * @returns String
+ */
+function inputTimeDomValueGet(element) {
+  var components = inputTimeComponentsGet(element), value = '';
 
-function inputTimeValueSet(element, value) {
-  var date;
-
-  if (value !== '') {
-    date = getDateFromRfc3339FullDateString(value);
-  }
-
-  if (date) {
-    inputTimeSetDateComponents(element, date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  }
-  else {
-    //console.warn("The specified value '" + value + "' does not conform to the required format, 'yyyy-MM-dd'.");
-    inputTimeSetDateComponents(element, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
+  if (components.hour !== INPUT_TIME_COMPONENT_EMPTY && components.minute !== INPUT_TIME_COMPONENT_EMPTY) {
+    value = components.hour + ':' + components.minute;
+    if (components.second !== INPUT_TIME_COMPONENT_EMPTY) {
+      value += ':' + components.second;
+    }
+    if (components.milisecond !== INPUT_TIME_COMPONENT_EMPTY) {
+      value += '.' + components.milisecond;
+    }
   }
 
   return value;
 }
 
-function inputTimeValueAsDateGet(element) {
-  return inputTimeGetDate(element);
+function inputTimeDomValueSet(element, value) {
+  var components;
+
+  if (value !== '') {
+    components = inputTimeValidTimeStringToComponents(value);
+  }
+
+  if (components) {
+    inputTimeComponentsSet(element, components.hour, components.minute, components.second, components.milisecond);
+  }
+  else {
+    inputTimeComponentsSet(element, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY);
+  }
+
+  return value;
 }
 
-function inputTimeValueAsDateSet(element, value) {
-  inputTimeSetDateComponents(element, value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
+function inputTimeDomValueAsDateGet(element) {
+  var components = inputTimeComponentsGet(element), date = null;
+
+  if (components.hour !== INPUT_TIME_COMPONENT_EMPTY && components.minute !== INPUT_TIME_COMPONENT_EMPTY) {
+    date = new Date(0, 0, 1, components.hour, components.minute);
+    if (components.second !== INPUT_TIME_COMPONENT_EMPTY) {
+      date.setUTCSeconds(components.second);
+    }
+    if (components.milisecond !== INPUT_TIME_COMPONENT_EMPTY) {
+      date.setUTCMilliseconds(components.milisecond);
+    }
+  }
+
+  return date;
+}
+
+function inputTimeDomValueAsDateSet(element, value) {
+  inputTimeComponentsSet(element, value.getUTCHours(), value.getUTCMinutes(), value.getUTCSeconds(), value.getUTCMilliseconds());
 }

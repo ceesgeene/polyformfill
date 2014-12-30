@@ -1,12 +1,19 @@
 'use strict';
 
+/* global HTMLInputElement, DOMException */
+
+/**
+ * @file
+ * Provides implementation of HTMLInputElement DOM interface for unsupporting browsers.
+ */
+
 var inputDomOriginalTypeGetter,
   inputDomOriginalValueGetter,
   inputDomOriginalValueSetter,
   inputDomOriginalStepUp,
   inputDomOriginalStepDown;
 
-function initInputDom() {
+function initInputDom(testInput) {
   var originalTypeDescriptor, originalValueDescriptor;
 
   if (HTMLInputElement && Object.isExtensible(HTMLInputElement.prototype)) {
@@ -55,7 +62,7 @@ function initInputDom() {
 }
 
 function inputDomException(code, message) {
-  return new Error(message);
+  return new Error(code + ': ' + message);
 }
 
 function inputDomTypeGet() {
@@ -80,9 +87,9 @@ function inputDomValueGet() {
 
   switch (inputType) {
     case 'date':
-      return inputDateValueGet(this);
+      return inputDateDomValueGet(this);
     case 'time':
-      return inputTimeValueGet(this);
+      return inputTimeDomValueGet(this);
     default:
       return inputDomOriginalValueGetter.call(this);
   }
@@ -93,9 +100,9 @@ function inputDomValueSet(value) {
 
   switch (inputType) {
     case 'date':
-      return inputDateValueSet(this, value);
+      return inputDateDomValueSet(this, value);
     case 'time':
-      return inputTimeValueSet(this, value);
+      return inputTimeDomValueSet(this, value);
     default:
       return inputDomOriginalValueSetter.call(this);
   }
@@ -172,9 +179,9 @@ function inputDomValueAsDateGet() {
 
   switch (inputType) {
     case 'date':
-      return inputDateValueAsDateGet(this);
+      return inputDateDomValueAsDateGet(this);
     case 'time':
-      return inputTimeValueAsDateGet(this);
+      return inputTimeDomValueAsDateGet(this);
     default:
       return null;
   }
@@ -193,9 +200,9 @@ function inputDomValueAsDateSet(value) {
   }
   switch (inputType) {
     case 'date':
-      return inputDateValueAsDateSet(this, value);
+      return inputDateDomValueAsDateSet(this, value);
     case 'time':
-      return inputTimeValueAsDateSet(this, value);
+      return inputTimeDomValueAsDateSet(this, value);
     default:
       return inputDomOriginalValueSetter.call(this, value);
   }
@@ -255,6 +262,15 @@ function inputDomStepUpOrDown(element, n, stepScaleFactor) {
   element.valueAsNumber = value;
 }
 
+/**
+ *
+ * @param element
+ * @param defaultStep
+ * @param stepScaleFactor
+ * @returns Number
+ *
+ * @see {@link http://www.w3.org/TR/html/forms.html#concept-input-step}
+ */
 function inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor) {
   defaultStep = defaultStep || 1;
   var step;

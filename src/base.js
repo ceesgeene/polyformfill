@@ -1,20 +1,17 @@
 'use strict';
 
-var testInput = document.createElement('input');
-
 /** @const */
 var INPUT_ATTR_TYPE = 'type';
 
-if (!('valueAsDate' in testInput)) {
-  initInput();
+function init() {
+  var testInput = document.createElement('input');
 
-  initInputDate();
+  if (!('valueAsDate' in testInput)) {
+    initInput(testInput);
 
-  //
-  initAccessibility();
-  initLocalization();
-  if (typeof initNormalization !== 'undefined') {
-    initNormalization();
+    initInputDate();
+    initInputTime();
   }
-  initInputTime();
 }
+
+init();

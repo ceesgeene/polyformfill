@@ -4,23 +4,7 @@
 
 describe('The DOM interface of input[type=date] elements', function () {
 
-  describe('input.type property', function () {
-    it('should not conflict with other input types', function () {
-      var input;
-
-      input = document.createElement('input');
-
-      expect(input.type).toBe('text');
-
-      input.setAttribute('type', 'text');
-
-      expect(input.type).toBe('text');
-
-      input.setAttribute('type', 'checkbox');
-
-      expect(input.type).toBe('checkbox');
-    });
-
+  describe('has a type property, which', function () {
     it('should return "date" for input elements with type=date', function () {
       var input;
 
@@ -31,7 +15,7 @@ describe('The DOM interface of input[type=date] elements', function () {
     });
   });
 
-  describe('input.value property', function () {
+  describe('has a value property, which', function () {
 
     it('should accept an empty string to clear the value', function () {
       var input, initialValue = '1970-01-01';
@@ -103,7 +87,7 @@ describe('The DOM interface of input[type=date] elements', function () {
     });
   });
 
-  describe('input.valueAsDate property', function () {
+  describe('has a valueAsDate property, which', function () {
     it('should return null for input elements not of type date or time', function () {
       var input;
 
@@ -133,7 +117,7 @@ describe('The DOM interface of input[type=date] elements', function () {
     });
   });
 
-  describe('input.valueAsNumber property', function () {
+  describe('has a valueAsNumber property, which', function () {
 
     it('should return an integer for input elements with type=date and a valid date value', function () {
       var input;
@@ -181,7 +165,7 @@ describe('The DOM interface of input[type=date] elements', function () {
     });
   });
 
-  describe('input.stepUp() method', function () {
+  describe('has a stepUp() method, which', function () {
     it('for elements without step, min and max attributes should increase the value by one day', function () {
       var input;
 
@@ -200,7 +184,7 @@ describe('The DOM interface of input[type=date] elements', function () {
     });
   });
 
-  describe('input.stepDown() method', function () {
+  describe('has a stepDown() method, which', function () {
     it('for elements without step, min and max attributes should decrease the value by one day', function () {
       var input;
 

@@ -1,16 +1,16 @@
 'use strict';
 
-function initInput() {
-  // @ifdef FEATURE_DOM
-  initInputDom();
+function initInput(testInput) {
+  // @if FEATURES.DOM
+  initInputDom(testInput);
   // @endif
-  // @ifdef FEATURE_ACCESSIBILITY
-  //initInputTimeAccessibility();
+  // @if FEATURES.ACCESSIBILITY
+  initInputAccessibility();
   // @endif
-  // @ifdef FEATURE_LOCALIZATION
-  //initInputTimeLocalization();
+  // @if FEATURES.LOCALIZATION
+  //initInputLocalization();
   // @endif
-  // @ifdef FEATURE_NORMALIZATION
-  //initInputTimeNormalization();
+  // @if FEATURES.NORMALIZATION
+  initInputNormalization();
   // @endif
 }
