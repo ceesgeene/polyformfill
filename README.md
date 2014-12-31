@@ -6,6 +6,7 @@ Polyfill script for HTML5 form elements.
 Currently supported:
 
  * input[type=date]
+ * input[type=time]
 
 Install
 -------
