@@ -4,8 +4,6 @@
   "browser": true,
   "node": false,
 
-  "validthis": true,
-
   "globals": {
     "console": true
   }

@@ -17,14 +17,42 @@ void function (window, document) {
         input[i].valueAsDate,
         input[i].value
       );
-
-      //input[i].value = 12;
     }
 
-    document.getElementById('my-date-1-button').addEventListener('click', function () {
-      document.getElementById('my-date-1').focus();
+    document.getElementById('example-date-1-button').addEventListener('click', updateExampleDate1);
+
+    document.getElementById('example-date-4').addEventListener('input', function() {
+      document.getElementById('example-date-4-output').value = this.value;
     });
+    document.getElementById('example-date-4-output').value = document.getElementById('example-date-4').value;
+
+
   }
 
+  function updateExampleDate1() {
+    var input = document.getElementById('example-date-1');
+
+    input.focus();
+
+    input.dispatchEvent(window.crossBrowser_initKeyboardEvent('keydown', { key: 'Right', bubbles: true }));
+    input.dispatchEvent(window.crossBrowser_initKeyboardEvent('keydown', { key: 'Up', bubbles: true }));
+  }
+
+
+  /*window.addEventListener('blur', function(e) {
+    console.log(e);
+  });
+  window.addEventListener('focus', function(e) {
+    console.log(e);
+  });
+  window.addEventListener('focusin', function(e) {
+    console.log(e);
+  });
+  window.addEventListener('keydown', function(e) {
+    console.log(e);
+  });
+  window.addEventListener('keypress', function(e) {
+    console.log(e);
+  });*/
 
 }(window, document);

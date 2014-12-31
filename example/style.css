@@ -1,0 +1,9 @@
+
+input[type=date],
+input[type=datetime-local],
+input[type=time] {
+  font-family: monospace;
+}
+input:invalid {
+  border-color: red;
+}
