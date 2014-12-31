@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Test for datetime polyfill</title>
+
+    <script src="../test/helpers/keyboardevent.js"></script>
+    <script src="../polyformfill.js"></script>
+    <script src="test.js" defer async></script>
+
+    <style>
+        input[type=date] {
+            font-family: monospace;
+        }
+        input:invalid {
+            border-color: red;
+        }
+    </style>
+</head>
+<body>
+
+<form method="POST">
+
+    <p>
+        <label for="example-text-1">Text 1</label>
+        <input id="example-text-1" type="text" name="example-text" value="Some value">
+    </p>
+
+    <p>
+        <label for="example-date-1">Date 1</label>
+        <input id="example-date-1" type="date" name="example-date" value="1996-12-19">
+
+        <button id="example-date-1-button" type="button">Focus Date 1</button>
+    </p>
+
+    <p>
+        <label for="example-date-2">Date 2</label>
+        <input id="example-date-2" type="date" name="example-date-2">
+    </p>
+
+    <p>
+        <label for="example-date-3">Date 3</label>
+        <input id="example-date-3" type="date" name="example-date-3" min="1970-01-01" max="2014-12-31" step="3" value="1996-12-19">
+    </p>
+
+    <p>
+        <label for="example-date-4">Date 4</label>
+        <input id="example-date-4" type="date" name="example-date-4" value="1996-12-19" lang="nl">
+        <output id="example-date-4-output" name="example-date-4-output" for="example-date-4"></output>
+    </p>
+
+    <p>
+        <label for="example-date-5">Date 5</label>
+        <input id="example-date-5" type="date" name="example-date-5" lang="en">
+    </p>
+
+    <p>
+        <label for="example-date-6">Date 6</label>
+        <input id="example-date-6" type="date" name="example-date-6" lang="de">
+        <code>
+            &lt;input id="example-date-6" type="date" name="example-date-6" lang="de"&gt;
+        </code>
+    </p>
+
+    <p>
+        <button type="submit">Submit</button>
+    </p>
+</form>
+
+</body>
+</html>

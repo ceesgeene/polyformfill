@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Examples of polyformfill for input[type=time]</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="../polyformfill.js"></script>
+</head>
+<body>
+
+<form method="POST">
+
+  <p>
+    <label for="example-time-1">Time 1</label>
+    <input id="example-time-1" type="time" name="example-time">
+  </p>
+
+  <p>
+    <label for="example-time-2">Time 2</label>
+    <input id="example-time-2" type="time" name="example-time-2" value="12:00">
+  </p>
+
+  <p>
+    <label for="example-time-3">Time 3</label>
+    <input id="example-time-3" type="time" name="example-time-3" value="12:00:00" step="1">
+  </p>
+
+  <p>
+    <label for="example-time-4">Time 4</label>
+    <input id="example-time-4" type="time" name="example-time-4" step="3600">
+  </p>
+
+  <p>
+    <label for="example-time-5">Time 5</label>
+    <input id="example-time-5" type="time" name="example-time-5" step="any" value="01:23:45.678">
+  </p>
+
+  <p>
+    <label for="example-time-6">Time 6</label>
+    <input id="example-time-6" type="time" name="example-time-6" lang="de">
+  </p>
+
+  <p>
+    <button type="submit">Submit</button>
+  </p>
+</form>
+
+</body>
+</html>
