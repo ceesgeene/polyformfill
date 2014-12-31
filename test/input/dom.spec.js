@@ -50,4 +50,28 @@ describe('The DOM interface of input elements', function () {
     });
   });
 
+  describe('has a valueAsDate property, which', function () {
+
+    it('should return null for input elements not of type date or time', function () {
+      var input;
+
+      input = document.createElement('input');
+
+      expect(input.valueAsDate).toBe(null);
+    });
+
+  });
+
+  describe('has a valueAsNumber property, which', function () {
+
+    it('should return NaN for input elements not of type date or time', function () {
+      var input;
+
+      input = document.createElement('input');
+
+      expect(input.valueAsNumber).toBeNaN();
+    });
+
+  });
+
 });

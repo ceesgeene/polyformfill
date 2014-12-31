@@ -10,43 +10,52 @@
 var inputDomOriginalTypeGetter,
   inputDomOriginalValueGetter,
   inputDomOriginalValueSetter,
+  inputDomOriginalValueAsNumberGetter,
+  inputDomOriginalValueAsNumberSetter,
   inputDomOriginalStepUp,
   inputDomOriginalStepDown;
 
 function initInputDom(testInput) {
-  var originalTypeDescriptor, originalValueDescriptor;
+  var descriptor;
 
   if (HTMLInputElement && Object.isExtensible(HTMLInputElement.prototype)) {
-
     // FF and IE
-    originalTypeDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'type');
+    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'type');
     // Chrome
-    if (originalTypeDescriptor === undefined) {
-      originalTypeDescriptor = Object.getOwnPropertyDescriptor(testInput, 'type');
+    if (descriptor === undefined) {
+      descriptor = Object.getOwnPropertyDescriptor(testInput, 'type');
     }
-    inputDomOriginalTypeGetter = originalTypeDescriptor.get;
+    inputDomOriginalTypeGetter = descriptor.get;
 
-    if (originalTypeDescriptor.configurable) {
+    if (descriptor.configurable) {
       Object.defineProperty(HTMLInputElement.prototype, 'type', {
         get: inputDomTypeGet
       });
     }
 
-    originalValueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-    if (originalValueDescriptor.configurable) {
+    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    if (descriptor.configurable) {
       Object.defineProperty(HTMLInputElement.prototype, 'value', {
         get: inputDomValueGet,
         set: inputDomValueSet
       });
 
-      inputDomOriginalValueGetter = originalValueDescriptor.get;
-      inputDomOriginalValueSetter = originalValueDescriptor.set;
+      inputDomOriginalValueGetter = descriptor.get;
+      inputDomOriginalValueSetter = descriptor.set;
     }
 
-    Object.defineProperty(HTMLInputElement.prototype, 'valueAsNumber', {
-      get: inputDomValueAsNumberGet,
-      set: inputDomValueAsNumberSet
-    });
+    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'valueAsNumber');
+    if (descriptor === undefined || descriptor.configurable) {
+      Object.defineProperty(HTMLInputElement.prototype, 'valueAsNumber', {
+        get: inputDomValueAsNumberGet,
+        set: inputDomValueAsNumberSet
+      });
+
+      if (descriptor) {
+        inputDomOriginalValueAsNumberGetter = descriptor.get;
+        inputDomOriginalValueAsNumberSetter = descriptor.set;
+      }
+    }
 
     Object.defineProperty(HTMLInputElement.prototype, 'valueAsDate', {
       get: inputDomValueAsDateGet,
@@ -123,7 +132,10 @@ function inputDomValueAsNumberGet() {
     case 'time':
       return inputDomValueAsNumberGetFromDate.call(this);
     default:
-      return inputDomOriginalValueSetter.call(this);
+      if (inputDomOriginalValueAsNumberGetter) {
+        return inputDomOriginalValueAsNumberGetter.call(this);
+      }
+      return NaN;
   }
 }
 
@@ -215,8 +227,9 @@ function inputDomStepUp(n) {
 
   switch (inputType) {
     case 'date':
+      return inputDomStepUpOrDown(this, n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
     case 'time':
-      return inputDomStepUpOrDown(this, n, INPUT_DATE_STEP_SCALE_FACTOR);
+      return inputDomStepUpOrDown(this, n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
     default:
       return inputDomOriginalStepUp.call(this, n);
   }
@@ -229,8 +242,9 @@ function inputDomStepDown(n) {
 
   switch (inputType) {
     case 'date':
+      return inputDomStepUpOrDown(this, -n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
     case 'time':
-      return inputDomStepUpOrDown(this, -n, INPUT_DATE_STEP_SCALE_FACTOR);
+      return inputDomStepUpOrDown(this, -n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
     default:
       return inputDomOriginalStepUp.call(this, n);
   }
@@ -241,14 +255,15 @@ function inputDomStepDown(n) {
  *
  * @param element
  * @param n
+ * @param defaultStep
  * @param stepScaleFactor
  *
  * @see {@link http://www.w3.org/TR/html/forms.html#dom-input-stepup}
  */
-function inputDomStepUpOrDown(element, n, stepScaleFactor) {
+function inputDomStepUpOrDown(element, n, defaultStep, stepScaleFactor) {
   var allowedValueStep, delta, value;
 
-    allowedValueStep = inputDomGetAllowedValueStep(element, 1, stepScaleFactor);
+    allowedValueStep = inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor);
     if (allowedValueStep === null) {
       throw inputDomException(DOMException.INVALID_STATE_ERR);
     }
@@ -272,7 +287,6 @@ function inputDomStepUpOrDown(element, n, stepScaleFactor) {
  * @see {@link http://www.w3.org/TR/html/forms.html#concept-input-step}
  */
 function inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor) {
-  defaultStep = defaultStep || 1;
   var step;
 
   if (element.hasAttribute('step')) {

@@ -426,33 +426,40 @@
     }
     return number;
   }
-  var inputDomOriginalTypeGetter, inputDomOriginalValueGetter, inputDomOriginalValueSetter, inputDomOriginalStepUp, inputDomOriginalStepDown;
+  var inputDomOriginalTypeGetter, inputDomOriginalValueGetter, inputDomOriginalValueSetter, inputDomOriginalValueAsNumberGetter, inputDomOriginalValueAsNumberSetter, inputDomOriginalStepUp, inputDomOriginalStepDown;
   function initInputDom(testInput) {
-    var originalTypeDescriptor, originalValueDescriptor;
+    var descriptor;
     if (HTMLInputElement && Object.isExtensible(HTMLInputElement.prototype)) {
-      originalTypeDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "type");
-      if (originalTypeDescriptor === undefined) {
-        originalTypeDescriptor = Object.getOwnPropertyDescriptor(testInput, "type");
+      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "type");
+      if (descriptor === undefined) {
+        descriptor = Object.getOwnPropertyDescriptor(testInput, "type");
       }
-      inputDomOriginalTypeGetter = originalTypeDescriptor.get;
-      if (originalTypeDescriptor.configurable) {
+      inputDomOriginalTypeGetter = descriptor.get;
+      if (descriptor.configurable) {
         Object.defineProperty(HTMLInputElement.prototype, "type", {
           get: inputDomTypeGet
         });
       }
-      originalValueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
-      if (originalValueDescriptor.configurable) {
+      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+      if (descriptor.configurable) {
         Object.defineProperty(HTMLInputElement.prototype, "value", {
           get: inputDomValueGet,
           set: inputDomValueSet
         });
-        inputDomOriginalValueGetter = originalValueDescriptor.get;
-        inputDomOriginalValueSetter = originalValueDescriptor.set;
+        inputDomOriginalValueGetter = descriptor.get;
+        inputDomOriginalValueSetter = descriptor.set;
       }
-      Object.defineProperty(HTMLInputElement.prototype, "valueAsNumber", {
-        get: inputDomValueAsNumberGet,
-        set: inputDomValueAsNumberSet
-      });
+      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "valueAsNumber");
+      if (descriptor === undefined || descriptor.configurable) {
+        Object.defineProperty(HTMLInputElement.prototype, "valueAsNumber", {
+          get: inputDomValueAsNumberGet,
+          set: inputDomValueAsNumberSet
+        });
+        if (descriptor) {
+          inputDomOriginalValueAsNumberGetter = descriptor.get;
+          inputDomOriginalValueAsNumberSetter = descriptor.set;
+        }
+      }
       Object.defineProperty(HTMLInputElement.prototype, "valueAsDate", {
         get: inputDomValueAsDateGet,
         set: inputDomValueAsDateSet
@@ -515,7 +522,10 @@
       return inputDomValueAsNumberGetFromDate.call(this);
 
      default:
-      return inputDomOriginalValueSetter.call(this);
+      if (inputDomOriginalValueAsNumberGetter) {
+        return inputDomOriginalValueAsNumberGetter.call(this);
+      }
+      return NaN;
     }
   }
   function inputDomValueAsNumberGetFromDate() {
@@ -576,8 +586,10 @@
     n = n || 1;
     switch (inputType) {
      case "date":
+      return inputDomStepUpOrDown(this, n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
+
      case "time":
-      return inputDomStepUpOrDown(this, n, INPUT_DATE_STEP_SCALE_FACTOR);
+      return inputDomStepUpOrDown(this, n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
 
      default:
       return inputDomOriginalStepUp.call(this, n);
@@ -588,16 +600,18 @@
     n = n || 1;
     switch (inputType) {
      case "date":
+      return inputDomStepUpOrDown(this, -n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
+
      case "time":
-      return inputDomStepUpOrDown(this, -n, INPUT_DATE_STEP_SCALE_FACTOR);
+      return inputDomStepUpOrDown(this, -n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
 
      default:
       return inputDomOriginalStepUp.call(this, n);
     }
   }
-  function inputDomStepUpOrDown(element, n, stepScaleFactor) {
+  function inputDomStepUpOrDown(element, n, defaultStep, stepScaleFactor) {
     var allowedValueStep, delta, value;
-    allowedValueStep = inputDomGetAllowedValueStep(element, 1, stepScaleFactor);
+    allowedValueStep = inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor);
     if (allowedValueStep === null) {
       throw inputDomException(DOMException.INVALID_STATE_ERR);
     }
@@ -607,7 +621,6 @@
     element.valueAsNumber = value;
   }
   function inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor) {
-    defaultStep = defaultStep || 1;
     var step;
     if (element.hasAttribute("step")) {
       step = element.getAttribute("step");
@@ -847,6 +860,7 @@
     value = inputDateComponentsSet(input, components.year, components.month, components.day);
     input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
   }
+  var INPUT_DATE_STEP_DEFAULT = 1;
   var INPUT_DATE_STEP_SCALE_FACTOR = 864e5;
   function inputDateDomValueGet(element) {
     return inputDateGetRfc3339(element);
@@ -1179,6 +1193,8 @@
     value = inputTimeComponentsSet(input, components.hour, components.minute, components.second, components.milisecond);
     input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
   }
+  var INPUT_TIME_STEP_DEFAULT = 60;
+  var INPUT_TIME_STEP_SCALE_FACTOR = 1e3;
   function inputTimeDomValueGet(element) {
     return inputTimeGetRfc3339(element);
   }
@@ -1197,11 +1213,13 @@
   function inputTimeDomValueAsDateGet(element) {
     var components = inputTimeComponentsGet(element), date = null;
     if (components.hour !== INPUT_TIME_COMPONENT_EMPTY && components.minute !== INPUT_TIME_COMPONENT_EMPTY) {
-      date = new Date(0, 0, 1, components.hour, components.minute);
-      if (components.second !== INPUT_TIME_COMPONENT_EMPTY) {
+      date = new Date(0);
+      date.setUTCHours(components.hour);
+      date.setUTCMinutes(components.minute);
+      if (components.second > INPUT_TIME_COMPONENT_EMPTY) {
         date.setUTCSeconds(components.second);
       }
-      if (components.milisecond !== INPUT_TIME_COMPONENT_EMPTY) {
+      if (components.milisecond > INPUT_TIME_COMPONENT_EMPTY) {
         date.setUTCMilliseconds(components.milisecond);
       }
     }

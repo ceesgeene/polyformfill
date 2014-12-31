@@ -1,5 +1,9 @@
 'use strict';
 
+
+/** @const */
+var INPUT_DATE_STEP_DEFAULT = 1;
+
 /** @const */
 var INPUT_DATE_STEP_SCALE_FACTOR = 86400000;
 

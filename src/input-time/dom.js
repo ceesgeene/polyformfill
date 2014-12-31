@@ -5,6 +5,12 @@
  * Dom interface polyfill code for input elements of type time.
  */
 
+/** @const */
+var INPUT_TIME_STEP_DEFAULT = 60;
+
+/** @const */
+var INPUT_TIME_STEP_SCALE_FACTOR = 1000;
+
 /**
  *
  * @param element
@@ -35,11 +41,13 @@ function inputTimeDomValueAsDateGet(element) {
   var components = inputTimeComponentsGet(element), date = null;
 
   if (components.hour !== INPUT_TIME_COMPONENT_EMPTY && components.minute !== INPUT_TIME_COMPONENT_EMPTY) {
-    date = new Date(0, 0, 1, components.hour, components.minute);
-    if (components.second !== INPUT_TIME_COMPONENT_EMPTY) {
+    date = new Date(0);
+    date.setUTCHours(components.hour);
+    date.setUTCMinutes(components.minute);
+    if (components.second > INPUT_TIME_COMPONENT_EMPTY) {
       date.setUTCSeconds(components.second);
     }
-    if (components.milisecond !== INPUT_TIME_COMPONENT_EMPTY) {
+    if (components.milisecond > INPUT_TIME_COMPONENT_EMPTY) {
       date.setUTCMilliseconds(components.milisecond);
     }
   }

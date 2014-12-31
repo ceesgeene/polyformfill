@@ -5,6 +5,7 @@
 describe('The DOM interface of input[type=date] elements', function () {
 
   describe('has a type property, which', function () {
+
     it('should return "date" for input elements with type=date', function () {
       var input;
 
@@ -13,6 +14,7 @@ describe('The DOM interface of input[type=date] elements', function () {
 
       expect(input.type).toBe('date');
     });
+
   });
 
   describe('has a value property, which', function () {
@@ -58,6 +60,7 @@ describe('The DOM interface of input[type=date] elements', function () {
       input.value = '';
       expect(input.value).toBe('');
     });
+
     it('should not accept assignments with an invalid date', function () {
       var input;
 
@@ -85,18 +88,12 @@ describe('The DOM interface of input[type=date] elements', function () {
       input.value = '1970-02-31';
       expect(input.value).toBe('');
     });
+
   });
 
   describe('has a valueAsDate property, which', function () {
-    it('should return null for input elements not of type date or time', function () {
-      var input;
 
-      input = document.createElement('input');
-
-      expect(input.valueAsDate).toBe(null);
-    });
-
-    it('should return a Date object for input elements with type=date and a valid date value', function () {
+    it('should return a Date object for input elements with a valid value', function () {
       var input;
 
       input = document.createElement('input');
@@ -106,7 +103,7 @@ describe('The DOM interface of input[type=date] elements', function () {
       expect(input.valueAsDate instanceof Date).toBeTruthy();
     });
 
-    it('should return null for input elements with type=date and an invalid date value', function () {
+    it('should return null for input elements with an invalid value', function () {
       var input;
 
       input = document.createElement('input');
@@ -115,11 +112,12 @@ describe('The DOM interface of input[type=date] elements', function () {
       input.value = '1970-02-31';
       expect(input.valueAsDate).toBe(null);
     });
+
   });
 
   describe('has a valueAsNumber property, which', function () {
 
-    it('should return an integer for input elements with type=date and a valid date value', function () {
+    it('should return an integer for input elements with a valid value', function () {
       var input;
 
       input = document.createElement('input');
@@ -139,7 +137,7 @@ describe('The DOM interface of input[type=date] elements', function () {
       expect(input.valueAsNumber).toBe(8640000000000000);
     });
 
-    it('should return NaN for input elements with type=date and an invalid date value', function () {
+    it('should return NaN for input elements with an invalid value', function () {
       var input;
 
       input = document.createElement('input');
@@ -163,9 +161,11 @@ describe('The DOM interface of input[type=date] elements', function () {
       input.value = '275760-09-14';
       expect(input.valueAsNumber).toBeNaN();
     });
+
   });
 
   describe('has a stepUp() method, which', function () {
+
     it('for elements without step, min and max attributes should increase the value by one day', function () {
       var input;
 
@@ -182,9 +182,11 @@ describe('The DOM interface of input[type=date] elements', function () {
       input.stepUp(22);
       expect(input.value).toBe('1970-02-01');
     });
+
   });
 
   describe('has a stepDown() method, which', function () {
+
     it('for elements without step, min and max attributes should decrease the value by one day', function () {
       var input;
 
@@ -201,5 +203,7 @@ describe('The DOM interface of input[type=date] elements', function () {
       input.stepDown(20);
       expect(input.value).toBe('1969-12-12');
     });
+
   });
+
 });
