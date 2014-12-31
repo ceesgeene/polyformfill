@@ -100,7 +100,8 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     sauceLabs: {
-      testName: 'polyformfill'
+      testName: 'polyformfill',
+      takeScreenshots: false
     },
     captureTimeout: 120000,
     customLaunchers: customLaunchers,
