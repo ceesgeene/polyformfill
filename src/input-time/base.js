@@ -33,7 +33,7 @@ var INPUT_TIME_COMPONENT_SECOND_MAX = 59;
 var INPUT_TIME_COMPONENT_MILISECOND_MIN = 0;
 var INPUT_TIME_COMPONENT_MILISECOND_MAX = 999;
 
-var inputTimeValidTimeStringRegExp = /^([0-1][0-9])|(2[0-3]):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
+var inputTimeValidTimeStringRegExp = /^(([0-1][0-9])|(2[0-3])):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
 
 var inputTimeValueFormatter;
 var inputTimeFormatOrderGetter;
@@ -108,6 +108,9 @@ function inputTimeValidTimeStringToComponents(str) {
     if (components[3] === undefined) {
       components[3] = INPUT_TIME_COMPONENT_HIDDEN;
     }
+    else {
+      components[3] = (components[3] + '000').slice(0, 3);
+    }
 
     return {
       hour: parseInt(components[0], 10),
@@ -143,7 +146,7 @@ function inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond)
     formatted = '--';
   }
   else {
-    formatted = ('00' + (hour)).slice(-2);
+    formatted = ('00' + hour).slice(-2);
   }
 
   formatted += ':';
@@ -151,7 +154,7 @@ function inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond)
     formatted += '--';
   }
   else {
-    formatted += ('00' + (minute)).slice(-2);
+    formatted += ('00' + minute).slice(-2);
   }
 
   if (second !== INPUT_TIME_COMPONENT_HIDDEN) {
@@ -160,7 +163,7 @@ function inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond)
       formatted += '--';
     }
     else {
-      formatted += ('00' + (second)).slice(-2);
+      formatted += ('00' + second).slice(-2);
     }
 
     if (milisecond !== INPUT_TIME_COMPONENT_HIDDEN) {
@@ -169,7 +172,7 @@ function inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond)
         formatted += '---';
       }
       else {
-        formatted += ('000' + (milisecond)).slice(-3);
+        formatted += ('000' + milisecond).slice(-3);
       }
     }
   }

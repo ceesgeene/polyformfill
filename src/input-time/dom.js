@@ -11,19 +11,7 @@
  * @returns String
  */
 function inputTimeDomValueGet(element) {
-  var components = inputTimeComponentsGet(element), value = '';
-
-  if (components.hour !== INPUT_TIME_COMPONENT_EMPTY && components.minute !== INPUT_TIME_COMPONENT_EMPTY) {
-    value = components.hour + ':' + components.minute;
-    if (components.second !== INPUT_TIME_COMPONENT_EMPTY) {
-      value += ':' + components.second;
-    }
-    if (components.milisecond !== INPUT_TIME_COMPONENT_EMPTY) {
-      value += '.' + components.milisecond;
-    }
-  }
-
-  return value;
+  return inputTimeGetRfc3339(element);
 }
 
 function inputTimeDomValueSet(element, value) {
