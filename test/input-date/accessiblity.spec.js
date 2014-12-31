@@ -26,18 +26,18 @@ describe('An accessible input[type=date] element', function () {
         w.document.body.appendChild(input);
 
         input.focus();
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Right', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Up', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Right', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Up', 'bubbles': true}));
 
         expect(input.value).toBe('1970-02-01');
 
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Right', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Left', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Up', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Right', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Left', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Up', 'bubbles': true}));
 
         expect(input.value).toBe('1970-03-01');
 
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Down', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Down', 'bubbles': true}));
 
         expect(input.value).toBe('1970-02-01');
 
@@ -61,11 +61,11 @@ describe('An accessible input[type=date] element', function () {
         w.document.body.appendChild(input);
 
         input.focus();
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Right', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Right', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Left', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Up', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Up', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Right', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Right', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Left', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Up', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Up', 'bubbles': true}));
 
         expect(input.value).toBe('1970-03-01');
 
@@ -98,9 +98,9 @@ describe('An accessible input[type=date] element', function () {
         w.document.body.appendChild(input);
 
         inputBefore.focus();
-        inputBefore.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'U+0009', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'U+0009', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Up', 'bubbles': true}));
+        inputBefore.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'U+0009', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'U+0009', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Up', 'bubbles': true}));
 
         expect(input.value).toBe('1007-07-15');
 
@@ -128,21 +128,21 @@ describe('An accessible input[type=date] element', function () {
         w.document.body.appendChild(input);
 
         input.focus();
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Right', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'U+0008', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Right', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'U+0008', 'bubbles': true}));
 
         expect(input.value).toBe('');
 
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Up', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Up', 'bubbles': true}));
 
         expect(input.value).toBe('1007-01-15');
 
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Right', 'bubbles': true}));
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'U+0008', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Right', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'U+0008', 'bubbles': true}));
 
         expect(input.value).toBe('');
 
-        input.dispatchEvent(w.crossBrowser_initKeyboardEvent("keydown", {"key": 'Up', 'bubbles': true}));
+        input.dispatchEvent(w.crossBrowser_initKeyboardEvent('keydown', {'key': 'Up', 'bubbles': true}));
 
         expect(input.value).toBe('1007-01-01');
 

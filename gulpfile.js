@@ -1,7 +1,10 @@
 'use strict';
 
+/* global require */
+
 var gulp = require('gulp'),
   concat = require('gulp-concat'),
+  preprocess = require('gulp-preprocess'),
   rename = require('gulp-rename'),
   replace = require('gulp-replace'),
   sourcemaps = require('gulp-sourcemaps'),
@@ -15,6 +18,16 @@ gulp.task('compress', function () {
   gulp.src(['src/polyformfill.js.prefix', 'src/**/base.js', 'src/**/*.js', 'src/polyformfill.js.suffix'])
     .pipe(concat('polyformfill.js'))
     .pipe(replace("'use strict';", ''))
+    .pipe(preprocess({
+      context: {
+        FEATURES: {
+          DOM: true,
+          ACCESSIBILITY: true,
+          LOCALIZATION: true,
+          NORMALIZATION: true
+        }
+      }
+    }))
     .pipe(uglify({
       mangle: false,
       output: {

@@ -1,4 +1,4 @@
-Polyformfill [![Build Status](https://api.travis-ci.org/ceesgeene/polyformfill.svg?branch=develop)](https://travis-ci.org/ceesgeene/polyformfill)
+Polyformfill [![Build Status](https://api.travis-ci.org/ceesgeene/polyformfill.svg?branch=develop)](https://travis-ci.org/ceesgeene/polyformfill) [![Coverage Status](https://img.shields.io/coveralls/ceesgeene/polyformfill.svg)](https://coveralls.io/r/ceesgeene/polyformfill)
 ==============
 
 Polyfill script for HTML5 form elements.

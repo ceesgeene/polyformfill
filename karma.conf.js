@@ -75,9 +75,9 @@ module.exports = function(config) {
     browsers: [
       'Chrome_lang_svSE',
       'Firefox',
-      'IE'
-      , 'IE10'
-      , 'IE9'
+      'IE',
+      'IE10',
+      'IE9'
     ],
 
     customLaunchers: {

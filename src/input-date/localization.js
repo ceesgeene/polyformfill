@@ -7,13 +7,13 @@
  * @see {@link http://www.w3.org/TR/html/forms.html#input-impl-notes|Implementation notes regarding localization of form controls}
  */
 
-function initLocalization() {
-  inputDateValueFormatter = inputDateLocalizedValueFormatter;
-  inputDateFormatOrderGetter = inputDatLocalizedFormatOrder;
-  inputDateFormatSeparatorGetter = inputDateLocalizedFormatSeparator;
+function initInputDateLocalization() {
+  inputDateValueFormatter = inputDateLocalizationValueFormatter;
+  inputDateFormatOrderGetter = inputDateLocalizationFormatOrder;
+  inputDateFormatSeparatorGetter = inputDateLocalizationFormatSeparator;
 }
 
-function inputDateLocalizedValueFormatter(input, year, month, day) {
+function inputDateLocalizationValueFormatter(input, year, month, day) {
   var separator = inputDateFormatSeparatorGetter(input),
     value;
 
@@ -64,7 +64,7 @@ function inputDateLocalizedValueFormatter(input, year, month, day) {
   return value;
 }
 
-function inputDatLocalizedFormatOrder(input) {
+function inputDateLocalizationFormatOrder(input) {
   var lang, order;
 
   if (input.hasAttribute('lang')) {
@@ -101,7 +101,7 @@ function inputDatLocalizedFormatOrder(input) {
   return order;
 }
 
-function inputDateLocalizedFormatSeparator(input) {
+function inputDateLocalizationFormatSeparator(input) {
   var lang, separator;
 
   if (input.hasAttribute('lang')) {
@@ -123,5 +123,5 @@ function inputDateLocalizedFormatSeparator(input) {
       break;
   }
 
-  return separator;
+  return [separator];
 }

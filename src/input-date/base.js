@@ -1,5 +1,13 @@
 'use strict';
 
+/**
+ * @file
+ * Initialization code for input elements of type date and code shared between the optional features (dom, accessibility, etc).
+ *
+ * @see {@link http://www.w3.org/TR/html-markup/input.date.html|input type=date - date input control}
+ * @see {@link http://www.w3.org/TR/html/forms.html#date-state-(type=date)|HTML5 - 4.10.5.1.7 Date state (type=date)}
+ */
+
 /** @const */
 var DATECOMPONENT_YEAR = 1,
   DATECOMPONENT_MONTH = 2,
@@ -11,53 +19,46 @@ var INPUT_DATE_YEAR_EMPTY = 0,
   INPUT_DATE_DAY_EMPTY = 0;
 
 /** @const */
-var INPUT_DATE_YEAR_MIN = 1;
-var INPUT_DATE_YEAR_MAX = 275760;
+var INPUT_DATE_YEAR_MIN = 1,
+  INPUT_DATE_YEAR_MAX = 275760;
 
-var INPUT_DATE_MONTH_MIN = 0;
-var INPUT_DATE_MONTH_MAX = 11;
+/** @const */
+var INPUT_DATE_MONTH_MIN = 0,
+  INPUT_DATE_MONTH_MAX = 11;
 
-var INPUT_DATE_DAY_MIN = 1;
-var INPUT_DATE_DAY_MAX = 31;
+/** @const */
+var INPUT_DATE_DAY_MIN = 1,
+  INPUT_DATE_DAY_MAX = 31;
 
 var rfc3999FullDateRegExp = /^([0-9]{4,})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-
-var inputDateNativeValueGetter;
-var inputDateNativeValueSetter;
 
 var inputDateValueFormatter;
 var inputDateFormatOrderGetter;
 var inputDateFormatSeparatorGetter;
 
 function initInputDate() {
-  inputDateNativeValueGetter = inputDateGetValueProperty;
-  inputDateNativeValueSetter = inputDateSetValueProperty;
-
   inputDateValueFormatter = inputDateFuzzyRfc3339ValueFormatter;
   inputDateFormatOrderGetter = inputDateRfc3339FormatOrder;
   inputDateFormatSeparatorGetter = inputDateRfc3339FormatSeparator;
+
+  initInputDateLocalization();
 }
 
-function inputDateGetValueProperty() {
-  return this.value;
-}
+function inputDateComponentsSet(input, year, month, day) {
+  var formattedValue;
 
-function inputDateSetValueProperty(value) {
-  this.value = value;
-  return this.value;
-}
-
-function inputDateSetDateComponents(input, year, month, day) {
   input.__polyformfillInputDate = {
     year: year,
     month: month,
     day: day
   };
 
-  inputDateNativeValueSetter.call(input, inputDateValueFormatter(input, year, month, day));
+  formattedValue = inputDateValueFormatter(input, year, month, day);
+  inputDomOriginalValueSetter.call(input, formattedValue);
+  return formattedValue;
 }
 
-function inputDateGetDateComponents(input) {
+function inputDateComponentsGet(input) {
   if (input.__polyformfillInputDate === undefined) {
     inputDateInitInternalValue(input);
   }
@@ -101,7 +102,7 @@ function inputDateRfc3339FormatOrder() {
 }
 
 function inputDateRfc3339FormatSeparator() {
-  return '-';
+  return ['-'];
 }
 
 function getDateFromRfc3339FullDateString(str) {
@@ -164,7 +165,7 @@ function inputDateGetRfc3339(input) {
 }
 
 function inputDateGetDate(input) {
-  var dateComponents = inputDateGetDateComponents(input), date = null;
+  var dateComponents = inputDateComponentsGet(input), date = null;
 
   if (dateComponents.year !== INPUT_DATE_YEAR_EMPTY && dateComponents.month !== INPUT_DATE_MONTH_EMPTY && dateComponents.day !== INPUT_DATE_DAY_EMPTY) {
     date = new Date(0);
