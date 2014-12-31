@@ -19,6 +19,9 @@ function inputNormalizationOnLoadFormatInputElements(event) {
       case 'date':
         inputDateNormalizationOnLoadFormatInputDateElements(elements[i]);
         break;
+      case 'time':
+        inputTimeNormalizationOnLoadFormatInputElements(elements[i]);
+        break;
       default:
         break;
     }
@@ -32,6 +35,9 @@ function inputNormalizationOnSubmitNormalizeInput(event) {
     switch (elements[i].getAttribute(INPUT_ATTR_TYPE)) {
       case 'date':
         inputDateNormalizationOnSubmitNormalizeDateInput(elements[i]);
+        break;
+      case 'time':
+        inputTimeNormalizationOnSubmitNormalizeInput(elements[i]);
         break;
       default:
         break;

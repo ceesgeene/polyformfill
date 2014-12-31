@@ -101,16 +101,40 @@ function inputTimeValidTimeStringToComponents(str) {
   var components;
   if (str && inputTimeValidTimeStringRegExp.test(str)) {
     components = str.split(/[:.]/);
+
+    if (components[2] === undefined) {
+      components[2] = INPUT_TIME_COMPONENT_HIDDEN;
+    }
+    if (components[3] === undefined) {
+      components[3] = INPUT_TIME_COMPONENT_HIDDEN;
+    }
+
     return {
       hour: parseInt(components[0], 10),
       minute: parseInt(components[1], 10),
-      second: parseInt(components[2], 10) || INPUT_TIME_COMPONENT_HIDDEN,
-      milisecond: parseInt(components[3], 10) || INPUT_TIME_COMPONENT_HIDDEN
+      second: parseInt(components[2], 10),
+      milisecond: parseInt(components[3], 10)
     };
   }
   return null;
 }
 
+function inputTimeGetRfc3339(element) {
+  var components = inputTimeComponentsGet(element);
+
+  if (components.hour > INPUT_TIME_COMPONENT_EMPTY && components.minute > INPUT_TIME_COMPONENT_EMPTY) {
+    if (components.second === INPUT_TIME_COMPONENT_EMPTY) {
+      components.second = INPUT_TIME_COMPONENT_HIDDEN
+    }
+    if (components.milisecond === INPUT_TIME_COMPONENT_EMPTY) {
+      components.milisecond = INPUT_TIME_COMPONENT_HIDDEN
+    }
+    return inputTimeDefaultValueFormatter(element, components.hour, components.minute, components.second, components.milisecond);
+  }
+  else {
+    return '';
+  }
+}
 
 function inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond) {
   var formatted;
