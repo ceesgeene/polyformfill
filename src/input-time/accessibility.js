@@ -81,7 +81,7 @@ function inputTimeAccessibilityOnKeyPressHandleUserInput(element, event) {
 
       componentOrder = inputTimeFormatOrderGetter(element),
       componentSeparator = inputTimeFormatSeparatorGetter(element),
-      selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+      selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
     switch (selectedComponent) {
       case INPUT_TIME_COMPONENT_HOUR:
@@ -149,16 +149,12 @@ function inputTimeAccessibilityOnBlurHandleInputNormalization(element) {
   inputTimeAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
 }
 
-function inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
-  return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
-}
-
 function inputTimeClearComponent(input, selectionStart) {
   var value = inputDomOriginalValueGetter.call(input),
     components = inputTimeComponentsGet(input),
     componentOrder = inputTimeFormatOrderGetter(input),
     componentSeparator = inputTimeFormatSeparatorGetter(input),
-    selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
     case INPUT_TIME_COMPONENT_HOUR:
@@ -186,7 +182,7 @@ function inputTimeAccessibilityNormalizeSelectedComponent(input, selectionStart)
     components = inputTimeComponentsGet(input),
     componentOrder = inputTimeFormatOrderGetter(input),
     componentSeparator = inputTimeFormatSeparatorGetter(input),
-    selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
     case INPUT_TIME_COMPONENT_HOUR:
@@ -241,7 +237,7 @@ function inputTimeAccessibilityIncreaseComponent(input, selectionStart, amount) 
     components = inputTimeComponentsGet(input),
     componentOrder = inputTimeFormatOrderGetter(input),
     componentSeparator = inputTimeFormatSeparatorGetter(input),
-    selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
     case INPUT_TIME_COMPONENT_HOUR:

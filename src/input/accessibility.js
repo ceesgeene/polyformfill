@@ -236,3 +236,7 @@ function inputAccessibilityGetSelectedComponentNumber(value, position, component
 
   return number;
 }
+
+function inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
+  return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
+}

@@ -426,6 +426,9 @@
     }
     return number;
   }
+  function inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
+    return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
+  }
   var inputDomOriginalTypeGetter, inputDomOriginalValueGetter, inputDomOriginalValueSetter, inputDomOriginalValueAsNumberGetter, inputDomOriginalValueAsNumberSetter, inputDomOriginalStepUp, inputDomOriginalStepDown;
   function initInputDom(testInput) {
     var descriptor;
@@ -731,7 +734,7 @@
     if (event.charCode > 47 && event.charCode < 58) {
       var selectionStart = element.selectionStart;
       var selectNext = false;
-      var value = inputDomOriginalValueGetter.call(element), components = inputDateComponentsGet(element), componentOrder = inputDateFormatOrderGetter(element), componentSeparator = inputDateFormatSeparatorGetter(element), selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+      var value = inputDomOriginalValueGetter.call(element), components = inputDateComponentsGet(element), componentOrder = inputDateFormatOrderGetter(element), componentSeparator = inputDateFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
       switch (selectedComponent) {
        case DATECOMPONENT_YEAR:
         components.year = parseInt((components.year + event.key).substr(-6), 10);
@@ -781,11 +784,8 @@
   function inputDateAccessibilityOnBlurHandleInputNormalization(element) {
     inputDateAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
   }
-  function inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
-    return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
-  }
   function inputDateClearDateComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
     switch (selectedComponent) {
      case DATECOMPONENT_YEAR:
       components.year = INPUT_DATE_YEAR_EMPTY;
@@ -806,7 +806,7 @@
     input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
   }
   function inputDateAccessibilityNormalizeSelectedComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
     switch (selectedComponent) {
      case DATECOMPONENT_YEAR:
       if (components.year > INPUT_DATE_YEAR_MAX) {
@@ -840,7 +840,7 @@
     input.setSelectionRange(selection[0], selection[1]);
   }
   function inputDateAccessibilityIncreaseDateComponent(input, selectionStart, amount) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
     switch (selectedComponent) {
      case DATECOMPONENT_YEAR:
       components.year = inputAccessibilityIncreaseComponent(components.year, amount, INPUT_DATE_YEAR_MIN, INPUT_DATE_YEAR_MAX);
@@ -1038,7 +1038,7 @@
   }
   function inputTimeAccessibilityOnKeyPressHandleUserInput(element, event) {
     if (event.charCode > 47 && event.charCode < 58) {
-      var selectionStart = element.selectionStart, selectNext = false, value = inputDomOriginalValueGetter.call(element), components = inputTimeComponentsGet(element), componentOrder = inputTimeFormatOrderGetter(element), componentSeparator = inputTimeFormatSeparatorGetter(element), selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+      var selectionStart = element.selectionStart, selectNext = false, value = inputDomOriginalValueGetter.call(element), components = inputTimeComponentsGet(element), componentOrder = inputTimeFormatOrderGetter(element), componentSeparator = inputTimeFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
       switch (selectedComponent) {
        case INPUT_TIME_COMPONENT_HOUR:
         components.hour = inputAccessibilityComplementComponent(components.hour, event.key, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX, 2);
@@ -1098,11 +1098,8 @@
   function inputTimeAccessibilityOnBlurHandleInputNormalization(element) {
     inputTimeAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
   }
-  function inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
-    return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
-  }
   function inputTimeClearComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
     switch (selectedComponent) {
      case INPUT_TIME_COMPONENT_HOUR:
       components.hour = INPUT_TIME_COMPONENT_EMPTY;
@@ -1127,7 +1124,7 @@
     input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
   }
   function inputTimeAccessibilityNormalizeSelectedComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
     switch (selectedComponent) {
      case INPUT_TIME_COMPONENT_HOUR:
       if (components.hour > INPUT_TIME_COMPONENT_HOUR_MAX) {
@@ -1169,7 +1166,7 @@
     element.setSelectionRange(selection[0], selection[1]);
   }
   function inputTimeAccessibilityIncreaseComponent(input, selectionStart, amount) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
     switch (selectedComponent) {
      case INPUT_TIME_COMPONENT_HOUR:
       components.hour = inputAccessibilityIncreaseComponent(components.hour, amount, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX);

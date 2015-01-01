@@ -81,7 +81,7 @@ function inputDateAccessibilityOnKeyPressHandleUserInput(element, event) {
 
       componentOrder = inputDateFormatOrderGetter(element),
       componentSeparator = inputDateFormatSeparatorGetter(element),
-      selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+      selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
     switch (selectedComponent) {
       case DATECOMPONENT_YEAR:
@@ -140,16 +140,12 @@ function inputDateAccessibilityOnBlurHandleInputNormalization(element) {
   inputDateAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
 }
 
-function inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
-  return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
-}
-
 function inputDateClearDateComponent(input, selectionStart) {
   var value = inputDomOriginalValueGetter.call(input),
     components = inputDateComponentsGet(input),
     componentOrder = inputDateFormatOrderGetter(input),
     componentSeparator = inputDateFormatSeparatorGetter(input),
-    selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
     case DATECOMPONENT_YEAR:
@@ -174,7 +170,7 @@ function inputDateAccessibilityNormalizeSelectedComponent(input, selectionStart)
     components = inputDateComponentsGet(input),
     componentOrder = inputDateFormatOrderGetter(input),
     componentSeparator = inputDateFormatSeparatorGetter(input),
-    selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
     case DATECOMPONENT_YEAR:
@@ -220,7 +216,7 @@ function inputDateAccessibilityIncreaseDateComponent(input, selectionStart, amou
     components = inputDateComponentsGet(input),
     componentOrder = inputDateFormatOrderGetter(input),
     componentSeparator = inputDateFormatSeparatorGetter(input),
-    selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
     case DATECOMPONENT_YEAR:
