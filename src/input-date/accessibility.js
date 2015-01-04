@@ -20,27 +20,8 @@ function inputDateAccessibilityOnKeydownHandleNavigation(element, event) {
       break;
     case 'Tab':
     case 'U+0009':
-      inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
-      if (event.altKey || event.ctrlKey || event.metaKey) {
-        return;
-      }
-
-      if (event.shiftKey) {
-        if (inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element)) !== 0) {
-          inputDateAccessibilitySelectPreviousDateComponent(element, selectionStart);
-        }
-        else {
-          return;
-        }
-      }
-      else if (inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element)) !== 2) {
-        inputDateAccessibilitySelectNextDateComponent(element, selectionStart);
-      }
-      else {
-        return;
-      }
-
-      break;
+      inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
+      return;
     case 'Left':
       inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
       inputDateAccessibilitySelectPreviousDateComponent(element, selectionStart);
@@ -57,6 +38,29 @@ function inputDateAccessibilityOnKeydownHandleNavigation(element, event) {
       break;
     default:
       return;
+  }
+  event.preventDefault();
+}
+
+function inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart) {
+  inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
+  if (event.altKey || event.ctrlKey || event.metaKey) {
+    return;
+  }
+
+  if (event.shiftKey) {
+    if (inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element)) !== 0) {
+      inputDateAccessibilitySelectPreviousDateComponent(element, selectionStart);
+    }
+    else {
+      return;
+    }
+  }
+  else if (inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element)) !== 2) {
+    inputDateAccessibilitySelectNextDateComponent(element, selectionStart);
+  }
+  else {
+    return;
   }
   event.preventDefault();
 }
