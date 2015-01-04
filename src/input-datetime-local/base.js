@@ -7,9 +7,9 @@
  * @see {@link http://www.w3.org/TR/html-markup/input.datetime-local.html}
  */
 
-var inputDatetimeLocalValueFormatter;
-var inputDatetimeLocalFormatOrderGetter;
-var inputDatetimeLocalFormatSeparatorGetter;
+var inputDatetimeLocalValueFormatter,
+  inputDatetimeLocalFormatOrderGetter,
+  inputDatetimeLocalFormatSeparatorGetter;
 
 function initInputDatetimeLocal() {
   inputDatetimeLocalValueFormatter = inputDatetimeLocalDefaultValueFormatter;

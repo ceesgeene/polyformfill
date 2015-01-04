@@ -32,9 +32,9 @@ var INPUT_DATE_DAY_MIN = 1,
 
 var rfc3999FullDateRegExp = /^([0-9]{4,})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
 
-var inputDateValueFormatter;
-var inputDateFormatOrderGetter;
-var inputDateFormatSeparatorGetter;
+var inputDateValueFormatter,
+  inputDateFormatOrderGetter,
+  inputDateFormatSeparatorGetter;
 
 function initInputDate() {
   inputDateValueFormatter = inputDateFuzzyRfc3339ValueFormatter;

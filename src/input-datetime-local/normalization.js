@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Provides normalization of input[type=date] elements.
+ * Provides normalization of input[type=datetime-local] elements.
  */
 
 function inputDatetimeLocalNormalizationOnLoadFormatInputElements(element) {

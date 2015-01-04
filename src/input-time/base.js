@@ -21,23 +21,26 @@ var INPUT_TIME_COMPONENT_EMPTY = -1;
 var INPUT_TIME_COMPONENT_HIDDEN = -2;
 
 /** @const */
-var INPUT_TIME_COMPONENT_HOUR_MIN = 0;
-var INPUT_TIME_COMPONENT_HOUR_MAX = 23;
+var INPUT_TIME_COMPONENT_HOUR_MIN = 0,
+  INPUT_TIME_COMPONENT_HOUR_MAX = 23;
 
-var INPUT_TIME_COMPONENT_MINUTE_MIN = 0;
-var INPUT_TIME_COMPONENT_MINUTE_MAX = 59;
+/** @const */
+var INPUT_TIME_COMPONENT_MINUTE_MIN = 0,
+  INPUT_TIME_COMPONENT_MINUTE_MAX = 59;
 
-var INPUT_TIME_COMPONENT_SECOND_MIN = 0;
-var INPUT_TIME_COMPONENT_SECOND_MAX = 59;
+/** @const */
+var INPUT_TIME_COMPONENT_SECOND_MIN = 0,
+  INPUT_TIME_COMPONENT_SECOND_MAX = 59;
 
-var INPUT_TIME_COMPONENT_MILISECOND_MIN = 0;
-var INPUT_TIME_COMPONENT_MILISECOND_MAX = 999;
+/** @const */
+var INPUT_TIME_COMPONENT_MILISECOND_MIN = 0,
+  INPUT_TIME_COMPONENT_MILISECOND_MAX = 999;
 
 var inputTimeValidTimeStringRegExp = /^(([0-1][0-9])|(2[0-3])):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
 
-var inputTimeValueFormatter;
-var inputTimeFormatOrderGetter;
-var inputTimeFormatSeparatorGetter;
+var inputTimeValueFormatter,
+  inputTimeFormatOrderGetter,
+  inputTimeFormatSeparatorGetter;
 
 function initInputTime() {
   inputTimeValueFormatter = inputTimeDefaultValueFormatter;

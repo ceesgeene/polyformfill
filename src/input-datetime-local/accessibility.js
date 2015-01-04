@@ -66,10 +66,10 @@ function inputDatetimeLocalAccessibilityOnTabKeydownHandleNavigation(element, ev
 }
 
 /**
- * Handles user input for HTML input elements of type "time".
+ * Handles user input for HTML input elements of type "datetime-local".
  *
  * @param {HTMLInputElement} element
- *   A HTMLInputElement of type "time".
+ *   A HTMLInputElement of type "datetime-local".
  * @param {KeyboardEvent} event
  *   A KeyboardEvent of type keypress. User input should be handled on keypress events because these are triggered
  *   every time an actual character is being inserted (keydown and keyup events are triggered only once).
@@ -88,6 +88,25 @@ function inputDatetimeLocalAccessibilityOnKeyPressHandleUserInput(element, event
       selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
     switch (selectedComponent) {
+      case DATECOMPONENT_YEAR:
+        components.year = inputAccessibilityComplementComponent(components.year, event.key, INPUT_DATE_YEAR_MIN, INPUT_DATE_YEAR_MAX, 27576);
+        if (components.year > 27576) {
+          selectNext = true;
+        }
+        break;
+      case DATECOMPONENT_MONTH:
+        components.month = inputAccessibilityComplementComponent(components.month, event.key, INPUT_DATE_MONTH_MIN, INPUT_DATE_MONTH_MAX, 0);
+        if (components.month > 0) {
+          selectNext = true;
+        }
+        break;
+      case DATECOMPONENT_DAY:
+        components.day = inputAccessibilityComplementComponent(components.day, event.key, INPUT_DATE_DAY_MIN, INPUT_DATE_DAY_MAX, 3);
+        if (components.day > 3) {
+          selectNext = true;
+        }
+        break;
+
       case INPUT_TIME_COMPONENT_HOUR:
         components.hour = inputAccessibilityComplementComponent(components.hour, event.key, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX, 2);
         if (components.hour > 2) {
@@ -116,7 +135,7 @@ function inputDatetimeLocalAccessibilityOnKeyPressHandleUserInput(element, event
         return;
     }
 
-    value = inputDatetimeLocalComponentsSet(element, components.hour, components.minute, components.second, components.milisecond);
+    value = inputDatetimeLocalComponentsSet(element, components.year, components.month, components.day, components.hour, components.minute, components.second, components.milisecond);
 
     var selection = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
     if (selectNext) {

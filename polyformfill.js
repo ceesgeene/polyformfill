@@ -22,9 +22,7 @@
   var INPUT_DATE_MONTH_MIN = 0, INPUT_DATE_MONTH_MAX = 11;
   var INPUT_DATE_DAY_MIN = 1, INPUT_DATE_DAY_MAX = 31;
   var rfc3999FullDateRegExp = /^([0-9]{4,})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-  var inputDateValueFormatter;
-  var inputDateFormatOrderGetter;
-  var inputDateFormatSeparatorGetter;
+  var inputDateValueFormatter, inputDateFormatOrderGetter, inputDateFormatSeparatorGetter;
   function initInputDate() {
     inputDateValueFormatter = inputDateFuzzyRfc3339ValueFormatter;
     inputDateFormatOrderGetter = inputDateRfc3339FormatOrder;
@@ -126,9 +124,7 @@
     }
     return date;
   }
-  var inputDatetimeLocalValueFormatter;
-  var inputDatetimeLocalFormatOrderGetter;
-  var inputDatetimeLocalFormatSeparatorGetter;
+  var inputDatetimeLocalValueFormatter, inputDatetimeLocalFormatOrderGetter, inputDatetimeLocalFormatSeparatorGetter;
   function initInputDatetimeLocal() {
     inputDatetimeLocalValueFormatter = inputDatetimeLocalDefaultValueFormatter;
     inputDatetimeLocalFormatOrderGetter = inputDatetimeLocalDefaultFormatOrder;
@@ -224,18 +220,12 @@
   var INPUT_TIME_COMPONENT_HOUR = 8, INPUT_TIME_COMPONENT_MINUTE = 16, INPUT_TIME_COMPONENT_SECOND = 32, INPUT_TIME_COMPONENT_MILISECOND = 64;
   var INPUT_TIME_COMPONENT_EMPTY = -1;
   var INPUT_TIME_COMPONENT_HIDDEN = -2;
-  var INPUT_TIME_COMPONENT_HOUR_MIN = 0;
-  var INPUT_TIME_COMPONENT_HOUR_MAX = 23;
-  var INPUT_TIME_COMPONENT_MINUTE_MIN = 0;
-  var INPUT_TIME_COMPONENT_MINUTE_MAX = 59;
-  var INPUT_TIME_COMPONENT_SECOND_MIN = 0;
-  var INPUT_TIME_COMPONENT_SECOND_MAX = 59;
-  var INPUT_TIME_COMPONENT_MILISECOND_MIN = 0;
-  var INPUT_TIME_COMPONENT_MILISECOND_MAX = 999;
+  var INPUT_TIME_COMPONENT_HOUR_MIN = 0, INPUT_TIME_COMPONENT_HOUR_MAX = 23;
+  var INPUT_TIME_COMPONENT_MINUTE_MIN = 0, INPUT_TIME_COMPONENT_MINUTE_MAX = 59;
+  var INPUT_TIME_COMPONENT_SECOND_MIN = 0, INPUT_TIME_COMPONENT_SECOND_MAX = 59;
+  var INPUT_TIME_COMPONENT_MILISECOND_MIN = 0, INPUT_TIME_COMPONENT_MILISECOND_MAX = 999;
   var inputTimeValidTimeStringRegExp = /^(([0-1][0-9])|(2[0-3])):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
-  var inputTimeValueFormatter;
-  var inputTimeFormatOrderGetter;
-  var inputTimeFormatSeparatorGetter;
+  var inputTimeValueFormatter, inputTimeFormatOrderGetter, inputTimeFormatSeparatorGetter;
   function initInputTime() {
     inputTimeValueFormatter = inputTimeDefaultValueFormatter;
     inputTimeFormatOrderGetter = inputTimeDefaultFormatOrder;
@@ -1185,6 +1175,27 @@
     if (event.charCode > 47 && event.charCode < 58) {
       var selectionStart = element.selectionStart, selectNext = false, value = inputDomOriginalValueGetter.call(element), components = inputDatetimeLocalComponentsGet(element), componentOrder = inputDatetimeLocalFormatOrderGetter(element), componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
       switch (selectedComponent) {
+       case DATECOMPONENT_YEAR:
+        components.year = inputAccessibilityComplementComponent(components.year, event.key, INPUT_DATE_YEAR_MIN, INPUT_DATE_YEAR_MAX, 27576);
+        if (components.year > 27576) {
+          selectNext = true;
+        }
+        break;
+
+       case DATECOMPONENT_MONTH:
+        components.month = inputAccessibilityComplementComponent(components.month, event.key, INPUT_DATE_MONTH_MIN, INPUT_DATE_MONTH_MAX, 0);
+        if (components.month > 0) {
+          selectNext = true;
+        }
+        break;
+
+       case DATECOMPONENT_DAY:
+        components.day = inputAccessibilityComplementComponent(components.day, event.key, INPUT_DATE_DAY_MIN, INPUT_DATE_DAY_MAX, 3);
+        if (components.day > 3) {
+          selectNext = true;
+        }
+        break;
+
        case INPUT_TIME_COMPONENT_HOUR:
         components.hour = inputAccessibilityComplementComponent(components.hour, event.key, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX, 2);
         if (components.hour > 2) {
@@ -1216,7 +1227,7 @@
        default:
         return;
       }
-      value = inputDatetimeLocalComponentsSet(element, components.hour, components.minute, components.second, components.milisecond);
+      value = inputDatetimeLocalComponentsSet(element, components.year, components.month, components.day, components.hour, components.minute, components.second, components.milisecond);
       var selection = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
       if (selectNext) {
         inputDatetimeLocalAccessibilitySelectNextComponent(element, selection[0]);
