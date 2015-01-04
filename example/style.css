@@ -4,6 +4,11 @@ input[type=datetime-local],
 input[type=time] {
   font-family: monospace;
 }
+
+input[type=datetime-local] {
+  width: 15em;
+}
+
 input:invalid {
   border-color: red;
 }

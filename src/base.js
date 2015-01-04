@@ -10,6 +10,7 @@ function init() {
     initInput(testInput);
 
     initInputDate();
+    initInputDatetimeLocal();
     initInputTime();
   }
 }

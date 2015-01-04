@@ -17,7 +17,10 @@ function inputNormalizationOnLoadFormatInputElements(event) {
   for (i = 0; i < elements.length; i++) {
     switch (elements[i].getAttribute(INPUT_ATTR_TYPE)) {
       case 'date':
-        inputDateNormalizationOnLoadFormatInputDateElements(elements[i]);
+        inputDateNormalizationOnLoadFormatInputElements(elements[i]);
+        break;
+      case 'datetime-local':
+        inputDatetimeLocalNormalizationOnLoadFormatInputElements(elements[i]);
         break;
       case 'time':
         inputTimeNormalizationOnLoadFormatInputElements(elements[i]);
@@ -34,7 +37,10 @@ function inputNormalizationOnSubmitNormalizeInput(event) {
   for (i = 0; i < elements.length; i++) {
     switch (elements[i].getAttribute(INPUT_ATTR_TYPE)) {
       case 'date':
-        inputDateNormalizationOnSubmitNormalizeDateInput(elements[i]);
+        inputDateNormalizationOnSubmitNormalizeInput(elements[i]);
+        break;
+      case 'datetime-local':
+        inputDatetimeLocalNormalizationOnSubmitNormalizeInput(elements[i]);
         break;
       case 'time':
         inputTimeNormalizationOnSubmitNormalizeInput(elements[i]);

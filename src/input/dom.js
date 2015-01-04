@@ -82,6 +82,7 @@ function inputDomTypeGet() {
     attr = this.getAttribute(INPUT_ATTR_TYPE);
     switch (attr) {
       case 'date':
+      case 'datetime-local':
       case 'time':
         return attr;
       default:
@@ -97,6 +98,8 @@ function inputDomValueGet() {
   switch (inputType) {
     case 'date':
       return inputDateDomValueGet(this);
+    case 'datetime-local':
+      return inputDatetimeLocalDomValueGet(this);
     case 'time':
       return inputTimeDomValueGet(this);
     default:
@@ -110,6 +113,8 @@ function inputDomValueSet(value) {
   switch (inputType) {
     case 'date':
       return inputDateDomValueSet(this, value);
+    case 'datetime-local':
+      return inputDatetimeLocalDomValueSet(this, value);
     case 'time':
       return inputTimeDomValueSet(this, value);
     default:
@@ -129,6 +134,7 @@ function inputDomValueAsNumberGet() {
 
   switch (inputType) {
     case 'date':
+    case 'datetime-local':
     case 'time':
       return inputDomValueAsNumberGetFromDate.call(this);
     default:
@@ -162,6 +168,7 @@ function inputDomValueAsNumberSet(value) {
 
   switch (inputType) {
     case 'date':
+    case 'datetime-local':
     case 'time':
       inputDomValueAsNumberSetFromDate.call(this, value);
       break;
@@ -192,6 +199,8 @@ function inputDomValueAsDateGet() {
   switch (inputType) {
     case 'date':
       return inputDateDomValueAsDateGet(this);
+    case 'datetime-local':
+      return inputDatetimeLocalDomValueAsDateGet(this);
     case 'time':
       return inputTimeDomValueAsDateGet(this);
     default:
@@ -213,6 +222,8 @@ function inputDomValueAsDateSet(value) {
   switch (inputType) {
     case 'date':
       return inputDateDomValueAsDateSet(this, value);
+    case 'datetime-local':
+      return inputDatetimeLocalDomValueAsDateSet(this, value);
     case 'time':
       return inputTimeDomValueAsDateSet(this, value);
     default:
@@ -228,6 +239,8 @@ function inputDomStepUp(n) {
   switch (inputType) {
     case 'date':
       return inputDomStepUpOrDown(this, n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
+    case 'datetime-local':
+      return inputDomStepUpOrDown(this, n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
     case 'time':
       return inputDomStepUpOrDown(this, n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
     default:
@@ -243,6 +256,8 @@ function inputDomStepDown(n) {
   switch (inputType) {
     case 'date':
       return inputDomStepUpOrDown(this, -n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
+    case 'datetime-local':
+      return inputDomStepUpOrDown(this, -n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
     case 'time':
       return inputDomStepUpOrDown(this, -n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
     default:

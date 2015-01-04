@@ -52,6 +52,9 @@ function inputAccessibilityOnKeydownHandleNavigation(event) {
       case 'date':
         inputDateAccessibilityOnKeydownHandleNavigation(event.target, event);
         break;
+      case 'datetime-local':
+        inputDatetimeLocalAccessibilityOnKeydownHandleNavigation(event.target, event);
+        break;
       case 'time':
         inputTimeAccessibilityOnKeydownHandleNavigation(event.target, event);
         break;
@@ -85,6 +88,9 @@ function inputAccessibilityOnKeyPressHandleUserInput(event) {
       case 'date':
         inputDateAccessibilityOnKeyPressHandleUserInput(event.target, event);
         break;
+      case 'datetime-local':
+        inputDatetimeLocalAccessibilityOnKeyPressHandleUserInput(event.target, event);
+        break;
       case 'time':
         inputTimeAccessibilityOnKeyPressHandleUserInput(event.target, event);
         break;
@@ -100,6 +106,9 @@ function inputAccessibilityOnFocusHandleInputSelection(event) {
       case 'date':
         inputDateAccessibilityOnFocusHandleInputSelection(event.target, event);
         break;
+      case 'datetime-local':
+        inputDatetimeLocalAccessibilityOnFocusHandleInputSelection(event.target, event);
+        break;
       case 'time':
         inputTimeAccessibilityOnFocusHandleInputSelection(event.target, event);
         break;
@@ -114,6 +123,9 @@ function inputAccessibilityOnBlurHandleInputNormalization(event) {
     switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
       case 'date':
         inputDateAccessibilityOnBlurHandleInputNormalization(event.target);
+        break;
+      case 'datetime-local':
+        inputDatetimeLocalAccessibilityOnBlurHandleInputNormalization(event.target);
         break;
       case 'time':
         inputTimeAccessibilityOnBlurHandleInputNormalization(event.target);
@@ -221,15 +233,11 @@ function inputAccessibilityGetNextComponentRange(value, position, componentSepar
 }
 
 function inputAccessibilityGetSelectedComponentNumber(value, position, componentSeparators) {
-  var number = 0, test, i, componentSeparatorsCount = componentSeparators.length;
+  var number = 0;
 
   while (position > 0) {
-    test = -1;
-    for (i = 0; i < componentSeparatorsCount; i++) {
-      test = Math.max(test, value.lastIndexOf(componentSeparators[i], position));
-    }
-    position = test - 1;
-    if (position > -2) {
+    position = inputAccessibilityPreviousSeparator(value, position, componentSeparators) - 1;
+    if (position > 0) {
       number++;
     }
   }

@@ -9,10 +9,10 @@
  */
 
 /** @const */
-var INPUT_TIME_COMPONENT_HOUR = 1,
-  INPUT_TIME_COMPONENT_MINUTE = 2,
-  INPUT_TIME_COMPONENT_SECOND = 4,
-  INPUT_TIME_COMPONENT_MILISECOND = 8;
+var INPUT_TIME_COMPONENT_HOUR = 8,
+  INPUT_TIME_COMPONENT_MINUTE = 16,
+  INPUT_TIME_COMPONENT_SECOND = 32,
+  INPUT_TIME_COMPONENT_MILISECOND = 64;
 
 /** @const */
 var INPUT_TIME_COMPONENT_EMPTY = -1;
@@ -46,17 +46,17 @@ function initInputTime() {
 }
 
 function inputTimeComponentsGet(input) {
-  if (input.__polyformfillInputTime === undefined) {
+  if (input.__polyformfillInputComponents === undefined) {
     inputTimeInitInternalValue(input);
   }
 
-  return input.__polyformfillInputTime;
+  return input.__polyformfillInputComponents;
 }
 
 function inputTimeComponentsSet(input, hour, minute, second, milisecond) {
   var formattedValue;
 
-  input.__polyformfillInputTime = {
+  input.__polyformfillInputComponents = {
     hour: hour,
     minute: minute,
     second: second,
@@ -78,10 +78,10 @@ function inputTimeInitInternalValue(input) {
   }
 
   if (components) {
-    input.__polyformfillInputTime = components;
+    input.__polyformfillInputComponents = components;
   }
   else {
-    input.__polyformfillInputTime = {
+    input.__polyformfillInputComponents = {
       hour: INPUT_TIME_COMPONENT_EMPTY,
       minute: INPUT_TIME_COMPONENT_EMPTY,
       second: INPUT_TIME_COMPONENT_HIDDEN,

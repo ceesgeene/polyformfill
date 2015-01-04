@@ -47,7 +47,7 @@ function initInputDate() {
 function inputDateComponentsSet(input, year, month, day) {
   var formattedValue;
 
-  input.__polyformfillInputDate = {
+  input.__polyformfillInputComponents = {
     year: year,
     month: month,
     day: day
@@ -59,11 +59,11 @@ function inputDateComponentsSet(input, year, month, day) {
 }
 
 function inputDateComponentsGet(input) {
-  if (input.__polyformfillInputDate === undefined) {
+  if (input.__polyformfillInputComponents === undefined) {
     inputDateInitInternalValue(input);
   }
 
-  return input.__polyformfillInputDate;
+  return input.__polyformfillInputComponents;
 }
 
 function inputDateFuzzyRfc3339ValueFormatter(input, year, month, day) {
@@ -133,14 +133,14 @@ function inputDateInitInternalValue(input) {
   }
 
   if (date) {
-    input.__polyformfillInputDate = {
+    input.__polyformfillInputComponents = {
       year: date.getUTCFullYear(),
       month: date.getUTCMonth(),
       day: date.getUTCDate()
     };
   }
   else {
-    input.__polyformfillInputDate = {
+    input.__polyformfillInputComponents = {
       year: INPUT_DATE_YEAR_EMPTY,
       month: INPUT_DATE_MONTH_EMPTY,
       day: INPUT_DATE_DAY_EMPTY
