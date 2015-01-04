@@ -20,29 +20,8 @@ function inputTimeAccessibilityOnKeydownHandleNavigation(element, event) {
       break;
     case 'Tab':
     case 'U+0009':
-      if (event.altKey || event.ctrlKey || event.metaKey) {
-        return;
-      }
-      else if (event.shiftKey) {
-        if (selectionStart === 0) {
-          inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
-          return;
-        }
-      }
-      else if (element.selectionEnd === inputDomOriginalValueGetter.call(element).length) {
-        inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
-        return;
-      }
-
-
-      if (event.shiftKey) {
-        inputTimeAccessibilitySelectPreviousComponent(element, selectionStart);
-      }
-      else {
-        inputTimeAccessibilitySelectNextComponent(element, selectionStart);
-      }
-
-      break;
+      inputTimeAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
+      return;
     case 'Left':
       inputTimeAccessibilitySelectPreviousComponent(element, selectionStart);
       break;
@@ -57,6 +36,31 @@ function inputTimeAccessibilityOnKeydownHandleNavigation(element, event) {
       break;
     default:
       return;
+  }
+  event.preventDefault();
+}
+
+function inputTimeAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart) {
+  if (event.altKey || event.ctrlKey || event.metaKey) {
+    return;
+  }
+  else if (event.shiftKey) {
+    if (selectionStart === 0) {
+      inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
+      return;
+    }
+  }
+  else if (element.selectionEnd === inputDomOriginalValueGetter.call(element).length) {
+    inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
+    return;
+  }
+
+
+  if (event.shiftKey) {
+    inputTimeAccessibilitySelectPreviousComponent(element, selectionStart);
+  }
+  else {
+    inputTimeAccessibilitySelectNextComponent(element, selectionStart);
   }
   event.preventDefault();
 }
