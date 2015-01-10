@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Handles keyboard navigation for HTML input elements of type "date".
@@ -13,28 +13,28 @@ function inputDateAccessibilityOnKeydownHandleNavigation(element, event) {
   var selectionStart = element.selectionStart;
 
   switch (event.key) {
-    case 'Backspace':
-    case 'U+0008':
-    case 'Del':
-      inputDateClearDateComponent(element, selectionStart);
+    case "Backspace":
+    case "U+0008":
+    case "Del":
+      inputDateAccessibilityClearComponent(element, selectionStart);
       break;
-    case 'Tab':
-    case 'U+0009':
+    case "Tab":
+    case "U+0009":
       inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
       return;
-    case 'Left':
+    case "Left":
       inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
-      inputDateAccessibilitySelectPreviousDateComponent(element, selectionStart);
+      inputDateAccessibilitySelectPreviousComponent(element, selectionStart);
       break;
-    case 'Up':
-      inputDateAccessibilityIncreaseDateComponent(element, selectionStart, 1);
+    case "Up":
+      inputDateAccessibilityIncreaseComponent(element, selectionStart, 1);
       break;
-    case 'Right':
+    case "Right":
       inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
-      inputDateAccessibilitySelectNextDateComponent(element, selectionStart);
+      inputDateAccessibilitySelectNextComponent(element, selectionStart);
       break;
-    case 'Down':
-      inputDateAccessibilityIncreaseDateComponent(element, selectionStart, -1);
+    case "Down":
+      inputDateAccessibilityIncreaseComponent(element, selectionStart, -1);
       break;
     default:
       return;
@@ -49,15 +49,15 @@ function inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, sele
   }
 
   if (event.shiftKey) {
-    if (inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element)) !== 0) {
-      inputDateAccessibilitySelectPreviousDateComponent(element, selectionStart);
+    if (0 !== inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element))) {
+      inputDateAccessibilitySelectPreviousComponent(element, selectionStart);
     }
     else {
       return;
     }
   }
-  else if (inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element)) !== 2) {
-    inputDateAccessibilitySelectNextDateComponent(element, selectionStart);
+  else if (2 !== inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element))) {
+    inputDateAccessibilitySelectNextComponent(element, selectionStart);
   }
   else {
     return;
@@ -75,46 +75,31 @@ function inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, sele
  *   every time an actual character is being inserted (keydown and keyup events are triggered only once).
  */
 function inputDateAccessibilityOnKeyPressHandleUserInput(element, event) {
+  var selectionStart, value, components, componentOrder, componentSeparator, selectedComponent, componentMin, componentMax, componentLimit;
+
   // Only allow numeric input.
-  if (event.charCode > 47 && event.charCode < 58) {
-    var selectionStart = element.selectionStart;
-    var selectNext = false;
+  if (47 < event.charCode && 58 > event.charCode) {
+    selectionStart = element.selectionStart;
 
-    var value = inputDomOriginalValueGetter.call(element),
-      components = inputDateComponentsGet(element),
+    value = inputDomOriginalValueGetter.call(element);
+    components = inputDateComponentsGet(element);
 
-      componentOrder = inputDateFormatOrderGetter(element),
-      componentSeparator = inputDateFormatSeparatorGetter(element),
-      selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    componentOrder = inputDateFormatOrderGetter(element);
+    componentSeparator = inputDateFormatSeparatorGetter(element);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    componentMin = inputComponentGetMinimum(element, selectedComponent);
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
+    componentLimit = componentMax / 10;
 
-    switch (selectedComponent) {
-      case DATECOMPONENT_YEAR:
-        components.year = parseInt((components.year + event.key).substr(-6), 10);
-        break;
-      case DATECOMPONENT_MONTH:
-        components.month = inputAccessibilityComplementComponent(components.month, event.key, INPUT_DATE_MONTH_MIN, INPUT_DATE_MONTH_MAX, 0);
-        if (components.month > 0) {
-          selectNext = true;
-        }
-        break;
-      case DATECOMPONENT_DAY:
-        components.day = inputAccessibilityComplementComponent(components.day, event.key, INPUT_DATE_DAY_MIN, INPUT_DATE_DAY_MAX, 3);
-        if (components.day > 3) {
-          selectNext = true;
-        }
-        break;
-      default:
-        return;
-    }
+    components[selectedComponent] = inputAccessibilityComplementComponent(components[selectedComponent], event.key, componentMin, componentMax, componentLimit);
 
-    value = inputDateComponentsSet(element, components.year, components.month, components.day);
+    value = inputDateComponentsSet(element, components);
 
-    var selection = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
-    if (selectNext) {
-      inputDateAccessibilitySelectNextDateComponent(element, selection[0], selection[1]);
+    if (components[selectedComponent] > componentLimit) {
+      inputDateAccessibilitySelectNextComponent(element, selectionStart);
     }
     else {
-      element.setSelectionRange.apply(element, selection);
+      inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
     }
   }
   event.preventDefault();
@@ -127,7 +112,7 @@ function inputDateAccessibilityOnFocusHandleInputSelection(element, event) {
   componentSeparator = inputDateFormatSeparatorGetter(element);
 
   if (!value) {
-    value = inputDateComponentsSet(element, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
+    value = inputDateComponentsSet(element, {yy: INPUT_DATE_YEAR_EMPTY, mm: INPUT_DATE_MONTH_EMPTY, dd: INPUT_DATE_DAY_EMPTY});
     selectionStart = 0;
   }
   else {
@@ -136,7 +121,7 @@ function inputDateAccessibilityOnFocusHandleInputSelection(element, event) {
 
   componentRange = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
 
-  element.setSelectionRange.apply(element, componentRange);
+  inputDomOriginalSetSelectionRange.apply(element, componentRange);
   event.preventDefault();
 }
 
@@ -144,98 +129,73 @@ function inputDateAccessibilityOnBlurHandleInputNormalization(element) {
   inputDateAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
 }
 
-function inputDateClearDateComponent(input, selectionStart) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputDateComponentsGet(input),
-    componentOrder = inputDateFormatOrderGetter(input),
-    componentSeparator = inputDateFormatSeparatorGetter(input),
+function inputDateAccessibilityClearComponent(element, selectionStart) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputDateComponentsGet(element),
+    componentOrder = inputDateFormatOrderGetter(element),
+    componentSeparator = inputDateFormatSeparatorGetter(element),
     selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
-    case DATECOMPONENT_YEAR:
-      components.year = INPUT_DATE_YEAR_EMPTY;
+    case INPUT_COMPONENT_YEAR:
+      components.yy = INPUT_DATE_YEAR_EMPTY;
       break;
-    case DATECOMPONENT_MONTH:
-      components.month = INPUT_DATE_MONTH_EMPTY;
+    case INPUT_COMPONENT_MONTH:
+      components.mm = INPUT_DATE_MONTH_EMPTY;
       break;
-    case DATECOMPONENT_DAY:
-      components.day = INPUT_DATE_DAY_EMPTY;
+    case INPUT_COMPONENT_DAY:
+      components.dd = INPUT_DATE_DAY_EMPTY;
       break;
     default:
       return;
   }
 
-  value = inputDateComponentsSet(input, components.year, components.month, components.day);
-  input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  value = inputDateComponentsSet(element, components);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
 }
 
-function inputDateAccessibilityNormalizeSelectedComponent(input, selectionStart) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputDateComponentsGet(input),
-    componentOrder = inputDateFormatOrderGetter(input),
-    componentSeparator = inputDateFormatSeparatorGetter(input),
-    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+function inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputDateComponentsGet(element),
+    componentOrder = inputDateFormatOrderGetter(element),
+    componentSeparator = inputDateFormatSeparatorGetter(element),
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator),
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
 
-  switch (selectedComponent) {
-    case DATECOMPONENT_YEAR:
-      if (components.year > INPUT_DATE_YEAR_MAX) {
-        components.year = INPUT_DATE_YEAR_MAX;
-      }
-      break;
-    case DATECOMPONENT_MONTH:
-      if (components.month > INPUT_DATE_MONTH_MAX) {
-        components.month = INPUT_DATE_MONTH_MAX;
-      }
-      break;
-    case DATECOMPONENT_DAY:
-      if (components.day > INPUT_DATE_DAY_MAX) {
-        components.day = INPUT_DATE_DAY_MAX;
-      }
-      break;
-    default:
-      return;
+  if (components[selectedComponent] > componentMax) {
+    components[selectedComponent] = componentMax;
   }
 
-  inputDateComponentsSet(input, components.year, components.month, components.day);
+  inputDateComponentsSet(element, components);
 }
 
-function inputDateAccessibilitySelectPreviousDateComponent(input, selectionStart) {
-  var value = inputDomOriginalValueGetter.call(input),
-    componentSeparator = inputDateFormatSeparatorGetter(input),
+function inputDateAccessibilitySelectPreviousComponent(element, selectionStart) {
+  var value = inputDomOriginalValueGetter.call(element),
+    componentSeparator = inputDateFormatSeparatorGetter(element),
     selection = inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator);
 
-  input.setSelectionRange(selection[0], selection[1]);
+  inputDomOriginalSetSelectionRange.apply(element, selection);
 }
 
-function inputDateAccessibilitySelectNextDateComponent(input, selectionStart) {
-  var value = inputDomOriginalValueGetter.call(input),
-    componentSeparator = inputDateFormatSeparatorGetter(input),
+function inputDateAccessibilitySelectNextComponent(element, selectionStart) {
+  var value = inputDomOriginalValueGetter.call(element),
+    componentSeparator = inputDateFormatSeparatorGetter(element),
     selection = inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator);
 
-  input.setSelectionRange(selection[0], selection[1]);
+  inputDomOriginalSetSelectionRange.apply(element, selection);
 }
 
-function inputDateAccessibilityIncreaseDateComponent(input, selectionStart, amount) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputDateComponentsGet(input),
-    componentOrder = inputDateFormatOrderGetter(input),
-    componentSeparator = inputDateFormatSeparatorGetter(input),
-    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+function inputDateAccessibilityIncreaseComponent(element, selectionStart, amount) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputDateComponentsGet(element),
+    componentOrder = inputDateFormatOrderGetter(element),
+    componentSeparator = inputDateFormatSeparatorGetter(element),
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator),
+    componentMin = inputComponentGetMinimum(element, selectedComponent),
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
 
-  switch (selectedComponent) {
-    case DATECOMPONENT_YEAR:
-      components.year = inputAccessibilityIncreaseComponent(components.year, amount, INPUT_DATE_YEAR_MIN, INPUT_DATE_YEAR_MAX);
-      break;
-    case DATECOMPONENT_MONTH:
-      components.month = inputAccessibilityIncreaseComponent(components.month, amount, INPUT_DATE_MONTH_MIN, INPUT_DATE_MONTH_MAX);
-      break;
-    case DATECOMPONENT_DAY:
-      components.day = inputAccessibilityIncreaseComponent(components.day, amount, INPUT_DATE_DAY_MIN, INPUT_DATE_DAY_MAX);
-      break;
-    default:
-      return;
-  }
+  components[selectedComponent] = inputAccessibilityIncreaseComponent(components[selectedComponent], amount, componentMin, componentMax);
 
-  value = inputDateComponentsSet(input, components.year, components.month, components.day);
-  input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  value = inputDateComponentsSet(element, components);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
 }

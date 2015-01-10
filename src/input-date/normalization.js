@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * @file
@@ -7,7 +7,7 @@
 
 function inputDateNormalizationOnLoadFormatInputElements(element) {
   var components = inputDateComponentsGet(element);
-  inputDateComponentsSet(element, components.year, components.month, components.day);
+  inputDateComponentsSet(element, components);
 }
 
 function inputDateNormalizationOnSubmitNormalizeInput(element) {

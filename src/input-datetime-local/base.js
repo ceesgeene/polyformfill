@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * @file
@@ -18,54 +18,53 @@ function initInputDatetimeLocal() {
 }
 
 function inputDatetimeLocalComponentsGet(input) {
-  if (input.__polyformfillInputComponents === undefined) {
-    inputDatetimeLocalInitInternalValue(input);
+  if (input[INPUT_PROPERTY_COMPONENTS] === undefined) {
+    input[INPUT_PROPERTY_COMPONENTS] = inputDatetimeLocalComponentsFromValue(input.getAttribute(INPUT_PROPERTY_VALUE));
   }
 
-  return input.__polyformfillInputComponents;
+  return input[INPUT_PROPERTY_COMPONENTS];
 }
 
-function inputDatetimeLocalComponentsSet(input, year, month, day, hour, minute, second, milisecond) {
+function inputDatetimeLocalComponentsSet(element, components) {
   var formattedValue;
 
-  input.__polyformfillInputComponents = {
-    year: year,
-    month: month,
-    day: day,
+  element[INPUT_PROPERTY_COMPONENTS] = {
+    yy: components[INPUT_COMPONENT_YEAR],
+    mm: components[INPUT_COMPONENT_MONTH],
+    dd: components[INPUT_COMPONENT_DAY],
 
-    hour: hour,
-    minute: minute,
-    second: second,
-    milisecond: milisecond
+    hh: components[INPUT_COMPONENT_HOUR],
+    ii: components[INPUT_COMPONENT_MINUTE],
+    ss: components[INPUT_COMPONENT_SECOND],
+    ms: components[INPUT_COMPONENT_MILISECOND]
   };
 
-  formattedValue = inputDatetimeLocalValueFormatter(input, year, month, day, hour, minute, second, milisecond);
-  inputDomOriginalValueSetter.call(input, formattedValue);
+  formattedValue = inputDatetimeLocalValueFormatter(element[INPUT_PROPERTY_COMPONENTS], element);
+  inputDomOriginalValueSetter.call(element, formattedValue);
   return formattedValue;
 }
 
 
-function inputDatetimeLocalInitInternalValue(input) {
-  var value = input.getAttribute('value'),
-    components;
+function inputDatetimeLocalComponentsFromValue(value) {
+  var components;
 
   if (value) {
     components = inputDatetimeLocalValidValueStringToComponents(value);
   }
 
   if (components) {
-    input.__polyformfillInputComponents = components;
+    return components;
   }
   else {
-    input.__polyformfillInputComponents = {
-      year: INPUT_DATE_YEAR_EMPTY,
-      month: INPUT_DATE_MONTH_EMPTY,
-      day: INPUT_DATE_DAY_EMPTY,
+    return {
+      yy: INPUT_DATE_YEAR_EMPTY,
+      mm: INPUT_DATE_MONTH_EMPTY,
+      dd: INPUT_DATE_DAY_EMPTY,
 
-      hour: INPUT_TIME_COMPONENT_EMPTY,
-      minute: INPUT_TIME_COMPONENT_EMPTY,
-      second: INPUT_TIME_COMPONENT_HIDDEN,
-      milisecond: INPUT_TIME_COMPONENT_HIDDEN
+      hh: INPUT_TIME_COMPONENT_EMPTY,
+      ii: INPUT_TIME_COMPONENT_EMPTY,
+      ss: INPUT_TIME_COMPONENT_HIDDEN,
+      ms: INPUT_TIME_COMPONENT_HIDDEN
     };
   }
 }
@@ -80,27 +79,27 @@ function inputDatetimeLocalInitInternalValue(input) {
 function inputDatetimeLocalValidValueStringToComponents(str) {
   var date, time;
 
-  str = str.split('T');
-  if (str.length === 2) {
+  str = str.split("T");
+  if (2 === str.length) {
     date = getDateFromRfc3339FullDateString(str[0]);
-    if (date === null) {
+    if (null === date) {
       return null;
     }
 
     time = inputTimeValidTimeStringToComponents(str[1]);
-    if (time === null) {
+    if (null === time) {
       return null;
     }
 
     return {
-      year: date.getUTCFullYear(),
-      month: date.getUTCMonth(),
-      day: date.getUTCDate(),
+      yy: date.getUTCFullYear(),
+      mm: date.getUTCMonth(),
+      dd: date.getUTCDate(),
 
-      hour: time.hour,
-      minute: time.minute,
-      second: time.second,
-      milisecond: time.milisecond
+      hh: time.hh,
+      ii: time.ii,
+      ss: time.ss,
+      ms: time.ms
     };
   }
   return null;
@@ -109,37 +108,37 @@ function inputDatetimeLocalValidValueStringToComponents(str) {
 function inputDatetimeLocalGetRfc3339(element) {
   var components = inputDatetimeLocalComponentsGet(element);
 
-  if (components.hour > INPUT_TIME_COMPONENT_EMPTY && components.minute > INPUT_TIME_COMPONENT_EMPTY) {
-    if (components.second === INPUT_TIME_COMPONENT_EMPTY) {
-      components.second = INPUT_TIME_COMPONENT_HIDDEN;
+  if (components.hh > INPUT_TIME_COMPONENT_EMPTY && components.ii > INPUT_TIME_COMPONENT_EMPTY) {
+    if (components.ss === INPUT_TIME_COMPONENT_EMPTY) {
+      components.ss = INPUT_TIME_COMPONENT_HIDDEN;
     }
-    if (components.milisecond === INPUT_TIME_COMPONENT_EMPTY) {
-      components.milisecond = INPUT_TIME_COMPONENT_HIDDEN;
+    if (components.ms === INPUT_TIME_COMPONENT_EMPTY) {
+      components.ms = INPUT_TIME_COMPONENT_HIDDEN;
     }
-    return inputDateFuzzyRfc3339ValueFormatter(element, components.year, components.month, components.day) + 'T' + inputTimeDefaultValueFormatter(element, components.hour, components.minute, components.second, components.milisecond);
+    return inputDateFuzzyRfc3339ValueFormatter(components) + "T" + inputTimeDefaultValueFormatter(components);
   }
   else {
-    return '';
+    return "";
   }
 }
 
-function inputDatetimeLocalDefaultValueFormatter(input, year, month, day, hour, minute, second, milisecond) {
-  return inputDateFuzzyRfc3339ValueFormatter(input, year, month, day) + ' ' + inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond);
+function inputDatetimeLocalDefaultValueFormatter(components) {
+  return inputDateFuzzyRfc3339ValueFormatter(components) + " " + inputTimeDefaultValueFormatter(components);
 }
 
 
 function inputDatetimeLocalDefaultFormatOrder() {
   return [
-    DATECOMPONENT_YEAR,
-    DATECOMPONENT_MONTH,
-    DATECOMPONENT_DAY,
-    INPUT_TIME_COMPONENT_HOUR,
-    INPUT_TIME_COMPONENT_MINUTE,
-    INPUT_TIME_COMPONENT_SECOND,
-    INPUT_TIME_COMPONENT_MILISECOND
+    INPUT_COMPONENT_YEAR,
+    INPUT_COMPONENT_MONTH,
+    INPUT_COMPONENT_DAY,
+    INPUT_COMPONENT_HOUR,
+    INPUT_COMPONENT_MINUTE,
+    INPUT_COMPONENT_SECOND,
+    INPUT_COMPONENT_MILISECOND
   ];
 }
 
 function inputDatetimeLocalDefaultFormatSeparator() {
-  return ['-', ' ', ':', '.'];
+  return ["-", " ", ":", "."];
 }

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 
 /** @const */
@@ -14,16 +14,16 @@ function inputDateDomValueGet(element) {
 function inputDateDomValueSet(element, value) {
   var date;
 
-  if (value !== '') {
+  if ("" !== value) {
     date = getDateFromRfc3339FullDateString(value);
   }
 
   if (date) {
-    inputDateComponentsSet(element, date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+    inputDateComponentsSet(element, {yy: date.getUTCFullYear(), mm: date.getUTCMonth(), dd: date.getUTCDate()});
   }
   else {
     //console.warn("The specified value '" + value + "' does not conform to the required format, 'yyyy-MM-dd'.");
-    inputDateComponentsSet(element, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
+    inputDateComponentsSet(element, {yy: INPUT_DATE_YEAR_EMPTY, mm: INPUT_DATE_MONTH_EMPTY, dd: INPUT_DATE_DAY_EMPTY});
   }
 
   return value;
@@ -34,5 +34,5 @@ function inputDateDomValueAsDateGet(element) {
 }
 
 function inputDateDomValueAsDateSet(element, value) {
-  inputDateComponentsSet(element, value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
+  inputDateComponentsSet(element, {yy: value.getUTCFullYear(), mm: value.getUTCMonth(), dd: value.getUTCDate()});
 }

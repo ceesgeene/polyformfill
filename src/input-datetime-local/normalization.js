@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * @file
@@ -7,7 +7,7 @@
 
 function inputDatetimeLocalNormalizationOnLoadFormatInputElements(element) {
   var components = inputDatetimeLocalComponentsGet(element);
-  inputDatetimeLocalComponentsSet(element, components.year, components.month, components.day, components.hour, components.minute, components.second, components.milisecond);
+  inputDatetimeLocalComponentsSet(element, components);
 }
 
 function inputDatetimeLocalNormalizationOnSubmitNormalizeInput(element) {

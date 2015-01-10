@@ -1,11 +1,14 @@
-'use strict';
+"use strict";
 
-/* global HTMLInputElement, DOMException */
+/* global HTMLInputElement */
 
 /**
  * @file
  * Provides implementation of HTMLInputElement DOM interface for unsupporting browsers.
  */
+
+/** @const */
+var DOMEXCEPTION_INVALID_STATE_ERR = 11;
 
 var inputDomOriginalTypeGetter,
   inputDomOriginalValueGetter,
@@ -13,29 +16,32 @@ var inputDomOriginalTypeGetter,
   inputDomOriginalValueAsNumberGetter,
   inputDomOriginalValueAsNumberSetter,
   inputDomOriginalStepUp,
-  inputDomOriginalStepDown;
+  inputDomOriginalStepDown,
+  inputDomOriginalSetSelectionRange;
 
 function initInputDom(testInput) {
-  var descriptor;
+  var descriptor, HTMLInputElementPrototype;
 
   if (HTMLInputElement && Object.isExtensible(HTMLInputElement.prototype)) {
+    HTMLInputElementPrototype = HTMLInputElement.prototype;
+
     // FF and IE
-    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'type');
+    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_ATTR_TYPE);
     // Chrome
     if (descriptor === undefined) {
-      descriptor = Object.getOwnPropertyDescriptor(testInput, 'type');
+      descriptor = Object.getOwnPropertyDescriptor(testInput, INPUT_ATTR_TYPE);
     }
     inputDomOriginalTypeGetter = descriptor.get;
 
     if (descriptor.configurable) {
-      Object.defineProperty(HTMLInputElement.prototype, 'type', {
+      Object.defineProperty(HTMLInputElementPrototype, INPUT_ATTR_TYPE, {
         get: inputDomTypeGet
       });
     }
 
-    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE);
     if (descriptor.configurable) {
-      Object.defineProperty(HTMLInputElement.prototype, 'value', {
+      Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE, {
         get: inputDomValueGet,
         set: inputDomValueSet
       });
@@ -44,9 +50,9 @@ function initInputDom(testInput) {
       inputDomOriginalValueSetter = descriptor.set;
     }
 
-    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'valueAsNumber');
+    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER);
     if (descriptor === undefined || descriptor.configurable) {
-      Object.defineProperty(HTMLInputElement.prototype, 'valueAsNumber', {
+      Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER, {
         get: inputDomValueAsNumberGet,
         set: inputDomValueAsNumberSet
       });
@@ -57,33 +63,35 @@ function initInputDom(testInput) {
       }
     }
 
-    Object.defineProperty(HTMLInputElement.prototype, 'valueAsDate', {
+    Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASDATE, {
       get: inputDomValueAsDateGet,
       set: inputDomValueAsDateSet
     });
 
-    inputDomOriginalStepUp = HTMLInputElement.prototype.stepUp;
-    HTMLInputElement.prototype.stepUp = inputDomStepUp;
+    inputDomOriginalStepUp = HTMLInputElementPrototype.stepUp;
+    HTMLInputElementPrototype.stepUp = inputDomStepUp;
 
-    inputDomOriginalStepDown = HTMLInputElement.prototype.stepDown;
-    HTMLInputElement.prototype.stepDown = inputDomStepDown;
+    inputDomOriginalStepDown = HTMLInputElementPrototype.stepDown;
+    HTMLInputElementPrototype.stepDown = inputDomStepDown;
+
+    inputDomOriginalSetSelectionRange = HTMLInputElementPrototype.setSelectionRange;
   }
 }
 
 function inputDomException(code, message) {
-  return new Error(code + ': ' + message);
+  return new Error(code + ": " + message);
 }
 
 function inputDomTypeGet() {
   var attr,
     type = inputDomOriginalTypeGetter.call(this);
 
-  if (type === 'text') {
+  if (INPUT_TYPE_TEXT === type) {
     attr = this.getAttribute(INPUT_ATTR_TYPE);
     switch (attr) {
-      case 'date':
-      case 'datetime-local':
-      case 'time':
+      case INPUT_TYPE_DATE:
+      case INPUT_TYPE_DATETIME_LOCAL:
+      case INPUT_TYPE_TIME:
         return attr;
       default:
         return type;
@@ -93,14 +101,12 @@ function inputDomTypeGet() {
 }
 
 function inputDomValueGet() {
-  var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-
-  switch (inputType) {
-    case 'date':
+  switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+    case INPUT_TYPE_DATE:
       return inputDateDomValueGet(this);
-    case 'datetime-local':
+    case INPUT_TYPE_DATETIME_LOCAL:
       return inputDatetimeLocalDomValueGet(this);
-    case 'time':
+    case INPUT_TYPE_TIME:
       return inputTimeDomValueGet(this);
     default:
       return inputDomOriginalValueGetter.call(this);
@@ -108,14 +114,12 @@ function inputDomValueGet() {
 }
 
 function inputDomValueSet(value) {
-  var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-
-  switch (inputType) {
-    case 'date':
+  switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+    case INPUT_TYPE_DATE:
       return inputDateDomValueSet(this, value);
-    case 'datetime-local':
+    case INPUT_TYPE_DATETIME_LOCAL:
       return inputDatetimeLocalDomValueSet(this, value);
-    case 'time':
+    case INPUT_TYPE_TIME:
       return inputTimeDomValueSet(this, value);
     default:
       return inputDomOriginalValueSetter.call(this);
@@ -130,12 +134,10 @@ function inputDomValueSet(value) {
  * @see {@link http://www.w3.org/TR/html/forms.html#dom-input-valueasnumber}
  */
 function inputDomValueAsNumberGet() {
-  var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-
-  switch (inputType) {
-    case 'date':
-    case 'datetime-local':
-    case 'time':
+  switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+    case INPUT_TYPE_DATE:
+    case INPUT_TYPE_DATETIME_LOCAL:
+    case INPUT_TYPE_TIME:
       return inputDomValueAsNumberGetFromDate.call(this);
     default:
       if (inputDomOriginalValueAsNumberGetter) {
@@ -164,12 +166,10 @@ function inputDomValueAsNumberGetFromDate() {
  * @see {@link http://www.w3.org/TR/html/forms.html#dom-input-valueasnumber}
  */
 function inputDomValueAsNumberSet(value) {
-  var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-
-  switch (inputType) {
-    case 'date':
-    case 'datetime-local':
-    case 'time':
+  switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+    case INPUT_TYPE_DATE:
+    case INPUT_TYPE_DATETIME_LOCAL:
+    case INPUT_TYPE_TIME:
       inputDomValueAsNumberSetFromDate.call(this, value);
       break;
     default:
@@ -194,14 +194,12 @@ function inputDomValueAsNumberSetFromDate(value) {
  * @see {@link http://www.w3.org/TR/html/forms.html#dom-input-valueasdate}
  */
 function inputDomValueAsDateGet() {
-  var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-
-  switch (inputType) {
-    case 'date':
+  switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+    case INPUT_TYPE_DATE:
       return inputDateDomValueAsDateGet(this);
-    case 'datetime-local':
+    case INPUT_TYPE_DATETIME_LOCAL:
       return inputDatetimeLocalDomValueAsDateGet(this);
-    case 'time':
+    case INPUT_TYPE_TIME:
       return inputTimeDomValueAsDateGet(this);
     default:
       return null;
@@ -214,17 +212,15 @@ function inputDomValueAsDateGet() {
  * @see {@link http://www.w3.org/TR/html/forms.html#dom-input-valueasdate}
  */
 function inputDomValueAsDateSet(value) {
-  var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-
   if (value instanceof Date) {
 
   }
-  switch (inputType) {
-    case 'date':
+  switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+    case INPUT_TYPE_DATE:
       return inputDateDomValueAsDateSet(this, value);
-    case 'datetime-local':
+    case INPUT_TYPE_DATETIME_LOCAL:
       return inputDatetimeLocalDomValueAsDateSet(this, value);
-    case 'time':
+    case INPUT_TYPE_TIME:
       return inputTimeDomValueAsDateSet(this, value);
     default:
       return inputDomOriginalValueSetter.call(this, value);
@@ -232,16 +228,14 @@ function inputDomValueAsDateSet(value) {
 }
 
 function inputDomStepUp(n) {
-  var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-
   n = n || 1;
 
-  switch (inputType) {
-    case 'date':
+  switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+    case INPUT_TYPE_DATE:
       return inputDomStepUpOrDown(this, n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
-    case 'datetime-local':
+    case INPUT_TYPE_DATETIME_LOCAL:
       return inputDomStepUpOrDown(this, n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
-    case 'time':
+    case INPUT_TYPE_TIME:
       return inputDomStepUpOrDown(this, n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
     default:
       return inputDomOriginalStepUp.call(this, n);
@@ -249,16 +243,14 @@ function inputDomStepUp(n) {
 }
 
 function inputDomStepDown(n) {
-  var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-
   n = n || 1;
 
-  switch (inputType) {
-    case 'date':
+  switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+    case INPUT_TYPE_DATE:
       return inputDomStepUpOrDown(this, -n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
-    case 'datetime-local':
+    case INPUT_TYPE_DATETIME_LOCAL:
       return inputDomStepUpOrDown(this, -n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
-    case 'time':
+    case INPUT_TYPE_TIME:
       return inputDomStepUpOrDown(this, -n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
     default:
       return inputDomOriginalStepUp.call(this, n);
@@ -276,18 +268,17 @@ function inputDomStepDown(n) {
  * @see {@link http://www.w3.org/TR/html/forms.html#dom-input-stepup}
  */
 function inputDomStepUpOrDown(element, n, defaultStep, stepScaleFactor) {
-  var allowedValueStep, delta, value;
+  var allowedValueStep = inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor), delta, value;
 
-    allowedValueStep = inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor);
-    if (allowedValueStep === null) {
-      throw inputDomException(DOMException.INVALID_STATE_ERR);
-    }
+  if (null === allowedValueStep) {
+    throw inputDomException(DOMEXCEPTION_INVALID_STATE_ERR);
+  }
 
-    value = element.valueAsNumber;
+  value = element.valueAsNumber;
 
-    delta = allowedValueStep * n;
+  delta = allowedValueStep * n;
 
-    value += delta;
+  value += delta;
 
   element.valueAsNumber = value;
 }
@@ -304,14 +295,14 @@ function inputDomStepUpOrDown(element, n, defaultStep, stepScaleFactor) {
 function inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor) {
   var step;
 
-  if (element.hasAttribute('step')) {
-    step = element.getAttribute('step');
+  if (element.hasAttribute("step")) {
+    step = element.getAttribute("step");
 
-    if (step === 'any') {
+    if ("any" === step) {
       return null;
     }
     step = parseInt(step, 10);
-    if (step < 1) {
+    if (1 > step) {
       step = defaultStep;
     }
   }

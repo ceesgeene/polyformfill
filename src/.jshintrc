@@ -4,7 +4,9 @@
   "browser": true,
   "node": false,
 
-  "maxstatements": 10,
+  "maxstatements": 15,
+
+  "unused": false,
 
   "validthis": true,
 

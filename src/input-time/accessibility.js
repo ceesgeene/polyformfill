@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Handles keyboard navigation for HTML input elements of type "time".
@@ -13,25 +13,25 @@ function inputTimeAccessibilityOnKeydownHandleNavigation(element, event) {
   var selectionStart = element.selectionStart;
 
   switch (event.key) {
-    case 'Backspace':
-    case 'U+0008':
-    case 'Del':
-      inputTimeClearComponent(element, selectionStart);
+    case "Backspace":
+    case "U+0008":
+    case "Del":
+      inputTimeAccessibilityClearComponent(element, selectionStart);
       break;
-    case 'Tab':
-    case 'U+0009':
+    case "Tab":
+    case "U+0009":
       inputTimeAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
       return;
-    case 'Left':
+    case "Left":
       inputTimeAccessibilitySelectPreviousComponent(element, selectionStart);
       break;
-    case 'Up':
+    case "Up":
       inputTimeAccessibilityIncreaseComponent(element, selectionStart, 1);
       break;
-    case 'Right':
+    case "Right":
       inputTimeAccessibilitySelectNextComponent(element, selectionStart);
       break;
-    case 'Down':
+    case "Down":
       inputTimeAccessibilityIncreaseComponent(element, selectionStart, -1);
       break;
     default:
@@ -45,7 +45,7 @@ function inputTimeAccessibilityOnTabKeydownHandleNavigation(element, event, sele
     return;
   }
   else if (event.shiftKey) {
-    if (selectionStart === 0) {
+    if (0 === selectionStart) {
       inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
       return;
     }
@@ -75,77 +75,56 @@ function inputTimeAccessibilityOnTabKeydownHandleNavigation(element, event, sele
  *   every time an actual character is being inserted (keydown and keyup events are triggered only once).
  */
 function inputTimeAccessibilityOnKeyPressHandleUserInput(element, event) {
+  var selectionStart, value, components, componentOrder, componentSeparator, selectedComponent, componentMin, componentMax, componentLimit;
+
   // Only allow numeric input.
-  if (event.charCode > 47 && event.charCode < 58) {
-    var selectionStart = element.selectionStart,
-      selectNext = false,
+  if (47 < event.charCode && 58 > event.charCode) {
+    selectionStart = element.selectionStart;
 
-      value = inputDomOriginalValueGetter.call(element),
-      components = inputTimeComponentsGet(element),
+    value = inputDomOriginalValueGetter.call(element);
+    components = inputTimeComponentsGet(element);
 
-      componentOrder = inputTimeFormatOrderGetter(element),
-      componentSeparator = inputTimeFormatSeparatorGetter(element),
-      selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    componentOrder = inputTimeFormatOrderGetter(element);
+    componentSeparator = inputTimeFormatSeparatorGetter(element);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    componentMin = inputComponentGetMinimum(element, selectedComponent);
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
+    componentLimit = componentMax / 10;
 
-    switch (selectedComponent) {
-      case INPUT_TIME_COMPONENT_HOUR:
-        components.hour = inputAccessibilityComplementComponent(components.hour, event.key, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX, 2);
-        if (components.hour > 2) {
-          selectNext = true;
-        }
-        break;
-      case INPUT_TIME_COMPONENT_MINUTE:
-        components.minute = inputAccessibilityComplementComponent(components.minute, event.key, INPUT_TIME_COMPONENT_MINUTE_MIN, INPUT_TIME_COMPONENT_MINUTE_MAX, 5);
-        if (components.minute > 5) {
-          selectNext = true;
-        }
-        break;
-      case INPUT_TIME_COMPONENT_SECOND:
-        components.second = inputAccessibilityComplementComponent(components.second, event.key, INPUT_TIME_COMPONENT_SECOND_MIN, INPUT_TIME_COMPONENT_SECOND_MAX, 5);
-        if (components.second > 5) {
-          selectNext = true;
-        }
-        break;
-      case INPUT_TIME_COMPONENT_MILISECOND:
-        components.milisecond = inputAccessibilityComplementComponent(components.second, event.key, INPUT_TIME_COMPONENT_MILISECOND_MIN, INPUT_TIME_COMPONENT_MILISECOND_MAX, 99);
-        if (components.milisecond > 99) {
-          selectNext = true;
-        }
-        break;
-      default:
-        return;
-    }
+    components[selectedComponent] = inputAccessibilityComplementComponent(components[selectedComponent], event.key, componentMin, componentMax, componentLimit);
 
-    value = inputTimeComponentsSet(element, components.hour, components.minute, components.second, components.milisecond);
+    value = inputTimeComponentsSet(element, components);
 
-    var selection = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
-    if (selectNext) {
-      inputTimeAccessibilitySelectNextComponent(element, selection[0]);
+    if (components[selectedComponent] > componentLimit) {
+      inputTimeAccessibilitySelectNextComponent(element, selectionStart);
     }
     else {
-      element.setSelectionRange.apply(element, selection);
+      inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
     }
   }
   event.preventDefault();
 }
 
 function inputTimeAccessibilityOnFocusHandleInputSelection(element, event) {
-  var componentRange, value, selectionStart, componentSeparator;
+  var value, selectionStart, componentSeparator;
 
   value = inputDomOriginalValueGetter.call(element);
   componentSeparator = inputTimeFormatSeparatorGetter(element);
 
   if (!value) {
-    value = inputTimeComponentsSet(element, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_HIDDEN, INPUT_TIME_COMPONENT_HIDDEN);
+    value = inputTimeComponentsSet(element, {
+      hh: INPUT_TIME_COMPONENT_EMPTY,
+      ii: INPUT_TIME_COMPONENT_EMPTY,
+      ss: INPUT_TIME_COMPONENT_HIDDEN,
+      ms: INPUT_TIME_COMPONENT_HIDDEN
+    });
     selectionStart = 0;
   }
   else {
     selectionStart = element.selectionStart;
   }
 
-  componentRange = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
-
-  element.setSelectionRange.apply(element, componentRange);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
   event.preventDefault();
 }
 
@@ -153,113 +132,63 @@ function inputTimeAccessibilityOnBlurHandleInputNormalization(element) {
   inputTimeAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
 }
 
-function inputTimeClearComponent(input, selectionStart) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputTimeComponentsGet(input),
-    componentOrder = inputTimeFormatOrderGetter(input),
-    componentSeparator = inputTimeFormatSeparatorGetter(input),
+function inputTimeAccessibilityClearComponent(element, selectionStart) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputTimeComponentsGet(element),
+    componentOrder = inputTimeFormatOrderGetter(element),
+    componentSeparator = inputTimeFormatSeparatorGetter(element),
     selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
-  switch (selectedComponent) {
-    case INPUT_TIME_COMPONENT_HOUR:
-      components.hour = INPUT_TIME_COMPONENT_EMPTY;
-      break;
-    case INPUT_TIME_COMPONENT_MINUTE:
-      components.minute = INPUT_TIME_COMPONENT_EMPTY;
-      break;
-    case INPUT_TIME_COMPONENT_SECOND:
-      components.second = INPUT_TIME_COMPONENT_EMPTY;
-      break;
-    case INPUT_TIME_COMPONENT_MILISECOND:
-      components.milisecond = INPUT_TIME_COMPONENT_EMPTY;
-      break;
-    default:
-      return;
-  }
+  components[selectedComponent] = INPUT_TIME_COMPONENT_EMPTY;
 
-  value = inputTimeComponentsSet(input, components.hour, components.minute, components.second, components.milisecond);
-  input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  value = inputTimeComponentsSet(element, components);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
 }
 
-function inputTimeAccessibilityNormalizeSelectedComponent(input, selectionStart) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputTimeComponentsGet(input),
-    componentOrder = inputTimeFormatOrderGetter(input),
-    componentSeparator = inputTimeFormatSeparatorGetter(input),
-    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+function inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputTimeComponentsGet(element),
+    componentOrder = inputTimeFormatOrderGetter(element),
+    componentSeparator = inputTimeFormatSeparatorGetter(element),
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator),
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
 
-  switch (selectedComponent) {
-    case INPUT_TIME_COMPONENT_HOUR:
-      if (components.hour > INPUT_TIME_COMPONENT_HOUR_MAX) {
-        components.hour = INPUT_TIME_COMPONENT_HOUR_MAX;
-      }
-      break;
-    case INPUT_TIME_COMPONENT_MINUTE:
-      if (components.minute > INPUT_TIME_COMPONENT_MINUTE_MAX) {
-        components.minute = INPUT_TIME_COMPONENT_MINUTE_MAX;
-      }
-      break;
-    case INPUT_TIME_COMPONENT_SECOND:
-      if (components.second > INPUT_TIME_COMPONENT_SECOND_MAX) {
-        components.second = INPUT_TIME_COMPONENT_SECOND_MAX;
-      }
-      break;
-    case INPUT_TIME_COMPONENT_MILISECOND:
-      if (components.milisecond > INPUT_TIME_COMPONENT_MILISECOND_MAX) {
-        components.milisecond = INPUT_TIME_COMPONENT_MILISECOND_MAX;
-      }
-      break;
-    default:
-      return;
+  if (components[selectedComponent] > componentMax) {
+    components[selectedComponent] = componentMax;
   }
 
-  inputTimeComponentsSet(input, components.hour, components.minute, components.second, components.milisecond);
+  inputTimeComponentsSet(element, components);
 }
 
 function inputTimeAccessibilitySelectPreviousComponent(element, selectionStart) {
   inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
 
   var value = inputDomOriginalValueGetter.call(element),
-    componentSeparator = inputTimeFormatSeparatorGetter(element),
-    selection = inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator);
+    componentSeparator = inputTimeFormatSeparatorGetter(element);
 
-  element.setSelectionRange(selection[0], selection[1]);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator));
 }
 
 function inputTimeAccessibilitySelectNextComponent(element, selectionStart) {
   inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
 
   var value = inputDomOriginalValueGetter.call(element),
-    componentSeparator = inputTimeFormatSeparatorGetter(element),
-    selection = inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator);
+    componentSeparator = inputTimeFormatSeparatorGetter(element);
 
-  element.setSelectionRange(selection[0], selection[1]);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator));
 }
 
-function inputTimeAccessibilityIncreaseComponent(input, selectionStart, amount) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputTimeComponentsGet(input),
-    componentOrder = inputTimeFormatOrderGetter(input),
-    componentSeparator = inputTimeFormatSeparatorGetter(input),
-    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+function inputTimeAccessibilityIncreaseComponent(element, selectionStart, amount) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputTimeComponentsGet(element),
+    componentOrder = inputTimeFormatOrderGetter(element),
+    componentSeparator = inputTimeFormatSeparatorGetter(element),
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator),
+    componentMin = inputComponentGetMinimum(element, selectedComponent),
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
 
-  switch (selectedComponent) {
-    case INPUT_TIME_COMPONENT_HOUR:
-      components.hour = inputAccessibilityIncreaseComponent(components.hour, amount, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX);
-      break;
-    case INPUT_TIME_COMPONENT_MINUTE:
-      components.minute = inputAccessibilityIncreaseComponent(components.minute, amount, INPUT_TIME_COMPONENT_MINUTE_MIN, INPUT_TIME_COMPONENT_MINUTE_MAX);
-      break;
-    case INPUT_TIME_COMPONENT_SECOND:
-      components.second = inputAccessibilityIncreaseComponent(components.second, amount, INPUT_TIME_COMPONENT_SECOND_MIN, INPUT_TIME_COMPONENT_SECOND_MAX);
-      break;
-    case INPUT_TIME_COMPONENT_MILISECOND:
-      components.milisecond = inputAccessibilityIncreaseComponent(components.milisecond, amount, INPUT_TIME_COMPONENT_MILISECOND_MIN, INPUT_TIME_COMPONENT_MILISECOND_MAX);
-      break;
-    default:
-      return;
-  }
+  components[selectedComponent] = inputAccessibilityIncreaseComponent(components[selectedComponent], amount, componentMin, componentMax);
 
-  value = inputTimeComponentsSet(input, components.hour, components.minute, components.second, components.milisecond);
-  input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  value = inputTimeComponentsSet(element, components);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
 }

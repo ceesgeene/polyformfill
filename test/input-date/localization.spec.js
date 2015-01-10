@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
 /* global describe, expect, it */
 
-describe('A localizable input[type=date] element', function () {
+describe("A localizable input[type=date] element", function () {
 
 });

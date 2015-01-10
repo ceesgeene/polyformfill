@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Handles keyboard navigation for HTML input elements of type "datetime-local".
@@ -13,25 +13,25 @@ function inputDatetimeLocalAccessibilityOnKeydownHandleNavigation(element, event
   var selectionStart = element.selectionStart;
 
   switch (event.key) {
-    case 'Backspace':
-    case 'U+0008':
-    case 'Del':
+    case "Backspace":
+    case "U+0008":
+    case "Del":
       inputDatetimeLocalClearComponent(element, selectionStart);
       break;
-    case 'Tab':
-    case 'U+0009':
+    case "Tab":
+    case "U+0009":
       inputDatetimeLocalAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
       return;
-    case 'Left':
+    case "Left":
       inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selectionStart);
       break;
-    case 'Up':
+    case "Up":
       inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, 1);
       break;
-    case 'Right':
+    case "Right":
       inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart);
       break;
-    case 'Down':
+    case "Down":
       inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, -1);
       break;
     default:
@@ -45,7 +45,7 @@ function inputDatetimeLocalAccessibilityOnTabKeydownHandleNavigation(element, ev
     return;
   }
   else if (event.shiftKey) {
-    if (selectionStart === 0) {
+    if (0 === selectionStart) {
       inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
       return;
     }
@@ -75,74 +75,31 @@ function inputDatetimeLocalAccessibilityOnTabKeydownHandleNavigation(element, ev
  *   every time an actual character is being inserted (keydown and keyup events are triggered only once).
  */
 function inputDatetimeLocalAccessibilityOnKeyPressHandleUserInput(element, event) {
+  var selectionStart, value, components, componentOrder, componentSeparator, selectedComponent, componentMin, componentMax, componentLimit;
+
   // Only allow numeric input.
-  if (event.charCode > 47 && event.charCode < 58) {
-    var selectionStart = element.selectionStart,
-      selectNext = false,
+  if (47 < event.charCode && 58 > event.charCode) {
+    selectionStart = element.selectionStart;
 
-      value = inputDomOriginalValueGetter.call(element),
-      components = inputDatetimeLocalComponentsGet(element),
+    value = inputDomOriginalValueGetter.call(element);
+    components = inputDateComponentsGet(element);
 
-      componentOrder = inputDatetimeLocalFormatOrderGetter(element),
-      componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
-      selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    componentOrder = inputDateFormatOrderGetter(element);
+    componentSeparator = inputDateFormatSeparatorGetter(element);
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    componentMin = inputComponentGetMinimum(element, selectedComponent);
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
+    componentLimit = componentMax / 10;
 
-    switch (selectedComponent) {
-      case DATECOMPONENT_YEAR:
-        components.year = inputAccessibilityComplementComponent(components.year, event.key, INPUT_DATE_YEAR_MIN, INPUT_DATE_YEAR_MAX, 27576);
-        if (components.year > 27576) {
-          selectNext = true;
-        }
-        break;
-      case DATECOMPONENT_MONTH:
-        components.month = inputAccessibilityComplementComponent(components.month, event.key, INPUT_DATE_MONTH_MIN, INPUT_DATE_MONTH_MAX, 0);
-        if (components.month > 0) {
-          selectNext = true;
-        }
-        break;
-      case DATECOMPONENT_DAY:
-        components.day = inputAccessibilityComplementComponent(components.day, event.key, INPUT_DATE_DAY_MIN, INPUT_DATE_DAY_MAX, 3);
-        if (components.day > 3) {
-          selectNext = true;
-        }
-        break;
+    components[selectedComponent] = inputAccessibilityComplementComponent(components[selectedComponent], event.key, componentMin, componentMax, componentLimit);
 
-      case INPUT_TIME_COMPONENT_HOUR:
-        components.hour = inputAccessibilityComplementComponent(components.hour, event.key, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX, 2);
-        if (components.hour > 2) {
-          selectNext = true;
-        }
-        break;
-      case INPUT_TIME_COMPONENT_MINUTE:
-        components.minute = inputAccessibilityComplementComponent(components.minute, event.key, INPUT_TIME_COMPONENT_MINUTE_MIN, INPUT_TIME_COMPONENT_MINUTE_MAX, 5);
-        if (components.minute > 5) {
-          selectNext = true;
-        }
-        break;
-      case INPUT_TIME_COMPONENT_SECOND:
-        components.second = inputAccessibilityComplementComponent(components.second, event.key, INPUT_TIME_COMPONENT_SECOND_MIN, INPUT_TIME_COMPONENT_SECOND_MAX, 5);
-        if (components.second > 5) {
-          selectNext = true;
-        }
-        break;
-      case INPUT_TIME_COMPONENT_MILISECOND:
-        components.milisecond = inputAccessibilityComplementComponent(components.second, event.key, INPUT_TIME_COMPONENT_MILISECOND_MIN, INPUT_TIME_COMPONENT_MILISECOND_MAX, 99);
-        if (components.milisecond > 99) {
-          selectNext = true;
-        }
-        break;
-      default:
-        return;
-    }
+    value = inputDatetimeLocalComponentsSet(element, components);
 
-    value = inputDatetimeLocalComponentsSet(element, components.year, components.month, components.day, components.hour, components.minute, components.second, components.milisecond);
-
-    var selection = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
-    if (selectNext) {
-      inputDatetimeLocalAccessibilitySelectNextComponent(element, selection[0]);
+    if (components[selectedComponent] > componentLimit) {
+      inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart);
     }
     else {
-      element.setSelectionRange.apply(element, selection);
+      inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
     }
   }
   event.preventDefault();
@@ -155,7 +112,15 @@ function inputDatetimeLocalAccessibilityOnFocusHandleInputSelection(element, eve
   componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element);
 
   if (!value) {
-    value = inputDatetimeLocalComponentsSet(element, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_HIDDEN, INPUT_TIME_COMPONENT_HIDDEN);
+    value = inputDatetimeLocalComponentsSet(element, {
+      yy: INPUT_DATE_YEAR_EMPTY,
+      mm: INPUT_DATE_MONTH_EMPTY,
+      dd: INPUT_DATE_DAY_EMPTY,
+      hh: INPUT_TIME_COMPONENT_EMPTY,
+      ii: INPUT_TIME_COMPONENT_EMPTY,
+      ss: INPUT_TIME_COMPONENT_HIDDEN,
+      ms: INPUT_TIME_COMPONENT_HIDDEN
+    });
     selectionStart = 0;
   }
   else {
@@ -164,7 +129,7 @@ function inputDatetimeLocalAccessibilityOnFocusHandleInputSelection(element, eve
 
   componentRange = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
 
-  element.setSelectionRange.apply(element, componentRange);
+  inputDomOriginalSetSelectionRange.apply(element, componentRange);
   event.preventDefault();
 }
 
@@ -172,93 +137,57 @@ function inputDatetimeLocalAccessibilityOnBlurHandleInputNormalization(element) 
   inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
 }
 
-function inputDatetimeLocalClearComponent(input, selectionStart) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputDatetimeLocalComponentsGet(input),
-    componentOrder = inputDatetimeLocalFormatOrderGetter(input),
-    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(input),
+function inputDatetimeLocalClearComponent(element, selectionStart) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputDatetimeLocalComponentsGet(element),
+    componentOrder = inputDatetimeLocalFormatOrderGetter(element),
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
     selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
-    case DATECOMPONENT_YEAR:
-      components.year = INPUT_DATE_YEAR_EMPTY;
+    case INPUT_COMPONENT_YEAR:
+      components.yy = INPUT_DATE_YEAR_EMPTY;
       break;
-    case DATECOMPONENT_MONTH:
-      components.month = INPUT_DATE_MONTH_EMPTY;
+    case INPUT_COMPONENT_MONTH:
+      components.mm = INPUT_DATE_MONTH_EMPTY;
       break;
-    case DATECOMPONENT_DAY:
-      components.day = INPUT_DATE_DAY_EMPTY;
+    case INPUT_COMPONENT_DAY:
+      components.dd = INPUT_DATE_DAY_EMPTY;
       break;
 
-    case INPUT_TIME_COMPONENT_HOUR:
-      components.hour = INPUT_TIME_COMPONENT_EMPTY;
+    case INPUT_COMPONENT_HOUR:
+      components.hh = INPUT_TIME_COMPONENT_EMPTY;
       break;
-    case INPUT_TIME_COMPONENT_MINUTE:
-      components.minute = INPUT_TIME_COMPONENT_EMPTY;
+    case INPUT_COMPONENT_MINUTE:
+      components.ii = INPUT_TIME_COMPONENT_EMPTY;
       break;
-    case INPUT_TIME_COMPONENT_SECOND:
-      components.second = INPUT_TIME_COMPONENT_EMPTY;
+    case INPUT_COMPONENT_SECOND:
+      components.ss = INPUT_TIME_COMPONENT_EMPTY;
       break;
-    case INPUT_TIME_COMPONENT_MILISECOND:
-      components.milisecond = INPUT_TIME_COMPONENT_EMPTY;
+    case INPUT_COMPONENT_MILISECOND:
+      components.ms = INPUT_TIME_COMPONENT_EMPTY;
       break;
     default:
       return;
   }
 
-  value = inputDatetimeLocalComponentsSet(input, components.year, components.month, components.day, components.hour, components.minute, components.second, components.milisecond);
-  input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  value = inputDatetimeLocalComponentsSet(element, components);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
 }
 
-function inputDatetimeLocalAccessibilityNormalizeSelectedComponent(input, selectionStart) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputDatetimeLocalComponentsGet(input),
-    componentOrder = inputDatetimeLocalFormatOrderGetter(input),
-    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(input),
-    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+function inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputDatetimeLocalComponentsGet(element),
+    componentOrder = inputDatetimeLocalFormatOrderGetter(element),
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator),
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
 
-  switch (selectedComponent) {
-    case DATECOMPONENT_YEAR:
-      if (components.year > INPUT_DATE_YEAR_MAX) {
-        components.year = INPUT_DATE_YEAR_MAX;
-      }
-      break;
-    case DATECOMPONENT_MONTH:
-      if (components.month > INPUT_DATE_MONTH_MAX) {
-        components.month = INPUT_DATE_MONTH_MAX;
-      }
-      break;
-    case DATECOMPONENT_DAY:
-      if (components.day > INPUT_DATE_DAY_MAX) {
-        components.day = INPUT_DATE_DAY_MAX;
-      }
-      break;
-
-    case INPUT_TIME_COMPONENT_HOUR:
-      if (components.hour > INPUT_TIME_COMPONENT_HOUR_MAX) {
-        components.hour = INPUT_TIME_COMPONENT_HOUR_MAX;
-      }
-      break;
-    case INPUT_TIME_COMPONENT_MINUTE:
-      if (components.minute > INPUT_TIME_COMPONENT_MINUTE_MAX) {
-        components.minute = INPUT_TIME_COMPONENT_MINUTE_MAX;
-      }
-      break;
-    case INPUT_TIME_COMPONENT_SECOND:
-      if (components.second > INPUT_TIME_COMPONENT_SECOND_MAX) {
-        components.second = INPUT_TIME_COMPONENT_SECOND_MAX;
-      }
-      break;
-    case INPUT_TIME_COMPONENT_MILISECOND:
-      if (components.milisecond > INPUT_TIME_COMPONENT_MILISECOND_MAX) {
-        components.milisecond = INPUT_TIME_COMPONENT_MILISECOND_MAX;
-      }
-      break;
-    default:
-      return;
+  if (components[selectedComponent] > componentMax) {
+    components[selectedComponent] = componentMax;
   }
 
-  inputDatetimeLocalComponentsSet(input, components.year, components.month, components.day, components.hour, components.minute, components.second, components.milisecond);
+  inputDatetimeLocalComponentsSet(element, components);
 }
 
 function inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selectionStart) {
@@ -268,7 +197,7 @@ function inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selecti
     componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
     selection = inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator);
 
-  element.setSelectionRange(selection[0], selection[1]);
+  inputDomOriginalSetSelectionRange.apply(element, selection);
 }
 
 function inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart) {
@@ -278,43 +207,20 @@ function inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionSt
     componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
     selection = inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator);
 
-  element.setSelectionRange(selection[0], selection[1]);
+  inputDomOriginalSetSelectionRange.apply(element, selection);
 }
 
-function inputDatetimeLocalAccessibilityIncreaseComponent(input, selectionStart, amount) {
-  var value = inputDomOriginalValueGetter.call(input),
-    components = inputDatetimeLocalComponentsGet(input),
-    componentOrder = inputDatetimeLocalFormatOrderGetter(input),
-    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(input),
-    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+function inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, amount) {
+  var value = inputDomOriginalValueGetter.call(element),
+    components = inputDatetimeLocalComponentsGet(element),
+    componentOrder = inputDatetimeLocalFormatOrderGetter(element),
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
+    selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator),
+    componentMin = inputComponentGetMinimum(element, selectedComponent),
+    componentMax = inputComponentGetMaximum(element, selectedComponent);
 
-  switch (selectedComponent) {
-    case DATECOMPONENT_YEAR:
-      components.year = inputAccessibilityIncreaseComponent(components.year, amount, INPUT_DATE_YEAR_MIN, INPUT_DATE_YEAR_MAX);
-      break;
-    case DATECOMPONENT_MONTH:
-      components.month = inputAccessibilityIncreaseComponent(components.month, amount, INPUT_DATE_MONTH_MIN, INPUT_DATE_MONTH_MAX);
-      break;
-    case DATECOMPONENT_DAY:
-      components.day = inputAccessibilityIncreaseComponent(components.day, amount, INPUT_DATE_DAY_MIN, INPUT_DATE_DAY_MAX);
-      break;
+  components[selectedComponent] = inputAccessibilityIncreaseComponent(components[selectedComponent], amount, componentMin, componentMax);
 
-    case INPUT_TIME_COMPONENT_HOUR:
-      components.hour = inputAccessibilityIncreaseComponent(components.hour, amount, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX);
-      break;
-    case INPUT_TIME_COMPONENT_MINUTE:
-      components.minute = inputAccessibilityIncreaseComponent(components.minute, amount, INPUT_TIME_COMPONENT_MINUTE_MIN, INPUT_TIME_COMPONENT_MINUTE_MAX);
-      break;
-    case INPUT_TIME_COMPONENT_SECOND:
-      components.second = inputAccessibilityIncreaseComponent(components.second, amount, INPUT_TIME_COMPONENT_SECOND_MIN, INPUT_TIME_COMPONENT_SECOND_MAX);
-      break;
-    case INPUT_TIME_COMPONENT_MILISECOND:
-      components.milisecond = inputAccessibilityIncreaseComponent(components.milisecond, amount, INPUT_TIME_COMPONENT_MILISECOND_MIN, INPUT_TIME_COMPONENT_MILISECOND_MAX);
-      break;
-    default:
-      return;
-  }
-
-  value = inputDatetimeLocalComponentsSet(input, components.year, components.month, components.day, components.hour, components.minute, components.second, components.milisecond);
-  input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  value = inputDatetimeLocalComponentsSet(element, components);
+  inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
 }
