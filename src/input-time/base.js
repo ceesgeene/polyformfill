@@ -129,10 +129,10 @@ function inputTimeGetRfc3339(element) {
 
   if (components.hh > INPUT_TIME_COMPONENT_EMPTY && components.ii > INPUT_TIME_COMPONENT_EMPTY) {
     if (components.ss === INPUT_TIME_COMPONENT_EMPTY) {
-      components.ss = INPUT_TIME_COMPONENT_HIDDEN
+      components.ss = INPUT_TIME_COMPONENT_HIDDEN;
     }
     if (components.ms === INPUT_TIME_COMPONENT_EMPTY) {
-      components.ms = INPUT_TIME_COMPONENT_HIDDEN
+      components.ms = INPUT_TIME_COMPONENT_HIDDEN;
     }
     return inputTimeDefaultValueFormatter(components);
   }

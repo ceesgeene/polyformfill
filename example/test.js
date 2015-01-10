@@ -1,4 +1,4 @@
-void function (window, document) {
+(function (window, document) {
   "use strict";
 
   if ("interactive" === document.readyState || "complete" === document.readyState) {
@@ -55,4 +55,4 @@ void function (window, document) {
     console.log(e);
   });*/
 
-}(window, document);
+}(window, document));
