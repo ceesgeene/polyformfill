@@ -18,6 +18,9 @@ function initInput(testInput) {
   // @if FEATURES.DOM
   initInputDom(testInput);
   // @endif
+  // @if FEATURES.VALIDATION
+  initInputValidation();
+  // @endif
   // @if FEATURES.ACCESSIBILITY
   initInputAccessibility(window.addEventListener);
   // @endif

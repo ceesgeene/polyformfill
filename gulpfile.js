@@ -22,6 +22,7 @@ gulp.task("compress", function () {
       context: {
         FEATURES: {
           DOM: true,
+          VALIDATION: true,
           ACCESSIBILITY: true,
           LOCALIZATION: true,
           NORMALIZATION: true
