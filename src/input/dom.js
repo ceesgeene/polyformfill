@@ -122,7 +122,7 @@ function inputDomValueSet(value) {
     case INPUT_TYPE_TIME:
       return inputTimeDomValueSet(this, value);
     default:
-      return inputDomOriginalValueSetter.call(this);
+      return inputDomOriginalValueSetter.call(this, value);
   }
 }
 
