@@ -43,9 +43,10 @@ function initInputAccessibility(addEventListener) {
  *   A KeyboardEvent of type keydown.
  */
 function inputAccessibilityOnKeydownHandleNavigation(event) {
-  if (event.defaultPrevented) {
+  // TODO in IE, defaultPrevented seems to be always set for Up and Down keydown events.
+  /*if (event.defaultPrevented) {
     return;
-  }
+  }*/
 
   // Returning early if the user input is irrelevant for this event handler.
   if (event.charCode) {
