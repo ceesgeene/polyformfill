@@ -535,7 +535,7 @@
     }
   }
   function inputValidationWillValidate() {
-    return !(this.disabled || this.readonly);
+    return !(this.disabled || this.readOnly);
   }
   function inputValidationSetCustomValidity(error) {
     this.validationMessage = error;

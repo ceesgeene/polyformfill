@@ -38,7 +38,7 @@ function initInputValidation() {
 }
 
 function inputValidationWillValidate() {
-  return !(this.disabled || this.readonly);
+  return !(this.disabled || this.readOnly);
 }
 
 function inputValidationSetCustomValidity(error) {

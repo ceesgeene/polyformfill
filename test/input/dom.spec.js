@@ -74,6 +74,53 @@ describe("The DOM interface of input elements", function () {
 
   });
 
+  describe("has a readOnly property, which", function () {
+
+    it("contains false if the input element has no readonly attribute", function () {
+      var input;
+
+      input = document.createElement("input");
+
+      expect(input.readOnly).toBe(false);
+    });
+
+    it("contains true if the input element has a readonly attribute", function () {
+      var input;
+
+      input = document.createElement("input");
+      input.setAttribute("readonly", "");
+
+      expect(input.readOnly).toBe(true);
+    });
+
+    it("accepts truthy values to enable the readony mode for the input element", function () {
+      var input;
+
+      input = document.createElement("input");
+
+      input.readOnly = "123";
+
+      expect(input.readOnly).toBe(true);
+      expect(input.getAttribute("readonly")).toBe("");
+    });
+
+    it("accepts falsy values to disable the readony mode for the input element", function () {
+      var input;
+
+      input = document.createElement("input");
+      input.setAttribute("readonly", "readonly");
+
+      expect(input.readOnly).toBe(true);
+
+      input.readOnly = 0;
+
+      expect(input.readOnly).toBe(false);
+      expect(input.getAttribute("readonly")).toBeNull();
+      expect(input.hasAttribute("readonly")).toBe(false);
+    });
+
+  });
+
   describe("has a required property, which", function () {
 
     it("should return true for required input elements", function () {
