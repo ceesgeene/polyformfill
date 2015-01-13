@@ -50,6 +50,30 @@ describe("The DOM interface of input elements", function () {
     });
   });
 
+  describe("has a maxLength property, which", function () {
+
+    it("contains the limit on the number of characters a user can input", function () {
+      var input;
+
+      input = document.createElement("input");
+      input.setAttribute("maxlength", "5");
+
+      expect(input.maxLength).toBe(5);
+    });
+
+    it("accepts positive integer values to limit the number of characters a user can input", function () {
+      var input;
+
+      input = document.createElement("input");
+
+      input.maxLength = 5;
+
+      expect(input.maxLength).toBe(5);
+      expect(input.getAttribute("maxlength")).toBe("5");
+    });
+
+  });
+
   describe("has a required property, which", function () {
 
     it("should return true for required input elements", function () {
