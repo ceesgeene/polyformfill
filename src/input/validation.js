@@ -38,7 +38,7 @@ function initInputValidation() {
 }
 
 function inputValidationWillValidate() {
-  return this.disabled || this.readonly;
+  return !(this.disabled || this.readonly);
 }
 
 function inputValidationSetCustomValidity(error) {
@@ -51,7 +51,7 @@ function inputValidationValidityGet() {
    value: new InputValidationValidityStateConstructor()
    });*/
   if (this.__polyformfillInputValidityState === undefined) {
-    this.__polyformfillInputValidityState = new InputValidationValidityStateConstructor();
+    this.__polyformfillInputValidityState = new InputValidationValidityStateConstructor(this);
   }
   return this.__polyformfillInputValidityState;
 }
@@ -61,6 +61,9 @@ function inputValidationCheckValidity() {
   var invalid, event;
 
   if (this.required && "" === this.value) {
+    invalid = true;
+  }
+  else if(this.validationMessage) {
     invalid = true;
   }
 
@@ -84,8 +87,8 @@ function inputValidationValidationMessageSet(value) {
 }
 
 
-function InputValidationValidityStateConstructor() {
-
+function InputValidationValidityStateConstructor(element) {
+  this.__polyformfillElement = element;
 }
 
 function InputValidationValidityStatePrototype() {
@@ -125,7 +128,7 @@ function InputValidationValidityStatePrototype() {
 }
 
 function inputValidationValidityStateValueMissing() {
-  return false;
+  return (this.__polyformfillElement.required && "" === this.__polyformfillElement.value);
 }
 
 function inputValidationValidityStateTypeMismatch() {
@@ -161,7 +164,7 @@ function inputValidationValidityStateBadInput() {
 }
 
 function inputValidationValidityStateCustomError() {
-  return false;
+  return !!(this.__polyformfillElement.validationMessage);
 }
 
 function inputValidationValidityStateValid() {

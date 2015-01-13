@@ -39,6 +39,16 @@ function initInputDom(testInput) {
       });
     }
 
+    // @if BROWSERS.IE9
+    descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, "required");
+    if (descriptor === undefined) {
+      Object.defineProperty(HTMLInputElementPrototype, "required", {
+        get: inputDomRequiredGet,
+        set: inputDomRequiredSet
+      });
+    }
+    // @endif
+
     descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE);
     if (descriptor.configurable) {
       Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE, {
@@ -98,6 +108,19 @@ function inputDomTypeGet() {
     }
   }
   return type;
+}
+
+function inputDomRequiredGet() {
+  return this.hasAttribute("required");
+}
+
+function inputDomRequiredSet(value) {
+  if (value) {
+    this.setAttribute("required", "");
+  }
+  else {
+    this.removeAttribute("required");
+  }
 }
 
 function inputDomValueGet() {

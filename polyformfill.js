@@ -250,6 +250,13 @@
           get: inputDomTypeGet
         });
       }
+      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, "required");
+      if (descriptor === undefined) {
+        Object.defineProperty(HTMLInputElementPrototype, "required", {
+          get: inputDomRequiredGet,
+          set: inputDomRequiredSet
+        });
+      }
       descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE);
       if (descriptor.configurable) {
         Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE, {
@@ -299,6 +306,16 @@
       }
     }
     return type;
+  }
+  function inputDomRequiredGet() {
+    return this.hasAttribute("required");
+  }
+  function inputDomRequiredSet(value) {
+    if (value) {
+      this.setAttribute("required", "");
+    } else {
+      this.removeAttribute("required");
+    }
   }
   function inputDomValueGet() {
     switch (this.getAttribute(INPUT_ATTR_TYPE)) {
@@ -518,14 +535,14 @@
     }
   }
   function inputValidationWillValidate() {
-    return this.disabled || this.readonly;
+    return !(this.disabled || this.readonly);
   }
   function inputValidationSetCustomValidity(error) {
     this.validationMessage = error;
   }
   function inputValidationValidityGet() {
     if (this.__polyformfillInputValidityState === undefined) {
-      this.__polyformfillInputValidityState = new InputValidationValidityStateConstructor();
+      this.__polyformfillInputValidityState = new InputValidationValidityStateConstructor(this);
     }
     return this.__polyformfillInputValidityState;
   }
@@ -533,6 +550,10 @@
     var invalid, event;
     if (this.required && "" === this.value) {
       invalid = true;
+    } else {
+      if (this.validationMessage) {
+        invalid = true;
+      }
     }
     if (invalid) {
       event = document.createEvent("CustomEvent");
@@ -548,7 +569,9 @@
   function inputValidationValidationMessageSet(value) {
     this.__polyformfillValidationMessage = value;
   }
-  function InputValidationValidityStateConstructor() {}
+  function InputValidationValidityStateConstructor(element) {
+    this.__polyformfillElement = element;
+  }
   function InputValidationValidityStatePrototype() {
     Object.defineProperty(this, "valueMissing", {
       get: inputValidationValidityStateValueMissing
@@ -585,7 +608,7 @@
     });
   }
   function inputValidationValidityStateValueMissing() {
-    return false;
+    return this.__polyformfillElement.required && "" === this.__polyformfillElement.value;
   }
   function inputValidationValidityStateTypeMismatch() {
     return false;
@@ -612,7 +635,7 @@
     return false;
   }
   function inputValidationValidityStateCustomError() {
-    return false;
+    return !!this.__polyformfillElement.validationMessage;
   }
   function inputValidationValidityStateValid() {
     return false;

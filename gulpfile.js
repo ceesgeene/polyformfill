@@ -20,6 +20,9 @@ gulp.task("compress", function () {
     .pipe(replace('"use strict";', ""))
     .pipe(preprocess({
       context: {
+        BROWSERS: {
+          IE9: true
+        },
         FEATURES: {
           DOM: true,
           VALIDATION: true,
