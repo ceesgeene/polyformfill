@@ -14,26 +14,18 @@ function initInputValidation() {
   if (window.ValidityState === undefined && HTMLInputElement && Object.isExtensible(HTMLInputElement.prototype)) {
     HTMLInputElementPrototype = HTMLInputElement.prototype;
 
-    Object.defineProperty(HTMLInputElementPrototype, "willValidate", {
-      get: inputValidationWillValidate
-    });
+    defineAccessorProperty(HTMLInputElementPrototype, "willValidate", inputValidationWillValidate);
 
     HTMLInputElementPrototype.setCustomValidity = inputValidationSetCustomValidity;
 
-    Object.defineProperty(HTMLInputElementPrototype, "validity", {
-      configurable: true,
-      get: inputValidationValidityGet
-    });
+    defineAccessorProperty(HTMLInputElementPrototype, "validity", inputValidationValidityGet);
 
     HTMLInputElementPrototype.checkValidity = inputValidationCheckValidity;
 
-    Object.defineProperty(HTMLInputElementPrototype, "validationMessage", {
-      get: inputValidationValidationMessageGet,
-      set: inputValidationValidationMessageSet
-    });
+    defineAccessorProperty(HTMLInputElementPrototype, "validationMessage", inputValidationValidationMessageGet,inputValidationValidationMessageSet);
 
-    InputValidationValidityStateConstructor.prototype = new InputValidationValidityStatePrototype;
-    window.ValidityState = InputValidationValidityStateConstructor;
+    InputValidationValidityState.prototype = new InputValidationValidityStatePrototype;
+    window.ValidityState = InputValidationValidityState;
   }
 }
 
@@ -47,13 +39,10 @@ function inputValidationSetCustomValidity(error) {
 
 
 function inputValidationValidityGet() {
-  /*Object.defineProperty(this, "validity", {
-   value: new InputValidationValidityStateConstructor()
-   });*/
-  if (this.__polyformfillInputValidityState === undefined) {
-    this.__polyformfillInputValidityState = new InputValidationValidityStateConstructor(this);
+  if (this.__polyformfillInputValidity === undefined) {
+    this.__polyformfillInputValidity = new InputValidationValidityState(this);
   }
-  return this.__polyformfillInputValidityState;
+  return this.__polyformfillInputValidity;
 }
 
 
@@ -87,44 +76,22 @@ function inputValidationValidationMessageSet(value) {
 }
 
 
-function InputValidationValidityStateConstructor(element) {
+function InputValidationValidityState(element) {
   this.__polyformfillElement = element;
 }
 
 function InputValidationValidityStatePrototype() {
-  Object.defineProperty(this, "valueMissing", {
-    get: inputValidationValidityStateValueMissing
-  });
-  Object.defineProperty(this, "typeMismatch", {
-    get: inputValidationValidityStateTypeMismatch
-  });
-  Object.defineProperty(this, "patternMismatch", {
-    get: inputValidationValidityStatePatternMismatch
-  });
-  Object.defineProperty(this, "tooLong", {
-    get: inputValidationValidityStateTooLong
-  });
-  Object.defineProperty(this, "tooShort", {
-    get: inputValidationValidityStateTooShort
-  });
-  Object.defineProperty(this, "rangeUnderflow", {
-    get: inputValidationValidityStateRangeUnderflow
-  });
-  Object.defineProperty(this, "rangeOverflow", {
-    get: inputValidationValidityStateRangeOverflow
-  });
-  Object.defineProperty(this, "stepMismatch", {
-    get: inputValidationValidityStateStepMismatch
-  });
-  Object.defineProperty(this, "badInput", {
-    get: inputValidationValidityStateBadInput
-  });
-  Object.defineProperty(this, "customError", {
-    get: inputValidationValidityStateCustomError
-  });
-  Object.defineProperty(this, "valid", {
-    get: inputValidationValidityStateValid
-  });
+  defineAccessorProperty(this, "valueMissing", inputValidationValidityStateValueMissing);
+  defineAccessorProperty(this, "typeMismatch", inputValidationValidityStateTypeMismatch);
+  defineAccessorProperty(this, "patternMismatch", inputValidationValidityStatePatternMismatch);
+  defineAccessorProperty(this, "tooLong", inputValidationValidityStateTooLong);
+  defineAccessorProperty(this, "tooShort", inputValidationValidityStateTooShort);
+  defineAccessorProperty(this, "rangeUnderflow", inputValidationValidityStateRangeUnderflow);
+  defineAccessorProperty(this, "rangeOverflow", inputValidationValidityStateRangeOverflow);
+  defineAccessorProperty(this, "stepMismatch", inputValidationValidityStateStepMismatch);
+  defineAccessorProperty(this, "badInput", inputValidationValidityStateBadInput);
+  defineAccessorProperty(this, "customError", inputValidationValidityStateCustomError);
+  defineAccessorProperty(this, "valid", inputValidationValidityStateValid);
 }
 
 function inputValidationValidityStateValueMissing() {
