@@ -15,3 +15,17 @@ function init() {
     initInputTime();
   }
 }
+
+function defineAccessorProperty(object, property, getter, setter) {
+  var descriptor = {
+    configurable: true,
+    enumerable: true
+  };
+  if (getter) {
+    descriptor.get = getter;
+  }
+  if (setter) {
+    descriptor.set = setter;
+  }
+  Object.defineProperty(object, property, descriptor);
+}

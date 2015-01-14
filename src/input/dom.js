@@ -34,27 +34,19 @@ function initInputDom(testInput) {
     inputDomOriginalTypeGetter = descriptor.get;
 
     if (descriptor.configurable) {
-      Object.defineProperty(HTMLInputElementPrototype, INPUT_ATTR_TYPE, {
-        get: inputDomTypeGet
-      });
+      defineAccessorProperty(HTMLInputElementPrototype, INPUT_ATTR_TYPE, inputDomTypeGet);
     }
 
     // @if BROWSERS.IE9
     descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, "required");
     if (descriptor === undefined) {
-      Object.defineProperty(HTMLInputElementPrototype, "required", {
-        get: inputDomRequiredGet,
-        set: inputDomRequiredSet
-      });
+      defineAccessorProperty(HTMLInputElementPrototype, "required", inputDomRequiredGet, inputDomRequiredSet);
     }
     // @endif
 
     descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE);
     if (descriptor.configurable) {
-      Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE, {
-        get: inputDomValueGet,
-        set: inputDomValueSet
-      });
+      defineAccessorProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE, inputDomValueGet, inputDomValueSet);
 
       inputDomOriginalValueGetter = descriptor.get;
       inputDomOriginalValueSetter = descriptor.set;
@@ -62,10 +54,7 @@ function initInputDom(testInput) {
 
     descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER);
     if (descriptor === undefined || descriptor.configurable) {
-      Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER, {
-        get: inputDomValueAsNumberGet,
-        set: inputDomValueAsNumberSet
-      });
+      defineAccessorProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER, inputDomValueAsNumberGet, inputDomValueAsNumberSet);
 
       if (descriptor) {
         inputDomOriginalValueAsNumberGetter = descriptor.get;
@@ -73,10 +62,7 @@ function initInputDom(testInput) {
       }
     }
 
-    Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASDATE, {
-      get: inputDomValueAsDateGet,
-      set: inputDomValueAsDateSet
-    });
+    defineAccessorProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASDATE, inputDomValueAsDateGet, inputDomValueAsDateSet);
 
     inputDomOriginalStepUp = HTMLInputElementPrototype.stepUp;
     HTMLInputElementPrototype.stepUp = inputDomStepUp;
