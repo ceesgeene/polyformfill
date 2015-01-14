@@ -61,9 +61,35 @@ function inputDateComponentsSet(element, components) {
     dd: components[INPUT_COMPONENT_DAY]
   };
 
+  if (components.yy === INPUT_DATE_YEAR_EMPTY && components.mm === INPUT_DATE_MONTH_EMPTY && components.dd === INPUT_DATE_DAY_EMPTY) {
+    if (element.required) {
+      element.setCustomValidity("Please fill out this field.");
+    }
+  }
+  else if (!inputDateComponentsValidate(components)) {
+    element.setCustomValidity("Please enter a valid value. The field is incomplete or has an invalid date.");
+  }
+  else {
+    element.setCustomValidity("");
+  }
+
   formattedValue = inputDateValueFormatter(element[INPUT_PROPERTY_COMPONENTS], element);
   inputDomOriginalValueSetter.call(element, formattedValue);
   return formattedValue;
+}
+
+function inputDateComponentsValidate(components) {
+  var date;
+
+  if (components.yy !== INPUT_DATE_YEAR_EMPTY && components.mm !== INPUT_DATE_MONTH_EMPTY && components.dd !== INPUT_DATE_DAY_EMPTY) {
+    date = new Date(0);
+    date.setUTCFullYear(components.yy, components.mm, components.dd);
+
+    if (date.getUTCFullYear() === components.yy && date.getUTCMonth() === components.mm && date.getUTCDate() === components.dd) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function inputDateFuzzyRfc3339ValueFormatter(components) {
@@ -108,16 +134,16 @@ function inputDateRfc3339FormatSeparator() {
 }
 
 function getDateFromRfc3339FullDateString(str) {
-  var date, dateComponents;
+  var date, components;
   if (str && rfc3999FullDateRegExp.test(str)) {
-    dateComponents = str.split("-");
+    components = str.split("-");
     // Max possible date; http://ecma-international.org/ecma-262/5.1/#sec-15.9.1.1
-    if (2757600914 > dateComponents.join("")) {
+    if (2757600914 > components.join("")) {
       date = new Date(0);
-      date.setUTCFullYear(dateComponents[0], dateComponents[1] - 1, dateComponents[2]);
+      date.setUTCFullYear(components[0], components[1] - 1, components[2]);
       // Don't accept values like february 31th. setUTCFullYear() automatically updates these values to correct dates,
       // like march 3 for given example.
-      if (date.getUTCMonth() != dateComponents[1] - 1 || date.getUTCDate() != dateComponents[2]) {
+      if (date.getUTCMonth() != components[1] - 1 || date.getUTCDate() != components[2]) {
         return null;
       }
       return date;
@@ -166,12 +192,12 @@ function inputDateGetRfc3339(input) {
 }
 
 function inputDateGetDate(input) {
-  var dateComponents = inputDateComponentsGet(input), date = null;
+  var components = inputDateComponentsGet(input), date = null;
 
-  if (dateComponents.yy !== INPUT_DATE_YEAR_EMPTY && dateComponents.mm !== INPUT_DATE_MONTH_EMPTY && dateComponents.dd !== INPUT_DATE_DAY_EMPTY) {
+  if (components.yy !== INPUT_DATE_YEAR_EMPTY && components.mm !== INPUT_DATE_MONTH_EMPTY && components.dd !== INPUT_DATE_DAY_EMPTY) {
     date = new Date(0);
     // TODO setUTCFullYear automatically updates incorrect dates, e.g. february 31th to march 3rd.
-    date.setUTCFullYear(dateComponents.yy, dateComponents.mm, dateComponents.dd);
+    date.setUTCFullYear(components.yy, components.mm, components.dd);
   }
 
   return date;

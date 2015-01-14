@@ -9,6 +9,19 @@
       initInputTime();
     }
   }
+  function defineAccessorProperty(object, property, getter, setter) {
+    var descriptor = {
+      configurable: true,
+      enumerable: true
+    };
+    if (getter) {
+      descriptor.get = getter;
+    }
+    if (setter) {
+      descriptor.set = setter;
+    }
+    Object.defineProperty(object, property, descriptor);
+  }
   function initInputAccessibility(addEventListener) {
     addEventListener("keydown", inputAccessibilityOnKeydownHandleNavigation);
     addEventListener("keypress", inputAccessibilityOnKeyPressHandleUserInput);
@@ -246,41 +259,27 @@
       }
       inputDomOriginalTypeGetter = descriptor.get;
       if (descriptor.configurable) {
-        Object.defineProperty(HTMLInputElementPrototype, INPUT_ATTR_TYPE, {
-          get: inputDomTypeGet
-        });
+        defineAccessorProperty(HTMLInputElementPrototype, INPUT_ATTR_TYPE, inputDomTypeGet);
       }
       descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, "required");
       if (descriptor === undefined) {
-        Object.defineProperty(HTMLInputElementPrototype, "required", {
-          get: inputDomRequiredGet,
-          set: inputDomRequiredSet
-        });
+        defineAccessorProperty(HTMLInputElementPrototype, "required", inputDomRequiredGet, inputDomRequiredSet);
       }
       descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE);
       if (descriptor.configurable) {
-        Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE, {
-          get: inputDomValueGet,
-          set: inputDomValueSet
-        });
+        defineAccessorProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE, inputDomValueGet, inputDomValueSet);
         inputDomOriginalValueGetter = descriptor.get;
         inputDomOriginalValueSetter = descriptor.set;
       }
       descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER);
       if (descriptor === undefined || descriptor.configurable) {
-        Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER, {
-          get: inputDomValueAsNumberGet,
-          set: inputDomValueAsNumberSet
-        });
+        defineAccessorProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER, inputDomValueAsNumberGet, inputDomValueAsNumberSet);
         if (descriptor) {
           inputDomOriginalValueAsNumberGetter = descriptor.get;
           inputDomOriginalValueAsNumberSetter = descriptor.set;
         }
       }
-      Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASDATE, {
-        get: inputDomValueAsDateGet,
-        set: inputDomValueAsDateSet
-      });
+      defineAccessorProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASDATE, inputDomValueAsDateGet, inputDomValueAsDateSet);
       inputDomOriginalStepUp = HTMLInputElementPrototype.stepUp;
       HTMLInputElementPrototype.stepUp = inputDomStepUp;
       inputDomOriginalStepDown = HTMLInputElementPrototype.stepDown;
@@ -517,21 +516,13 @@
     var HTMLInputElementPrototype;
     if (window.ValidityState === undefined && HTMLInputElement && Object.isExtensible(HTMLInputElement.prototype)) {
       HTMLInputElementPrototype = HTMLInputElement.prototype;
-      Object.defineProperty(HTMLInputElementPrototype, "willValidate", {
-        get: inputValidationWillValidate
-      });
+      defineAccessorProperty(HTMLInputElementPrototype, "willValidate", inputValidationWillValidate);
       HTMLInputElementPrototype.setCustomValidity = inputValidationSetCustomValidity;
-      Object.defineProperty(HTMLInputElementPrototype, "validity", {
-        configurable: true,
-        get: inputValidationValidityGet
-      });
+      defineAccessorProperty(HTMLInputElementPrototype, "validity", inputValidationValidityGet);
       HTMLInputElementPrototype.checkValidity = inputValidationCheckValidity;
-      Object.defineProperty(HTMLInputElementPrototype, "validationMessage", {
-        get: inputValidationValidationMessageGet,
-        set: inputValidationValidationMessageSet
-      });
-      InputValidationValidityStateConstructor.prototype = new InputValidationValidityStatePrototype();
-      window.ValidityState = InputValidationValidityStateConstructor;
+      defineAccessorProperty(HTMLInputElementPrototype, "validationMessage", inputValidationValidationMessageGet, inputValidationValidationMessageSet);
+      InputValidationValidityState.prototype = new InputValidationValidityStatePrototype();
+      window.ValidityState = InputValidationValidityState;
     }
   }
   function inputValidationWillValidate() {
@@ -541,10 +532,10 @@
     this.validationMessage = error;
   }
   function inputValidationValidityGet() {
-    if (this.__polyformfillInputValidityState === undefined) {
-      this.__polyformfillInputValidityState = new InputValidationValidityStateConstructor(this);
+    if (this.__polyformfillInputValidity === undefined) {
+      this.__polyformfillInputValidity = new InputValidationValidityState(this);
     }
-    return this.__polyformfillInputValidityState;
+    return this.__polyformfillInputValidity;
   }
   function inputValidationCheckValidity() {
     var invalid, event;
@@ -569,43 +560,21 @@
   function inputValidationValidationMessageSet(value) {
     this.__polyformfillValidationMessage = value;
   }
-  function InputValidationValidityStateConstructor(element) {
+  function InputValidationValidityState(element) {
     this.__polyformfillElement = element;
   }
   function InputValidationValidityStatePrototype() {
-    Object.defineProperty(this, "valueMissing", {
-      get: inputValidationValidityStateValueMissing
-    });
-    Object.defineProperty(this, "typeMismatch", {
-      get: inputValidationValidityStateTypeMismatch
-    });
-    Object.defineProperty(this, "patternMismatch", {
-      get: inputValidationValidityStatePatternMismatch
-    });
-    Object.defineProperty(this, "tooLong", {
-      get: inputValidationValidityStateTooLong
-    });
-    Object.defineProperty(this, "tooShort", {
-      get: inputValidationValidityStateTooShort
-    });
-    Object.defineProperty(this, "rangeUnderflow", {
-      get: inputValidationValidityStateRangeUnderflow
-    });
-    Object.defineProperty(this, "rangeOverflow", {
-      get: inputValidationValidityStateRangeOverflow
-    });
-    Object.defineProperty(this, "stepMismatch", {
-      get: inputValidationValidityStateStepMismatch
-    });
-    Object.defineProperty(this, "badInput", {
-      get: inputValidationValidityStateBadInput
-    });
-    Object.defineProperty(this, "customError", {
-      get: inputValidationValidityStateCustomError
-    });
-    Object.defineProperty(this, "valid", {
-      get: inputValidationValidityStateValid
-    });
+    defineAccessorProperty(this, "valueMissing", inputValidationValidityStateValueMissing);
+    defineAccessorProperty(this, "typeMismatch", inputValidationValidityStateTypeMismatch);
+    defineAccessorProperty(this, "patternMismatch", inputValidationValidityStatePatternMismatch);
+    defineAccessorProperty(this, "tooLong", inputValidationValidityStateTooLong);
+    defineAccessorProperty(this, "tooShort", inputValidationValidityStateTooShort);
+    defineAccessorProperty(this, "rangeUnderflow", inputValidationValidityStateRangeUnderflow);
+    defineAccessorProperty(this, "rangeOverflow", inputValidationValidityStateRangeOverflow);
+    defineAccessorProperty(this, "stepMismatch", inputValidationValidityStateStepMismatch);
+    defineAccessorProperty(this, "badInput", inputValidationValidityStateBadInput);
+    defineAccessorProperty(this, "customError", inputValidationValidityStateCustomError);
+    defineAccessorProperty(this, "valid", inputValidationValidityStateValid);
   }
   function inputValidationValidityStateValueMissing() {
     return this.__polyformfillElement.required && "" === this.__polyformfillElement.value;
@@ -801,9 +770,31 @@
       mm: components[INPUT_COMPONENT_MONTH],
       dd: components[INPUT_COMPONENT_DAY]
     };
+    if (components.yy === INPUT_DATE_YEAR_EMPTY && components.mm === INPUT_DATE_MONTH_EMPTY && components.dd === INPUT_DATE_DAY_EMPTY) {
+      if (element.required) {
+        element.setCustomValidity("Please fill out this field.");
+      }
+    } else {
+      if (!inputDateComponentsValidate(components)) {
+        element.setCustomValidity("Please enter a valid value. The field is incomplete or has an invalid date.");
+      } else {
+        element.setCustomValidity("");
+      }
+    }
     formattedValue = inputDateValueFormatter(element[INPUT_PROPERTY_COMPONENTS], element);
     inputDomOriginalValueSetter.call(element, formattedValue);
     return formattedValue;
+  }
+  function inputDateComponentsValidate(components) {
+    var date;
+    if (components.yy !== INPUT_DATE_YEAR_EMPTY && components.mm !== INPUT_DATE_MONTH_EMPTY && components.dd !== INPUT_DATE_DAY_EMPTY) {
+      date = new Date(0);
+      date.setUTCFullYear(components.yy, components.mm, components.dd);
+      if (date.getUTCFullYear() === components.yy && date.getUTCMonth() === components.mm && date.getUTCDate() === components.dd) {
+        return true;
+      }
+    }
+    return false;
   }
   function inputDateFuzzyRfc3339ValueFormatter(components) {
     var year, month, day;
