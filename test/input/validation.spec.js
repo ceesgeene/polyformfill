@@ -1,6 +1,6 @@
 "use strict";
 
-/* global describe, expect, it */
+/* global describe, expect, it, xdescribe, xit */
 
 describe("The DOM interface (validation) of input elements", function () {
 
@@ -119,7 +119,7 @@ describe("The DOM interface (validation) of input elements", function () {
     describe("has a patternMismatch property, which", function () {
 
       // TODO implement polyfill in IE
-      /*it("returns true if the element's value doesn't match the provided pattern.", function () {
+      xit("returns true if the element's value doesn't match the provided pattern.", function () {
         var input;
 
         input = document.createElement("input");
@@ -127,7 +127,7 @@ describe("The DOM interface (validation) of input elements", function () {
         input.value = "ABCD";
 
         expect(input.validity.patternMismatch).toBe(true);
-      });*/
+      });
 
       it("returns false if the element's value does match the provided pattern.", function () {
         var input;
@@ -144,7 +144,7 @@ describe("The DOM interface (validation) of input elements", function () {
     describe("has a tooLong property, which", function () {
 
       // TODO Unable to test
-      /*it("returns true if the element's value is longer than the provided maximum length.", function () {
+      xit("returns true if the element's value is longer than the provided maximum length.", function () {
         var input;
 
         input = document.createElement("input");
@@ -152,7 +152,7 @@ describe("The DOM interface (validation) of input elements", function () {
         input.value = "ABCDE";
 
         expect(input.validity.tooLong).toBe(true);
-      });*/
+      });
 
       it("returns false if the element's value is not longer than the provided maximum length.", function () {
         var input;
@@ -175,7 +175,7 @@ describe("The DOM interface (validation) of input elements", function () {
 
     });
 
-    /*describe("has a tooShort property, which", function () {
+    xdescribe("has a tooShort property, which", function () {
 
       it("returns true if the element's value, if it is not the empty string, is shorter than the provided minimum length.", function () {
         var input;
@@ -216,7 +216,7 @@ describe("The DOM interface (validation) of input elements", function () {
         expect(input.validity.tooShort).toBe(false);
       });
 
-    });*/
+    });
 
     describe("has a rangeUnderflow property, which", function () {
 
@@ -254,7 +254,7 @@ describe("The DOM interface (validation) of input elements", function () {
 
     });
 
-    /*describe("has a badInput property, which", function () {
+    xdescribe("has a badInput property, which", function () {
 
       it("returns true if the user has provided input in the user interface that the user agent is unable to convert to a value.", function () {
         var input;
@@ -264,7 +264,7 @@ describe("The DOM interface (validation) of input elements", function () {
         expect(input.validity.badInput).toBe(true);
       });
 
-    });*/
+    });
 
     describe("has a customError property, which", function () {
 
@@ -323,7 +323,7 @@ describe("The DOM interface (validation) of input elements", function () {
       expect(input.checkValidity()).toBe(false);
     });
 
-    /*it("fires an invalid event at the element if the element's value has validity problems.", function (done) {
+    xit("fires an invalid event at the element if the element's value has validity problems.", function (done) {
       var input;
 
       input = document.createElement("input");
@@ -335,7 +335,7 @@ describe("The DOM interface (validation) of input elements", function () {
       });
 
       input.checkValidity();
-    });*/
+    });
 
   });
 

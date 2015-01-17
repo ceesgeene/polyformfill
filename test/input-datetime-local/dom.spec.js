@@ -1,6 +1,6 @@
 "use strict";
 
-/* global describe, expect, it */
+/* global describe, expect, it, xdescribe */
 
 describe("The DOM interface of input[type=datetime-local] elements", function () {
 
@@ -96,8 +96,8 @@ describe("The DOM interface of input[type=datetime-local] elements", function ()
 
   });
 
-  /* TODO chrome doesn't seem to support valueAsDate for datetime-local input elements!?
-  describe("has a valueAsDate property, which", function () {
+  // TODO chrome doesn't seem to support valueAsDate for datetime-local input elements!?
+  xdescribe("has a valueAsDate property, which", function () {
 
     it("should return a Date object for input elements with a valid value", function () {
       var input;
@@ -119,7 +119,7 @@ describe("The DOM interface of input[type=datetime-local] elements", function ()
       expect(input.valueAsDate).toBe(null);
     });
 
-  });*/
+  });
 
   describe("has a valueAsNumber property, which", function () {
 
