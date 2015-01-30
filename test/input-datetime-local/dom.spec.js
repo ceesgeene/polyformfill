@@ -2,17 +2,17 @@
 
 /* global describe, expect, it */
 
-describe("The DOM interface of input[type=time] elements", function () {
+describe("The DOM interface of input[type=datetime-local] elements", function () {
 
   describe("has a type property, which", function () {
 
-    it("should return 'time' for input elements with type=time", function () {
+    it("should return 'datetime-local' for input elements with type=datetime-local", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
+      input.setAttribute("type", "datetime-local");
 
-      expect(input.type).toBe("time");
+      expect(input.type).toBe("datetime-local");
     });
 
   });
@@ -20,10 +20,10 @@ describe("The DOM interface of input[type=time] elements", function () {
   describe("has a value property, which", function () {
 
     it("should accept an empty string to clear the value", function () {
-      var input, initialValue = "12:34:56.789";
+      var input, initialValue = "1010-10-10T10:10:10.101";
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
+      input.setAttribute("type", "datetime-local");
       input.setAttribute("value", initialValue);
 
       expect(input.value).toBe(initialValue);
@@ -36,30 +36,30 @@ describe("The DOM interface of input[type=time] elements", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
+      input.setAttribute("type", "datetime-local");
 
-      input.value = "00:00:00.001";
-      expect(input.value).toBe("00:00:00.001");
+      input.value = "1970-01-01T00:00:00.001";
+      expect(input.value).toBe("1970-01-01T00:00:00.001");
 
-      input.value = "01:00:00.001";
-      expect(input.value).toBe("01:00:00.001");
+      input.value = "1970-01-01T01:00:00.001";
+      expect(input.value).toBe("1970-01-01T01:00:00.001");
 
-      input.value = "12:12:12.120";
-      expect(input.value).toBe("12:12:12.120");
+      input.value = "1970-01-01T12:12:12.120";
+      expect(input.value).toBe("1970-01-01T12:12:12.120");
 
       // Can"t test 10:10:10.1 easily, since chrome will return the same value if set through .value, but padded with
       // zeros when set through user input. This polyfill always returns with padding of zeros.
-      input.value = "10:10:10.100";
-      expect(input.value).toBe("10:10:10.100");
+      input.value = "1970-01-01T10:10:10.100";
+      expect(input.value).toBe("1970-01-01T10:10:10.100");
 
-      input.value = "12:12:12";
-      expect(input.value).toBe("12:12:12");
+      input.value = "1970-01-01T12:12:12";
+      expect(input.value).toBe("1970-01-01T12:12:12");
 
-      input.value = "23:12:12";
-      expect(input.value).toBe("23:12:12");
+      input.value = "1970-01-01T23:12:12";
+      expect(input.value).toBe("1970-01-01T23:12:12");
 
-      //input.value = "23:59:59.1001";
-      //expect(input.value).toBe("23:59:59.100");
+      //input.value = "1970-01-01T23:59:59.1001";
+      //expect(input.value).toBe("1970-01-01T23:59:59.100");
 
     });
 
@@ -67,9 +67,9 @@ describe("The DOM interface of input[type=time] elements", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
+      input.setAttribute("type", "datetime-local");
 
-      input.value = "not a time string";
+      input.value = "not a datetime-local string";
       expect(input.value).toBe("");
 
       input.value = 0;
@@ -96,15 +96,16 @@ describe("The DOM interface of input[type=time] elements", function () {
 
   });
 
+  /* TODO chrome doesn't seem to support valueAsDate for datetime-local input elements!?
   describe("has a valueAsDate property, which", function () {
 
     it("should return a Date object for input elements with a valid value", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
+      input.setAttribute("type", "datetime-local");
 
-      input.value = "01:01:01.01";
+      input.value = "1971-01-01T01:01:01.01";
       expect(input.valueAsDate instanceof Date).toBeTruthy();
     });
 
@@ -112,13 +113,13 @@ describe("The DOM interface of input[type=time] elements", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
+      input.setAttribute("type", "datetime-local");
 
-      input.value = "24:01:01.01";
+      input.value = "1970-01-01T24:01:01.01";
       expect(input.valueAsDate).toBe(null);
     });
 
-  });
+  });*/
 
   describe("has a valueAsNumber property, which", function () {
 
@@ -126,18 +127,18 @@ describe("The DOM interface of input[type=time] elements", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
+      input.setAttribute("type", "datetime-local");
 
-      input.setAttribute("value", "00:00");
+      input.setAttribute("value", "1970-01-01T00:00");
       expect(input.valueAsNumber).toBe(0);
 
-      input.value = "01:01";
+      input.value = "1970-01-01T01:01";
       expect(input.valueAsNumber).toBe(3660000);
 
-      input.value = "03:25:45.678";
+      input.value = "1970-01-01T03:25:45.678";
       expect(input.valueAsNumber).toBe(12345678);
 
-      input.value = "23:59:59.999";
+      input.value = "1970-01-01T23:59:59.999";
       expect(input.valueAsNumber).toBe(86399999);
     });
 
@@ -145,30 +146,30 @@ describe("The DOM interface of input[type=time] elements", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
+      input.setAttribute("type", "datetime-local");
 
-      input.value = "not a time string";
+      input.value = "not a datetime-local string";
       expect(input.valueAsNumber).toBeNaN();
 
       input.value = 0;
       expect(input.valueAsNumber).toBeNaN();
 
-      input.value = "1";
+      input.value = "1970-01-01T1";
       expect(input.valueAsNumber).toBeNaN();
 
-      input.value = "1:1";
+      input.value = "1970-01-01T1:1";
       expect(input.valueAsNumber).toBeNaN();
 
-      input.value = "1:01";
+      input.value = "1970-01-01T1:01";
       expect(input.valueAsNumber).toBeNaN();
 
-      input.value = "24:01";
+      input.value = "1970-01-01T24:01";
       expect(input.valueAsNumber).toBeNaN();
 
-      input.value = "23:60";
+      input.value = "1970-01-01T23:60";
       expect(input.valueAsNumber).toBeNaN();
 
-      input.value = "23:59:60";
+      input.value = "1970-01-01T23:59:60";
       expect(input.valueAsNumber).toBeNaN();
     });
   });
@@ -179,17 +180,17 @@ describe("The DOM interface of input[type=time] elements", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
-      input.setAttribute("value", "00:00:00.001");
+      input.setAttribute("type", "datetime-local");
+      input.setAttribute("value", "1970-01-01T00:00:00.001");
 
       input.stepUp();
-      expect(input.value).toBe("00:01:00.001");
+      expect(input.value).toBe("1970-01-01T00:01:00.001");
 
       input.stepUp(8);
-      expect(input.value).toBe("00:09:00.001");
+      expect(input.value).toBe("1970-01-01T00:09:00.001");
 
       input.stepUp(51);
-      expect(input.value).toBe("01:00:00.001");
+      expect(input.value).toBe("1970-01-01T01:00:00.001");
     });
 
   });
@@ -200,17 +201,17 @@ describe("The DOM interface of input[type=time] elements", function () {
       var input;
 
       input = document.createElement("input");
-      input.setAttribute("type", "time");
-      input.setAttribute("value", "01:00:00.001");
+      input.setAttribute("type", "datetime-local");
+      input.setAttribute("value", "1970-01-01T01:00:00.001");
 
       input.stepDown();
-      expect(input.value).toBe("00:59:00.001");
+      expect(input.value).toBe("1970-01-01T00:59:00.001");
 
       input.stepDown(8);
-      expect(input.value).toBe("00:51:00.001");
+      expect(input.value).toBe("1970-01-01T00:51:00.001");
 
       input.stepDown(51);
-      expect(input.value).toBe("00:00:00.001");
+      expect(input.value).toBe("1970-01-01T00:00:00.001");
     });
 
   });

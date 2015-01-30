@@ -1,40 +1,38 @@
 "use strict";
 
 /**
- * Handles keyboard navigation for HTML input elements of type "date".
+ * Handles keyboard navigation for HTML input elements of type "datetime-local".
  *
  * @param {HTMLInputElement} element
- *   A HTMLInputElement of type "date".
+ *   A HTMLInputElement of type "datetime-local".
  * @param {KeyboardEvent} event
  *   A KeyboardEvent of type keydown. keypress events can't be used because IE doesn't trigger keypress events for
  *   keys like TAB and BACKSPACE.
  */
-function inputDateAccessibilityOnKeydownHandleNavigation(element, event) {
+function inputDatetimeLocalAccessibilityOnKeydownHandleNavigation(element, event) {
   var selectionStart = element.selectionStart;
 
   switch (event.key) {
     case "Backspace":
     case "U+0008":
     case "Del":
-      inputDateAccessibilityClearComponent(element, selectionStart);
+      inputDatetimeLocalClearComponent(element, selectionStart);
       break;
     case "Tab":
     case "U+0009":
-      inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
+      inputDatetimeLocalAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
       return;
     case "Left":
-      inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
-      inputDateAccessibilitySelectPreviousComponent(element, selectionStart);
+      inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selectionStart);
       break;
     case "Up":
-      inputDateAccessibilityIncreaseComponent(element, selectionStart, 1);
+      inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, 1);
       break;
     case "Right":
-      inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
-      inputDateAccessibilitySelectNextComponent(element, selectionStart);
+      inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart);
       break;
     case "Down":
-      inputDateAccessibilityIncreaseComponent(element, selectionStart, -1);
+      inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, -1);
       break;
     default:
       return;
@@ -42,39 +40,41 @@ function inputDateAccessibilityOnKeydownHandleNavigation(element, event) {
   event.preventDefault();
 }
 
-function inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart) {
-  inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
+function inputDatetimeLocalAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart) {
   if (event.altKey || event.ctrlKey || event.metaKey) {
     return;
   }
-
-  if (event.shiftKey) {
-    if (0 !== inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element))) {
-      inputDateAccessibilitySelectPreviousComponent(element, selectionStart);
-    }
-    else {
+  else if (event.shiftKey) {
+    if (0 === selectionStart) {
+      inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
       return;
     }
   }
-  else if (2 !== inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element))) {
-    inputDateAccessibilitySelectNextComponent(element, selectionStart);
+  else if (element.selectionEnd === inputDomOriginalValueGetter.call(element).length) {
+    inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
+    return;
+  }
+
+
+  if (event.shiftKey) {
+    inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selectionStart);
   }
   else {
-    return;
+    inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart);
   }
   event.preventDefault();
 }
 
 /**
- * Handles user input for HTML input elements of type "date".
+ * Handles user input for HTML input elements of type "datetime-local".
  *
  * @param {HTMLInputElement} element
- *   A HTMLInputElement of type "date".
+ *   A HTMLInputElement of type "datetime-local".
  * @param {KeyboardEvent} event
  *   A KeyboardEvent of type keypress. User input should be handled on keypress events because these are triggered
  *   every time an actual character is being inserted (keydown and keyup events are triggered only once).
  */
-function inputDateAccessibilityOnKeyPressHandleUserInput(element, event) {
+function inputDatetimeLocalAccessibilityOnKeyPressHandleUserInput(element, event) {
   var selectionStart, value, components, componentOrder, componentSeparator, selectedComponent, componentMin, componentMax, componentLimit;
 
   // Only allow numeric input.
@@ -93,10 +93,10 @@ function inputDateAccessibilityOnKeyPressHandleUserInput(element, event) {
 
     components[selectedComponent] = inputAccessibilityComplementComponent(components[selectedComponent], event.key, componentMin, componentMax, componentLimit);
 
-    value = inputDateComponentsSet(element, components);
+    value = inputDatetimeLocalComponentsSet(element, components);
 
     if (components[selectedComponent] > componentLimit) {
-      inputDateAccessibilitySelectNextComponent(element, selectionStart);
+      inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart);
     }
     else {
       inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
@@ -105,14 +105,22 @@ function inputDateAccessibilityOnKeyPressHandleUserInput(element, event) {
   event.preventDefault();
 }
 
-function inputDateAccessibilityOnFocusHandleInputSelection(element, event) {
+function inputDatetimeLocalAccessibilityOnFocusHandleInputSelection(element, event) {
   var componentRange, value, selectionStart, componentSeparator;
 
   value = inputDomOriginalValueGetter.call(element);
-  componentSeparator = inputDateFormatSeparatorGetter(element);
+  componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element);
 
   if (!value) {
-    value = inputDateComponentsSet(element, {yy: INPUT_DATE_YEAR_EMPTY, mm: INPUT_DATE_MONTH_EMPTY, dd: INPUT_DATE_DAY_EMPTY});
+    value = inputDatetimeLocalComponentsSet(element, {
+      yy: INPUT_DATE_YEAR_EMPTY,
+      mm: INPUT_DATE_MONTH_EMPTY,
+      dd: INPUT_DATE_DAY_EMPTY,
+      hh: INPUT_TIME_COMPONENT_EMPTY,
+      ii: INPUT_TIME_COMPONENT_EMPTY,
+      ss: INPUT_TIME_COMPONENT_HIDDEN,
+      ms: INPUT_TIME_COMPONENT_HIDDEN
+    });
     selectionStart = 0;
   }
   else {
@@ -125,15 +133,15 @@ function inputDateAccessibilityOnFocusHandleInputSelection(element, event) {
   event.preventDefault();
 }
 
-function inputDateAccessibilityOnBlurHandleInputNormalization(element) {
-  inputDateAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
+function inputDatetimeLocalAccessibilityOnBlurHandleInputNormalization(element) {
+  inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
 }
 
-function inputDateAccessibilityClearComponent(element, selectionStart) {
+function inputDatetimeLocalClearComponent(element, selectionStart) {
   var value = inputDomOriginalValueGetter.call(element),
-    components = inputDateComponentsGet(element),
-    componentOrder = inputDateFormatOrderGetter(element),
-    componentSeparator = inputDateFormatSeparatorGetter(element),
+    components = inputDatetimeLocalComponentsGet(element),
+    componentOrder = inputDatetimeLocalFormatOrderGetter(element),
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
     selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
 
   switch (selectedComponent) {
@@ -146,19 +154,32 @@ function inputDateAccessibilityClearComponent(element, selectionStart) {
     case INPUT_COMPONENT_DAY:
       components.dd = INPUT_DATE_DAY_EMPTY;
       break;
+
+    case INPUT_COMPONENT_HOUR:
+      components.hh = INPUT_TIME_COMPONENT_EMPTY;
+      break;
+    case INPUT_COMPONENT_MINUTE:
+      components.ii = INPUT_TIME_COMPONENT_EMPTY;
+      break;
+    case INPUT_COMPONENT_SECOND:
+      components.ss = INPUT_TIME_COMPONENT_EMPTY;
+      break;
+    case INPUT_COMPONENT_MILISECOND:
+      components.ms = INPUT_TIME_COMPONENT_EMPTY;
+      break;
     default:
       return;
   }
 
-  value = inputDateComponentsSet(element, components);
+  value = inputDatetimeLocalComponentsSet(element, components);
   inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
 }
 
-function inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart) {
+function inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart) {
   var value = inputDomOriginalValueGetter.call(element),
-    components = inputDateComponentsGet(element),
-    componentOrder = inputDateFormatOrderGetter(element),
-    componentSeparator = inputDateFormatSeparatorGetter(element),
+    components = inputDatetimeLocalComponentsGet(element),
+    componentOrder = inputDatetimeLocalFormatOrderGetter(element),
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
     selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator),
     componentMax = inputComponentGetMaximum(element, selectedComponent);
 
@@ -166,36 +187,40 @@ function inputDateAccessibilityNormalizeSelectedComponent(element, selectionStar
     components[selectedComponent] = componentMax;
   }
 
-  inputDateComponentsSet(element, components);
+  inputDatetimeLocalComponentsSet(element, components);
 }
 
-function inputDateAccessibilitySelectPreviousComponent(element, selectionStart) {
+function inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selectionStart) {
+  inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
+
   var value = inputDomOriginalValueGetter.call(element),
-    componentSeparator = inputDateFormatSeparatorGetter(element),
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
     selection = inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator);
 
   inputDomOriginalSetSelectionRange.apply(element, selection);
 }
 
-function inputDateAccessibilitySelectNextComponent(element, selectionStart) {
+function inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart) {
+  inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
+
   var value = inputDomOriginalValueGetter.call(element),
-    componentSeparator = inputDateFormatSeparatorGetter(element),
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
     selection = inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator);
 
   inputDomOriginalSetSelectionRange.apply(element, selection);
 }
 
-function inputDateAccessibilityIncreaseComponent(element, selectionStart, amount) {
+function inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, amount) {
   var value = inputDomOriginalValueGetter.call(element),
-    components = inputDateComponentsGet(element),
-    componentOrder = inputDateFormatOrderGetter(element),
-    componentSeparator = inputDateFormatSeparatorGetter(element),
+    components = inputDatetimeLocalComponentsGet(element),
+    componentOrder = inputDatetimeLocalFormatOrderGetter(element),
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element),
     selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator),
     componentMin = inputComponentGetMinimum(element, selectedComponent),
     componentMax = inputComponentGetMaximum(element, selectedComponent);
 
   components[selectedComponent] = inputAccessibilityIncreaseComponent(components[selectedComponent], amount, componentMin, componentMax);
 
-  value = inputDateComponentsSet(element, components);
+  value = inputDatetimeLocalComponentsSet(element, components);
   inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
 }

@@ -1,17 +1,17 @@
-'use strict';
+"use strict";
 
 /** @const */
-var INPUT_ATTR_TYPE = 'type';
+var INPUT_ATTR_TYPE = "type",
+  INPUT_ATTR_LANG = "lang";
 
 function init() {
-  var testInput = document.createElement('input');
+  var testInput = document.createElement("input");
 
-  if (!('valueAsDate' in testInput)) {
+  if (!(INPUT_PROPERTY_VALUEASDATE in testInput)) {
     initInput(testInput);
 
     initInputDate();
+    initInputDatetimeLocal();
     initInputTime();
   }
 }
-
-init();

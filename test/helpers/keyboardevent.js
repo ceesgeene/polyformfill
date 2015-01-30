@@ -2,16 +2,16 @@
  * https://gist.github.com/termi/4654819
  */
 (function (window, document) {
-  'use strict';
+  "use strict";
 
   var _initKeyboardEvent_type = (function (e) {
       try {
         e.initKeyboardEvent(
-          'keyup', // in DOMString typeArg
+          "keyup", // in DOMString typeArg
           false, // in boolean canBubbleArg
           false, // in boolean cancelableArg
           window, // in views::AbstractView viewArg
-          '+', // [test]in DOMString keyIdentifierArg | webkit event.keyIdentifier | IE9 event.key
+          "+", // [test]in DOMString keyIdentifierArg | webkit event.keyIdentifier | IE9 event.key
           3, // [test]in unsigned long keyLocationArg | webkit event.keyIdentifier | IE9 event.location
           true, // [test]in boolean ctrlKeyArg | webkit event.shiftKey | old webkit event.ctrlKey | IE9 event.modifiersList
           false, // [test]shift | alt
@@ -20,7 +20,7 @@
           false // altGraphKey
         );
 
-        return ((e['keyIdentifier'] || e['key']) == '+' && (e['keyLocation'] || e['location']) == 3) && (
+        return ("+" === (e["keyIdentifier"] || e["key"]) && 3 == (e["keyLocation"] || e["location"])) && (
             e.ctrlKey ?
               e.altKey ? // webkit
                 1
@@ -35,20 +35,20 @@
           ;
       }
       catch (__e__) {
-        _initKeyboardEvent_type = 0
+        _initKeyboardEvent_type = 0;
       }
-    })(document.createEvent('KeyboardEvent')),
+    })(document.createEvent("KeyboardEvent")),
 
      _keyboardEvent_properties_dictionary = {
-      char: '',
-      key: '',
+      char: "",
+      key: "",
       location: 0,
       ctrlKey: false,
       shiftKey: false,
       altKey: false,
       metaKey: false,
       repeat: false,
-      locale: '',
+      locale: "",
 
       detail: 0,
       bubbles: false,
@@ -88,86 +88,86 @@
   }
 
   function crossBrowser_initKeyboardEvent(type, dict) {
-    var e;
+    var event;
     if (_initKeyboardEvent_type) {
-      e = document.createEvent('KeyboardEvent');
+      event = document.createEvent("KeyboardEvent");
     }
     else {
-      e = document.createEvent('Event');
+      event = document.createEvent("Event");
     }
     var localDict = getNormalizedProperties(dict);
 
-    if (!localDict['keyCode']) {
-      localDict['keyCode'] = _key && _key.charCodeAt(0) || 0;
+    if (!localDict["keyCode"]) {
+      localDict["keyCode"] = _key && _key.charCodeAt(0) || 0;
     }
-    if (!localDict['charCode']) {
-      localDict['charCode'] = _char && _char.charCodeAt(0) || 0;
+    if (!localDict["charCode"]) {
+      localDict["charCode"] = _char && _char.charCodeAt(0) || 0;
     }
-    if (!localDict['which']) {
-      localDict['which'] = localDict['keyCode'];
+    if (!localDict["which"]) {
+      localDict["which"] = localDict["keyCode"];
     }
 
-    var _ctrlKey = localDict['ctrlKey'],
-      _shiftKey = localDict['shiftKey'],
-      _altKey = localDict['altKey'],
-      _metaKey = localDict['metaKey'],
-      _altGraphKey = localDict['altGraphKey'],
+    var _ctrlKey = localDict["ctrlKey"],
+      _shiftKey = localDict["shiftKey"],
+      _altKey = localDict["altKey"],
+      _metaKey = localDict["metaKey"],
+      _altGraphKey = localDict["altGraphKey"],
 
-       _modifiersListArg = _initKeyboardEvent_type > 3 ? (
-      (_ctrlKey ? 'Control' : '')
-      + (_shiftKey ? ' Shift' : '')
-      + (_altKey ? ' Alt' : '')
-      + (_metaKey ? ' Meta' : '')
-      + (_altGraphKey ? ' AltGraph' : '')
+       _modifiersListArg = 3 < _initKeyboardEvent_type ? (
+      (_ctrlKey ? "Control" : "")
+      + (_shiftKey ? " Shift" : "")
+      + (_altKey ? " Alt" : "")
+      + (_metaKey ? " Meta" : "")
+      + (_altGraphKey ? " AltGraph" : "")
       ).trim() : null,
 
-      _key = localDict['key'] + '',
-      _char = localDict['char'] + '',
-      _location = localDict['location'],
-      _keyCode = localDict['keyCode'],
-      _charCode = localDict['charCode'],
+      _key = localDict["key"] + "",
+      _char = localDict["char"] + "",
+      _location = localDict["location"],
+      _keyCode = localDict["keyCode"],
+      _charCode = localDict["charCode"],
 
-      _bubbles = localDict['bubbles'],
-      _cancelable = localDict['cancelable'],
+      _bubbles = localDict["bubbles"],
+      _cancelable = localDict["cancelable"],
 
-      _repeat = localDict['repeat'],
-      _locale = localDict['locale'],
+      _repeat = localDict["repeat"],
+      _locale = localDict["locale"],
       _view = window;
 
-    if ('initKeyEvent' in e) {//FF
+    if ("initKeyEvent" in event) {//FF
       //https://developer.mozilla.org/en/DOM/event.initKeyEvent
-      e.initKeyEvent(type, _bubbles, _cancelable, _view, _ctrlKey, _altKey, _shiftKey, _metaKey, _keyCode, _charCode);
+      event.initKeyEvent(type, _bubbles, _cancelable, _view, _ctrlKey, _altKey, _shiftKey, _metaKey, _keyCode, _charCode);
     }
-    else if (_initKeyboardEvent_type && 'initKeyboardEvent' in e) {//https://developer.mozilla.org/en/DOM/KeyboardEvent#initKeyboardEvent()
-      if (_initKeyboardEvent_type == 1) { // webkit
+    else if (_initKeyboardEvent_type && "initKeyboardEvent" in event) {//https://developer.mozilla.org/en/DOM/KeyboardEvent#initKeyboardEvent()
+      if (1 === _initKeyboardEvent_type) { // webkit
         //http://stackoverflow.com/a/8490774/1437207
         //https://bugs.webkit.org/show_bug.cgi?id=13368
-        e.initKeyboardEvent(type, _bubbles, _cancelable, _view, _key, _location, _ctrlKey, _shiftKey, _altKey, _metaKey, _altGraphKey);
+        event.initKeyboardEvent(type, _bubbles, _cancelable, _view, _key, _location, _ctrlKey, _shiftKey, _altKey, _metaKey, _altGraphKey);
       }
-      else if (_initKeyboardEvent_type == 2) { // old webkit
+      else if (2 === _initKeyboardEvent_type) { // old webkit
         //http://code.google.com/p/chromium/issues/detail?id=52408
-        e.initKeyboardEvent(type, _bubbles, _cancelable, _view, _ctrlKey, _altKey, _shiftKey, _metaKey, _keyCode, _charCode);
+        event.initKeyboardEvent(type, _bubbles, _cancelable, _view, _ctrlKey, _altKey, _shiftKey, _metaKey, _keyCode, _charCode);
       }
-      else if (_initKeyboardEvent_type == 3) { // webkit
-        e.initKeyboardEvent(type, _bubbles, _cancelable, _view, _key, _location, _ctrlKey, _altKey, _shiftKey, _metaKey, _altGraphKey);
+      else if (3 === _initKeyboardEvent_type) { // webkit
+        event.initKeyboardEvent(type, _bubbles, _cancelable, _view, _key, _location, _ctrlKey, _altKey, _shiftKey, _metaKey, _altGraphKey);
       }
-      else if (_initKeyboardEvent_type == 4) { // IE9
+      else if (4 === _initKeyboardEvent_type) { // IE9
         //http://msdn.microsoft.com/en-us/library/ie/ff975297(v=vs.85).aspx
-        e.initKeyboardEvent(type, _bubbles, _cancelable, _view, _key, _location, _modifiersListArg, _repeat, _locale);
+        event.initKeyboardEvent(type, _bubbles, _cancelable, _view, _key, _location, _modifiersListArg, _repeat, _locale);
       }
       else { // FireFox|w3c
         //http://www.w3.org/TR/DOM-Level-3-Events/#events-KeyboardEvent-initKeyboardEvent
         //https://developer.mozilla.org/en/DOM/KeyboardEvent#initKeyboardEvent()
-        e.initKeyboardEvent(type, _bubbles, _cancelable, _view, _char, _key, _location, _modifiersListArg, _repeat, _locale);
+        event.initKeyboardEvent(type, _bubbles, _cancelable, _view, _char, _key, _location, _modifiersListArg, _repeat, _locale);
       }
     }
     else {
-      e.initEvent(type, _bubbles, _cancelable)
+      event.initEvent(type, _bubbles, _cancelable);
     }
 
-    normalizeEventProperties(e, localDict);
+    normalizeEventProperties(event, localDict);
 
-    return e;
+    return event;
   }
 
   //export

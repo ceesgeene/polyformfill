@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * @file
@@ -9,10 +9,10 @@
  */
 
 /** @const */
-var INPUT_TIME_COMPONENT_HOUR = 1,
-  INPUT_TIME_COMPONENT_MINUTE = 2,
-  INPUT_TIME_COMPONENT_SECOND = 4,
-  INPUT_TIME_COMPONENT_MILISECOND = 8;
+var INPUT_COMPONENT_HOUR = "hh",
+  INPUT_COMPONENT_MINUTE = "ii",
+  INPUT_COMPONENT_SECOND = "ss",
+  INPUT_COMPONENT_MILISECOND = "ms";
 
 /** @const */
 var INPUT_TIME_COMPONENT_EMPTY = -1;
@@ -21,23 +21,26 @@ var INPUT_TIME_COMPONENT_EMPTY = -1;
 var INPUT_TIME_COMPONENT_HIDDEN = -2;
 
 /** @const */
-var INPUT_TIME_COMPONENT_HOUR_MIN = 0;
-var INPUT_TIME_COMPONENT_HOUR_MAX = 23;
+var INPUT_TIME_COMPONENT_HOUR_MIN = 0,
+  INPUT_TIME_COMPONENT_HOUR_MAX = 23;
 
-var INPUT_TIME_COMPONENT_MINUTE_MIN = 0;
-var INPUT_TIME_COMPONENT_MINUTE_MAX = 59;
+/** @const */
+var INPUT_TIME_COMPONENT_MINUTE_MIN = 0,
+  INPUT_TIME_COMPONENT_MINUTE_MAX = 59;
 
-var INPUT_TIME_COMPONENT_SECOND_MIN = 0;
-var INPUT_TIME_COMPONENT_SECOND_MAX = 59;
+/** @const */
+var INPUT_TIME_COMPONENT_SECOND_MIN = 0,
+  INPUT_TIME_COMPONENT_SECOND_MAX = 59;
 
-var INPUT_TIME_COMPONENT_MILISECOND_MIN = 0;
-var INPUT_TIME_COMPONENT_MILISECOND_MAX = 999;
+/** @const */
+var INPUT_TIME_COMPONENT_MILISECOND_MIN = 0,
+  INPUT_TIME_COMPONENT_MILISECOND_MAX = 999;
 
 var inputTimeValidTimeStringRegExp = /^(([0-1][0-9])|(2[0-3])):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
 
-var inputTimeValueFormatter;
-var inputTimeFormatOrderGetter;
-var inputTimeFormatSeparatorGetter;
+var inputTimeValueFormatter,
+  inputTimeFormatOrderGetter,
+  inputTimeFormatSeparatorGetter;
 
 function initInputTime() {
   inputTimeValueFormatter = inputTimeDefaultValueFormatter;
@@ -46,46 +49,45 @@ function initInputTime() {
 }
 
 function inputTimeComponentsGet(input) {
-  if (input.__polyformfillInputTime === undefined) {
-    inputTimeInitInternalValue(input);
+  if (input[INPUT_PROPERTY_COMPONENTS] === undefined) {
+    input[INPUT_PROPERTY_COMPONENTS] = inputTimeComponentsFromValue(input.getAttribute(INPUT_PROPERTY_VALUE));
   }
 
-  return input.__polyformfillInputTime;
+  return input[INPUT_PROPERTY_COMPONENTS];
 }
 
-function inputTimeComponentsSet(input, hour, minute, second, milisecond) {
+function inputTimeComponentsSet(element, components) {
   var formattedValue;
 
-  input.__polyformfillInputTime = {
-    hour: hour,
-    minute: minute,
-    second: second,
-    milisecond: milisecond
+  element[INPUT_PROPERTY_COMPONENTS] = {
+    hh: components[INPUT_COMPONENT_HOUR],
+    ii: components[INPUT_COMPONENT_MINUTE],
+    ss: components[INPUT_COMPONENT_SECOND],
+    ms: components[INPUT_COMPONENT_MILISECOND]
   };
 
-  formattedValue = inputTimeValueFormatter(input, hour, minute, second, milisecond);
-  inputDomOriginalValueSetter.call(input, formattedValue);
+  formattedValue = inputTimeValueFormatter(element[INPUT_PROPERTY_COMPONENTS], element);
+  inputDomOriginalValueSetter.call(element, formattedValue);
   return formattedValue;
 }
 
 
-function inputTimeInitInternalValue(input) {
-  var value = input.getAttribute('value'),
-    components;
+function inputTimeComponentsFromValue(value) {
+  var components;
 
-  if (value !== '') {
+  if ("" !== value) {
     components = inputTimeValidTimeStringToComponents(value);
   }
 
   if (components) {
-    input.__polyformfillInputTime = components;
+    return components;
   }
   else {
-    input.__polyformfillInputTime = {
-      hour: INPUT_TIME_COMPONENT_EMPTY,
-      minute: INPUT_TIME_COMPONENT_EMPTY,
-      second: INPUT_TIME_COMPONENT_HIDDEN,
-      milisecond: INPUT_TIME_COMPONENT_HIDDEN
+    return {
+      hh: INPUT_TIME_COMPONENT_EMPTY,
+      ii: INPUT_TIME_COMPONENT_EMPTY,
+      ss: INPUT_TIME_COMPONENT_HIDDEN,
+      ms: INPUT_TIME_COMPONENT_HIDDEN
     };
   }
 }
@@ -109,14 +111,14 @@ function inputTimeValidTimeStringToComponents(str) {
       components[3] = INPUT_TIME_COMPONENT_HIDDEN;
     }
     else {
-      components[3] = (components[3] + '000').slice(0, 3);
+      components[3] = (components[3] + "000").slice(0, 3);
     }
 
     return {
-      hour: parseInt(components[0], 10),
-      minute: parseInt(components[1], 10),
-      second: parseInt(components[2], 10),
-      milisecond: parseInt(components[3], 10)
+      hh: parseInt(components[0], 10),
+      ii: parseInt(components[1], 10),
+      ss: parseInt(components[2], 10),
+      ms: parseInt(components[3], 10)
     };
   }
   return null;
@@ -125,54 +127,54 @@ function inputTimeValidTimeStringToComponents(str) {
 function inputTimeGetRfc3339(element) {
   var components = inputTimeComponentsGet(element);
 
-  if (components.hour > INPUT_TIME_COMPONENT_EMPTY && components.minute > INPUT_TIME_COMPONENT_EMPTY) {
-    if (components.second === INPUT_TIME_COMPONENT_EMPTY) {
-      components.second = INPUT_TIME_COMPONENT_HIDDEN
+  if (components.hh > INPUT_TIME_COMPONENT_EMPTY && components.ii > INPUT_TIME_COMPONENT_EMPTY) {
+    if (components.ss === INPUT_TIME_COMPONENT_EMPTY) {
+      components.ss = INPUT_TIME_COMPONENT_HIDDEN;
     }
-    if (components.milisecond === INPUT_TIME_COMPONENT_EMPTY) {
-      components.milisecond = INPUT_TIME_COMPONENT_HIDDEN
+    if (components.ms === INPUT_TIME_COMPONENT_EMPTY) {
+      components.ms = INPUT_TIME_COMPONENT_HIDDEN;
     }
-    return inputTimeDefaultValueFormatter(element, components.hour, components.minute, components.second, components.milisecond);
+    return inputTimeDefaultValueFormatter(components);
   }
   else {
-    return '';
+    return "";
   }
 }
 
-function inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond) {
+function inputTimeDefaultValueFormatter(components) {
   var formatted;
 
-  if (hour === INPUT_TIME_COMPONENT_EMPTY) {
-    formatted = '--';
+  if (components.hh === INPUT_TIME_COMPONENT_EMPTY) {
+    formatted = "--";
   }
   else {
-    formatted = ('00' + hour).slice(-2);
+    formatted = ("00" + components.hh).slice(-2);
   }
 
-  formatted += ':';
-  if (minute === INPUT_TIME_COMPONENT_EMPTY) {
-    formatted += '--';
+  formatted += ":";
+  if (components.ii === INPUT_TIME_COMPONENT_EMPTY) {
+    formatted += "--";
   }
   else {
-    formatted += ('00' + minute).slice(-2);
+    formatted += ("00" + components.ii).slice(-2);
   }
 
-  if (second !== INPUT_TIME_COMPONENT_HIDDEN) {
-    formatted += ':';
-    if (second === INPUT_TIME_COMPONENT_EMPTY) {
-      formatted += '--';
+  if (components.ss !== INPUT_TIME_COMPONENT_HIDDEN) {
+    formatted += ":";
+    if (components.ss === INPUT_TIME_COMPONENT_EMPTY) {
+      formatted += "--";
     }
     else {
-      formatted += ('00' + second).slice(-2);
+      formatted += ("00" + components.ss).slice(-2);
     }
 
-    if (milisecond !== INPUT_TIME_COMPONENT_HIDDEN) {
-      formatted += '.';
-      if (milisecond === INPUT_TIME_COMPONENT_EMPTY) {
-        formatted += '---';
+    if (components.ms !== INPUT_TIME_COMPONENT_HIDDEN) {
+      formatted += ".";
+      if (components.ms === INPUT_TIME_COMPONENT_EMPTY) {
+        formatted += "---";
       }
       else {
-        formatted += ('000' + milisecond).slice(-3);
+        formatted += ("000" + components.ms).slice(-3);
       }
     }
   }
@@ -183,13 +185,13 @@ function inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond)
 
 function inputTimeDefaultFormatOrder() {
   return [
-    INPUT_TIME_COMPONENT_HOUR,
-    INPUT_TIME_COMPONENT_MINUTE,
-    INPUT_TIME_COMPONENT_SECOND,
-    INPUT_TIME_COMPONENT_MILISECOND
+    INPUT_COMPONENT_HOUR,
+    INPUT_COMPONENT_MINUTE,
+    INPUT_COMPONENT_SECOND,
+    INPUT_COMPONENT_MILISECOND
   ];
 }
 
 function inputTimeDefaultFormatSeparator() {
-  return [':', '.'];
+  return [":", "."];
 }

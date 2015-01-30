@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-/* global window, HTMLInputElement */
+/* global HTMLInputElement */
 
 /**
  * @file
@@ -14,19 +14,24 @@
  * @see {@link http://www.w3.org/TR/html/forms.html#input-impl-notes}
  */
 
-function initInputAccessibility() {
+/**
+ * Initializes the accessibility feature of the polyfill script for HTML input elements.
+ *
+ * @param {Function} addEventListener
+ */
+function initInputAccessibility(addEventListener) {
   // Binding event handlers to the window (instead of to each input element) to closely emulate native behavior (e.g. so
   // that other scripts can override it).
-  window.addEventListener('keydown', inputAccessibilityOnKeydownHandleNavigation);
-  window.addEventListener('keypress', inputAccessibilityOnKeyPressHandleUserInput);
+  addEventListener("keydown", inputAccessibilityOnKeydownHandleNavigation);
+  addEventListener("keypress", inputAccessibilityOnKeyPressHandleUserInput);
 
-  window.addEventListener('focus', inputAccessibilityOnFocusHandleInputSelection, true);
-  window.addEventListener('focusin', inputAccessibilityOnFocusHandleInputSelection);
+  addEventListener("focus", inputAccessibilityOnFocusHandleInputSelection, true);
+  addEventListener("focusin", inputAccessibilityOnFocusHandleInputSelection);
 
-  window.addEventListener('click', inputAccessibilityOnFocusHandleInputSelection);
+  addEventListener("click", inputAccessibilityOnFocusHandleInputSelection);
 
-  window.addEventListener('blur', inputAccessibilityOnBlurHandleInputNormalization, true);
-  //window.addEventListener('focusout', inputAccessibilityOnBlurHandleInputNormalization);
+  addEventListener("blur", inputAccessibilityOnBlurHandleInputNormalization, true);
+  //addEventListener("focusout", inputAccessibilityOnBlurHandleInputNormalization);
 }
 
 /**
@@ -38,9 +43,10 @@ function initInputAccessibility() {
  *   A KeyboardEvent of type keydown.
  */
 function inputAccessibilityOnKeydownHandleNavigation(event) {
-  if (event.defaultPrevented) {
+  // TODO in IE, defaultPrevented seems to be always set for Up and Down keydown events.
+  /*if (event.defaultPrevented) {
     return;
-  }
+  }*/
 
   // Returning early if the user input is irrelevant for this event handler.
   if (event.charCode) {
@@ -49,10 +55,13 @@ function inputAccessibilityOnKeydownHandleNavigation(event) {
 
   if (event.target instanceof HTMLInputElement) {
     switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
-      case 'date':
+      case INPUT_TYPE_DATE:
         inputDateAccessibilityOnKeydownHandleNavigation(event.target, event);
         break;
-      case 'time':
+      case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalAccessibilityOnKeydownHandleNavigation(event.target, event);
+        break;
+      case INPUT_TYPE_TIME:
         inputTimeAccessibilityOnKeydownHandleNavigation(event.target, event);
         break;
       default:
@@ -82,10 +91,13 @@ function inputAccessibilityOnKeyPressHandleUserInput(event) {
 
   if (event.target instanceof HTMLInputElement) {
     switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
-      case 'date':
+      case INPUT_TYPE_DATE:
         inputDateAccessibilityOnKeyPressHandleUserInput(event.target, event);
         break;
-      case 'time':
+      case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalAccessibilityOnKeyPressHandleUserInput(event.target, event);
+        break;
+      case INPUT_TYPE_TIME:
         inputTimeAccessibilityOnKeyPressHandleUserInput(event.target, event);
         break;
       default:
@@ -97,10 +109,13 @@ function inputAccessibilityOnKeyPressHandleUserInput(event) {
 function inputAccessibilityOnFocusHandleInputSelection(event) {
   if (event.target instanceof HTMLInputElement) {
     switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
-      case 'date':
+      case INPUT_TYPE_DATE:
         inputDateAccessibilityOnFocusHandleInputSelection(event.target, event);
         break;
-      case 'time':
+      case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalAccessibilityOnFocusHandleInputSelection(event.target, event);
+        break;
+      case INPUT_TYPE_TIME:
         inputTimeAccessibilityOnFocusHandleInputSelection(event.target, event);
         break;
       default:
@@ -112,10 +127,13 @@ function inputAccessibilityOnFocusHandleInputSelection(event) {
 function inputAccessibilityOnBlurHandleInputNormalization(event) {
   if (event.target instanceof HTMLInputElement) {
     switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
-      case 'date':
+      case INPUT_TYPE_DATE:
         inputDateAccessibilityOnBlurHandleInputNormalization(event.target);
         break;
-      case 'time':
+      case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalAccessibilityOnBlurHandleInputNormalization(event.target);
+        break;
+      case INPUT_TYPE_TIME:
         inputTimeAccessibilityOnBlurHandleInputNormalization(event.target);
         break;
       default:
@@ -139,15 +157,15 @@ function inputAccessibilityIncreaseComponent(value, amount, min, max) {
 function inputAccessibilityComplementComponent(value, addition, min, max, limit) {
   if (value > limit) {
     value = parseInt(addition, 10);
-    if (min === 0) {
+    if (0 === min) {
       value -= 1;
     }
   }
-  else if (min === 0) {
-    value = parseInt('' + (value + 1) + addition, 10) - 1;
+  else if (0 === min) {
+    value = parseInt("" + (value + 1) + addition, 10) - 1;
   }
   else {
-    value = parseInt('' + value + addition, 10);
+    value = parseInt("" + value + addition, 10);
   }
   if (value > max) {
     value = max;
@@ -192,7 +210,7 @@ function inputAccessibilityGetPreviousComponentRange(value, position, componentS
   var start, end;
 
   end = inputAccessibilityPreviousSeparator(value, position, componentSeparators);
-  if (end === 0) {
+  if (0 === end) {
     start = end;
     end = inputAccessibilityNextSeparator(value, position, componentSeparators);
   }
@@ -221,18 +239,18 @@ function inputAccessibilityGetNextComponentRange(value, position, componentSepar
 }
 
 function inputAccessibilityGetSelectedComponentNumber(value, position, componentSeparators) {
-  var number = 0, test, i, componentSeparatorsCount = componentSeparators.length;
+  var number = 0;
 
-  while (position > 0) {
-    test = -1;
-    for (i = 0; i < componentSeparatorsCount; i++) {
-      test = Math.max(test, value.lastIndexOf(componentSeparators[i], position));
-    }
-    position = test - 1;
-    if (position > -2) {
+  while (0 < position) {
+    position = inputAccessibilityPreviousSeparator(value, position, componentSeparators) - 1;
+    if (0 < position) {
       number++;
     }
   }
 
   return number;
+}
+
+function inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
+  return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
 }

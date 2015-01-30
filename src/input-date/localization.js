@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  *
@@ -13,47 +13,50 @@ function initInputDateLocalization() {
   inputDateFormatSeparatorGetter = inputDateLocalizationFormatSeparator;
 }
 
-function inputDateLocalizationValueFormatter(input, year, month, day) {
-  var separator = inputDateFormatSeparatorGetter(input),
+function inputDateLocalizationValueFormatter(components, element) {
+  var year, month, day, separator = inputDateFormatSeparatorGetter(element),
     value;
 
-  if (year === INPUT_DATE_YEAR_EMPTY) {
-    year = 'yyyy';
+  if (components.yy === INPUT_DATE_YEAR_EMPTY) {
+    year = "yyyy";
   }
   else {
-    if (year <= 9999) {
-      year = ('000' + year).slice(-4);
+    if (9999 >= components.yy) {
+      year = ("000" + components.yy).slice(-4);
+    }
+    else {
+      year = components.yy;
     }
   }
 
-  if (month === INPUT_DATE_MONTH_EMPTY) {
-    month = 'mm';
+  if (components.mm === INPUT_DATE_MONTH_EMPTY) {
+    month = "mm";
   }
   else {
-    month = ('00' + (month + 1)).slice(-2);
+    month = ("00" + (components.mm + 1)).slice(-2);
   }
 
-  if (day === INPUT_DATE_DAY_EMPTY) {
-    day = 'dd';
+  if (components.dd === INPUT_DATE_DAY_EMPTY) {
+    day = "dd";
   }
   else {
-    day = ('00' + day).slice(-2);
+    day = ("00" + components.dd).slice(-2);
   }
 
   var lang;
 
-  if (input.hasAttribute('lang')) {
-    lang = input.getAttribute('lang').toLowerCase();
+  if (element.hasAttribute(INPUT_ATTR_LANG)) {
+    lang = element.getAttribute(INPUT_ATTR_LANG).toLowerCase();
   }
 
   switch (lang) {
-    case 'en':
-    case 'en-us':
+    case "en":
+    case "en-us":
       value = month + separator + day + separator + year;
       break;
-    case 'en-gb':
-    case 'de':
-    case 'nl':
+    case "en-gb":
+    case "de":
+    case "nl":
       value = day + separator + month + separator + year;
       break;
     default:
@@ -67,33 +70,33 @@ function inputDateLocalizationValueFormatter(input, year, month, day) {
 function inputDateLocalizationFormatOrder(input) {
   var lang, order;
 
-  if (input.hasAttribute('lang')) {
-    lang = input.getAttribute('lang').toLowerCase();
+  if (input.hasAttribute(INPUT_ATTR_LANG)) {
+    lang = input.getAttribute(INPUT_ATTR_LANG).toLowerCase();
   }
 
   switch (lang) {
-    case 'en':
-    case 'en-us':
+    case "en":
+    case "en-us":
       order = [
-        DATECOMPONENT_MONTH,
-        DATECOMPONENT_DAY,
-        DATECOMPONENT_YEAR
+        INPUT_COMPONENT_MONTH,
+        INPUT_COMPONENT_DAY,
+        INPUT_COMPONENT_YEAR
       ];
       break;
-    case 'en-gb':
-    case 'de':
-    case 'nl':
+    case "en-gb":
+    case "de":
+    case "nl":
       order = [
-        DATECOMPONENT_DAY,
-        DATECOMPONENT_MONTH,
-        DATECOMPONENT_YEAR
+        INPUT_COMPONENT_DAY,
+        INPUT_COMPONENT_MONTH,
+        INPUT_COMPONENT_YEAR
       ];
       break;
     default:
       order = [
-        DATECOMPONENT_YEAR,
-        DATECOMPONENT_MONTH,
-        DATECOMPONENT_DAY
+        INPUT_COMPONENT_YEAR,
+        INPUT_COMPONENT_MONTH,
+        INPUT_COMPONENT_DAY
       ];
       break;
   }
@@ -104,22 +107,22 @@ function inputDateLocalizationFormatOrder(input) {
 function inputDateLocalizationFormatSeparator(input) {
   var lang, separator;
 
-  if (input.hasAttribute('lang')) {
-    lang = input.getAttribute('lang').toLowerCase();
+  if (input.hasAttribute(INPUT_ATTR_LANG)) {
+    lang = input.getAttribute(INPUT_ATTR_LANG).toLowerCase();
   }
 
   switch (lang) {
-    case 'en':
-    case 'en-us':
-    case 'en-gb':
-    case 'fr':
-      separator = '/';
+    case "en":
+    case "en-us":
+    case "en-gb":
+    case "fr":
+      separator = "/";
       break;
-    case 'de':
-      separator = '.';
+    case "de":
+      separator = ".";
       break;
     default:
-      separator = '-';
+      separator = "-";
       break;
   }
 

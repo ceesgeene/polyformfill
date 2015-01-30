@@ -16,9 +16,9 @@
   "trailing": true,
   "white": false,
   "indent": 2,
-  "quotmark": "single",
+  "quotmark": "double",
 
-  "maxparams": 3,
+  "maxparams": 5,
   "maxdepth": 3,
   "maxcomplexity": 10
 }

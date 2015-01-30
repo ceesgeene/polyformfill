@@ -1,263 +1,21 @@
-(function(window, document, undefined) {
+!function(window, document, undefined) {
   "use strict";
-  var INPUT_ATTR_TYPE = "type";
   function init() {
     var testInput = document.createElement("input");
-    if (!("valueAsDate" in testInput)) {
+    if (!(INPUT_PROPERTY_VALUEASDATE in testInput)) {
       initInput(testInput);
       initInputDate();
+      initInputDatetimeLocal();
       initInputTime();
     }
   }
-  init();
-  function initInput(testInput) {
-    initInputDom(testInput);
-    initInputAccessibility();
-    initInputNormalization();
-  }
-  var DATECOMPONENT_YEAR = 1, DATECOMPONENT_MONTH = 2, DATECOMPONENT_DAY = 4;
-  var INPUT_DATE_YEAR_EMPTY = 0, INPUT_DATE_MONTH_EMPTY = -1, INPUT_DATE_DAY_EMPTY = 0;
-  var INPUT_DATE_YEAR_MIN = 1, INPUT_DATE_YEAR_MAX = 275760;
-  var INPUT_DATE_MONTH_MIN = 0, INPUT_DATE_MONTH_MAX = 11;
-  var INPUT_DATE_DAY_MIN = 1, INPUT_DATE_DAY_MAX = 31;
-  var rfc3999FullDateRegExp = /^([0-9]{4,})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-  var inputDateValueFormatter;
-  var inputDateFormatOrderGetter;
-  var inputDateFormatSeparatorGetter;
-  function initInputDate() {
-    inputDateValueFormatter = inputDateFuzzyRfc3339ValueFormatter;
-    inputDateFormatOrderGetter = inputDateRfc3339FormatOrder;
-    inputDateFormatSeparatorGetter = inputDateRfc3339FormatSeparator;
-    initInputDateLocalization();
-  }
-  function inputDateComponentsSet(input, year, month, day) {
-    var formattedValue;
-    input.__polyformfillInputDate = {
-      year: year,
-      month: month,
-      day: day
-    };
-    formattedValue = inputDateValueFormatter(input, year, month, day);
-    inputDomOriginalValueSetter.call(input, formattedValue);
-    return formattedValue;
-  }
-  function inputDateComponentsGet(input) {
-    if (input.__polyformfillInputDate === undefined) {
-      inputDateInitInternalValue(input);
-    }
-    return input.__polyformfillInputDate;
-  }
-  function inputDateFuzzyRfc3339ValueFormatter(input, year, month, day) {
-    if (year === INPUT_DATE_YEAR_EMPTY) {
-      year = "yyyy";
-    } else {
-      if (year <= 9999) {
-        year = ("000" + year).slice(-4);
-      }
-    }
-    if (month === INPUT_DATE_MONTH_EMPTY) {
-      month = "mm";
-    } else {
-      month = ("00" + (month + 1)).slice(-2);
-    }
-    if (day === INPUT_DATE_DAY_EMPTY) {
-      day = "dd";
-    } else {
-      day = ("00" + day).slice(-2);
-    }
-    return year + "-" + month + "-" + day;
-  }
-  function inputDateRfc3339FormatOrder() {
-    return [ DATECOMPONENT_YEAR, DATECOMPONENT_MONTH, DATECOMPONENT_DAY ];
-  }
-  function inputDateRfc3339FormatSeparator() {
-    return [ "-" ];
-  }
-  function getDateFromRfc3339FullDateString(str) {
-    var date, dateComponents;
-    if (str && rfc3999FullDateRegExp.test(str)) {
-      dateComponents = str.split("-");
-      if (dateComponents.join("") < 2757600914) {
-        date = new Date(0);
-        date.setUTCFullYear(dateComponents[0], dateComponents[1] - 1, dateComponents[2]);
-        if (date.getUTCMonth() != dateComponents[1] - 1 || date.getUTCDate() != dateComponents[2]) {
-          return null;
-        }
-        return date;
-      }
-    }
-    return null;
-  }
-  function inputDateInitInternalValue(input) {
-    var value = input.getAttribute("value"), date;
-    if (value !== "") {
-      date = getDateFromRfc3339FullDateString(value);
-    }
-    if (date) {
-      input.__polyformfillInputDate = {
-        year: date.getUTCFullYear(),
-        month: date.getUTCMonth(),
-        day: date.getUTCDate()
-      };
-    } else {
-      input.__polyformfillInputDate = {
-        year: INPUT_DATE_YEAR_EMPTY,
-        month: INPUT_DATE_MONTH_EMPTY,
-        day: INPUT_DATE_DAY_EMPTY
-      };
-    }
-  }
-  function inputDateGetRfc3339(input) {
-    var date = inputDateGetDate(input), value;
-    if (date) {
-      value = date.toISOString().replace("+0", "").replace("+", "");
-      value = value.substr(0, value.indexOf("T"));
-    } else {
-      value = "";
-    }
-    return value;
-  }
-  function inputDateGetDate(input) {
-    var dateComponents = inputDateComponentsGet(input), date = null;
-    if (dateComponents.year !== INPUT_DATE_YEAR_EMPTY && dateComponents.month !== INPUT_DATE_MONTH_EMPTY && dateComponents.day !== INPUT_DATE_DAY_EMPTY) {
-      date = new Date(0);
-      date.setUTCFullYear(dateComponents.year, dateComponents.month, dateComponents.day);
-    }
-    return date;
-  }
-  var INPUT_TIME_COMPONENT_HOUR = 1, INPUT_TIME_COMPONENT_MINUTE = 2, INPUT_TIME_COMPONENT_SECOND = 4, INPUT_TIME_COMPONENT_MILISECOND = 8;
-  var INPUT_TIME_COMPONENT_EMPTY = -1;
-  var INPUT_TIME_COMPONENT_HIDDEN = -2;
-  var INPUT_TIME_COMPONENT_HOUR_MIN = 0;
-  var INPUT_TIME_COMPONENT_HOUR_MAX = 23;
-  var INPUT_TIME_COMPONENT_MINUTE_MIN = 0;
-  var INPUT_TIME_COMPONENT_MINUTE_MAX = 59;
-  var INPUT_TIME_COMPONENT_SECOND_MIN = 0;
-  var INPUT_TIME_COMPONENT_SECOND_MAX = 59;
-  var INPUT_TIME_COMPONENT_MILISECOND_MIN = 0;
-  var INPUT_TIME_COMPONENT_MILISECOND_MAX = 999;
-  var inputTimeValidTimeStringRegExp = /^(([0-1][0-9])|(2[0-3])):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
-  var inputTimeValueFormatter;
-  var inputTimeFormatOrderGetter;
-  var inputTimeFormatSeparatorGetter;
-  function initInputTime() {
-    inputTimeValueFormatter = inputTimeDefaultValueFormatter;
-    inputTimeFormatOrderGetter = inputTimeDefaultFormatOrder;
-    inputTimeFormatSeparatorGetter = inputTimeDefaultFormatSeparator;
-  }
-  function inputTimeComponentsGet(input) {
-    if (input.__polyformfillInputTime === undefined) {
-      inputTimeInitInternalValue(input);
-    }
-    return input.__polyformfillInputTime;
-  }
-  function inputTimeComponentsSet(input, hour, minute, second, milisecond) {
-    var formattedValue;
-    input.__polyformfillInputTime = {
-      hour: hour,
-      minute: minute,
-      second: second,
-      milisecond: milisecond
-    };
-    formattedValue = inputTimeValueFormatter(input, hour, minute, second, milisecond);
-    inputDomOriginalValueSetter.call(input, formattedValue);
-    return formattedValue;
-  }
-  function inputTimeInitInternalValue(input) {
-    var value = input.getAttribute("value"), components;
-    if (value !== "") {
-      components = inputTimeValidTimeStringToComponents(value);
-    }
-    if (components) {
-      input.__polyformfillInputTime = components;
-    } else {
-      input.__polyformfillInputTime = {
-        hour: INPUT_TIME_COMPONENT_EMPTY,
-        minute: INPUT_TIME_COMPONENT_EMPTY,
-        second: INPUT_TIME_COMPONENT_HIDDEN,
-        milisecond: INPUT_TIME_COMPONENT_HIDDEN
-      };
-    }
-  }
-  function inputTimeValidTimeStringToComponents(str) {
-    var components;
-    if (str && inputTimeValidTimeStringRegExp.test(str)) {
-      components = str.split(/[:.]/);
-      if (components[2] === undefined) {
-        components[2] = INPUT_TIME_COMPONENT_HIDDEN;
-      }
-      if (components[3] === undefined) {
-        components[3] = INPUT_TIME_COMPONENT_HIDDEN;
-      } else {
-        components[3] = (components[3] + "000").slice(0, 3);
-      }
-      return {
-        hour: parseInt(components[0], 10),
-        minute: parseInt(components[1], 10),
-        second: parseInt(components[2], 10),
-        milisecond: parseInt(components[3], 10)
-      };
-    }
-    return null;
-  }
-  function inputTimeGetRfc3339(element) {
-    var components = inputTimeComponentsGet(element);
-    if (components.hour > INPUT_TIME_COMPONENT_EMPTY && components.minute > INPUT_TIME_COMPONENT_EMPTY) {
-      if (components.second === INPUT_TIME_COMPONENT_EMPTY) {
-        components.second = INPUT_TIME_COMPONENT_HIDDEN;
-      }
-      if (components.milisecond === INPUT_TIME_COMPONENT_EMPTY) {
-        components.milisecond = INPUT_TIME_COMPONENT_HIDDEN;
-      }
-      return inputTimeDefaultValueFormatter(element, components.hour, components.minute, components.second, components.milisecond);
-    } else {
-      return "";
-    }
-  }
-  function inputTimeDefaultValueFormatter(input, hour, minute, second, milisecond) {
-    var formatted;
-    if (hour === INPUT_TIME_COMPONENT_EMPTY) {
-      formatted = "--";
-    } else {
-      formatted = ("00" + hour).slice(-2);
-    }
-    formatted += ":";
-    if (minute === INPUT_TIME_COMPONENT_EMPTY) {
-      formatted += "--";
-    } else {
-      formatted += ("00" + minute).slice(-2);
-    }
-    if (second !== INPUT_TIME_COMPONENT_HIDDEN) {
-      formatted += ":";
-      if (second === INPUT_TIME_COMPONENT_EMPTY) {
-        formatted += "--";
-      } else {
-        formatted += ("00" + second).slice(-2);
-      }
-      if (milisecond !== INPUT_TIME_COMPONENT_HIDDEN) {
-        formatted += ".";
-        if (milisecond === INPUT_TIME_COMPONENT_EMPTY) {
-          formatted += "---";
-        } else {
-          formatted += ("000" + milisecond).slice(-3);
-        }
-      }
-    }
-    return formatted;
-  }
-  function inputTimeDefaultFormatOrder() {
-    return [ INPUT_TIME_COMPONENT_HOUR, INPUT_TIME_COMPONENT_MINUTE, INPUT_TIME_COMPONENT_SECOND, INPUT_TIME_COMPONENT_MILISECOND ];
-  }
-  function inputTimeDefaultFormatSeparator() {
-    return [ ":", "." ];
-  }
-  function initInputAccessibility() {
-    window.addEventListener("keydown", inputAccessibilityOnKeydownHandleNavigation);
-    window.addEventListener("keypress", inputAccessibilityOnKeyPressHandleUserInput);
-    window.addEventListener("focus", inputAccessibilityOnFocusHandleInputSelection, true);
-    window.addEventListener("focusin", inputAccessibilityOnFocusHandleInputSelection);
-    window.addEventListener("click", inputAccessibilityOnFocusHandleInputSelection);
-    window.addEventListener("blur", inputAccessibilityOnBlurHandleInputNormalization, true);
+  function initInputAccessibility(addEventListener) {
+    addEventListener("keydown", inputAccessibilityOnKeydownHandleNavigation);
+    addEventListener("keypress", inputAccessibilityOnKeyPressHandleUserInput);
+    addEventListener("focus", inputAccessibilityOnFocusHandleInputSelection, true);
+    addEventListener("focusin", inputAccessibilityOnFocusHandleInputSelection);
+    addEventListener("click", inputAccessibilityOnFocusHandleInputSelection);
+    addEventListener("blur", inputAccessibilityOnBlurHandleInputNormalization, true);
   }
   function inputAccessibilityOnKeydownHandleNavigation(event) {
     if (event.defaultPrevented) {
@@ -268,16 +26,16 @@
     }
     if (event.target instanceof HTMLInputElement) {
       switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
-       case "date":
+       case INPUT_TYPE_DATE:
         inputDateAccessibilityOnKeydownHandleNavigation(event.target, event);
         break;
 
-       case "time":
-        inputTimeAccessibilityOnKeydownHandleNavigation(event.target, event);
+       case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalAccessibilityOnKeydownHandleNavigation(event.target, event);
         break;
 
-       default:
-        break;
+       case INPUT_TYPE_TIME:
+        inputTimeAccessibilityOnKeydownHandleNavigation(event.target, event);
       }
     }
   }
@@ -290,48 +48,48 @@
     }
     if (event.target instanceof HTMLInputElement) {
       switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
-       case "date":
+       case INPUT_TYPE_DATE:
         inputDateAccessibilityOnKeyPressHandleUserInput(event.target, event);
         break;
 
-       case "time":
-        inputTimeAccessibilityOnKeyPressHandleUserInput(event.target, event);
+       case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalAccessibilityOnKeyPressHandleUserInput(event.target, event);
         break;
 
-       default:
-        break;
+       case INPUT_TYPE_TIME:
+        inputTimeAccessibilityOnKeyPressHandleUserInput(event.target, event);
       }
     }
   }
   function inputAccessibilityOnFocusHandleInputSelection(event) {
     if (event.target instanceof HTMLInputElement) {
       switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
-       case "date":
+       case INPUT_TYPE_DATE:
         inputDateAccessibilityOnFocusHandleInputSelection(event.target, event);
         break;
 
-       case "time":
-        inputTimeAccessibilityOnFocusHandleInputSelection(event.target, event);
+       case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalAccessibilityOnFocusHandleInputSelection(event.target, event);
         break;
 
-       default:
-        break;
+       case INPUT_TYPE_TIME:
+        inputTimeAccessibilityOnFocusHandleInputSelection(event.target, event);
       }
     }
   }
   function inputAccessibilityOnBlurHandleInputNormalization(event) {
     if (event.target instanceof HTMLInputElement) {
       switch (event.target.getAttribute(INPUT_ATTR_TYPE)) {
-       case "date":
+       case INPUT_TYPE_DATE:
         inputDateAccessibilityOnBlurHandleInputNormalization(event.target);
         break;
 
-       case "time":
-        inputTimeAccessibilityOnBlurHandleInputNormalization(event.target);
+       case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalAccessibilityOnBlurHandleInputNormalization(event.target);
         break;
 
-       default:
-        break;
+       case INPUT_TYPE_TIME:
+        inputTimeAccessibilityOnBlurHandleInputNormalization(event.target);
       }
     }
   }
@@ -349,11 +107,11 @@
   function inputAccessibilityComplementComponent(value, addition, min, max, limit) {
     if (value > limit) {
       value = parseInt(addition, 10);
-      if (min === 0) {
+      if (0 === min) {
         value -= 1;
       }
     } else {
-      if (min === 0) {
+      if (0 === min) {
         value = parseInt("" + (value + 1) + addition, 10) - 1;
       } else {
         value = parseInt("" + value + addition, 10);
@@ -365,7 +123,7 @@
     return value;
   }
   function inputAccessibilityPreviousSeparator(value, position, componentSeparators) {
-    var previous = 0, test, i, componentSeparatorsCount = componentSeparators.length;
+    var test, i, previous = 0, componentSeparatorsCount = componentSeparators.length;
     for (i = 0; i < componentSeparatorsCount; i++) {
       test = value.lastIndexOf(componentSeparators[i], position - 1) + 1;
       if (test > previous) {
@@ -375,7 +133,7 @@
     return previous;
   }
   function inputAccessibilityNextSeparator(value, position, componentSeparators) {
-    var next = value.length, test, i, componentSeparatorsCount = componentSeparators.length;
+    var test, i, next = value.length, componentSeparatorsCount = componentSeparators.length;
     for (i = 0; i < componentSeparatorsCount; i++) {
       test = value.indexOf(componentSeparators[i], position);
       if (test < next && test !== -1) {
@@ -391,11 +149,11 @@
   function inputAccessibilityGetPreviousComponentRange(value, position, componentSeparators) {
     var start, end;
     end = inputAccessibilityPreviousSeparator(value, position, componentSeparators);
-    if (end === 0) {
+    if (0 === end) {
       start = end;
       end = inputAccessibilityNextSeparator(value, position, componentSeparators);
     } else {
-      end = end - 1;
+      end -= 1;
       start = inputAccessibilityPreviousSeparator(value, end, componentSeparators);
     }
     return [ start, end ];
@@ -407,51 +165,105 @@
       end = start;
       start = inputAccessibilityPreviousSeparator(value, position, componentSeparators);
     } else {
-      start = start + 1;
+      start += 1;
       end = inputAccessibilityNextSeparator(value, start, componentSeparators);
     }
     return [ start, end ];
   }
   function inputAccessibilityGetSelectedComponentNumber(value, position, componentSeparators) {
-    var number = 0, test, i, componentSeparatorsCount = componentSeparators.length;
-    while (position > 0) {
-      test = -1;
-      for (i = 0; i < componentSeparatorsCount; i++) {
-        test = Math.max(test, value.lastIndexOf(componentSeparators[i], position));
-      }
-      position = test - 1;
-      if (position > -2) {
+    var number = 0;
+    while (0 < position) {
+      position = inputAccessibilityPreviousSeparator(value, position, componentSeparators) - 1;
+      if (0 < position) {
         number++;
       }
     }
     return number;
   }
-  var inputDomOriginalTypeGetter, inputDomOriginalValueGetter, inputDomOriginalValueSetter, inputDomOriginalValueAsNumberGetter, inputDomOriginalValueAsNumberSetter, inputDomOriginalStepUp, inputDomOriginalStepDown;
+  function inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
+    return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
+  }
+  function initInput(testInput) {
+    initInputDom(testInput);
+    initInputAccessibility(window.addEventListener);
+    initInputNormalization(window.addEventListener);
+  }
+  function inputComponentGetMinimum(element, selectedComponent) {
+    if (element.hasAttribute("min")) {}
+    switch (selectedComponent) {
+     case INPUT_COMPONENT_YEAR:
+      return INPUT_DATE_YEAR_MIN;
+
+     case INPUT_COMPONENT_MONTH:
+      return INPUT_DATE_MONTH_MIN;
+
+     case INPUT_COMPONENT_DAY:
+      return INPUT_DATE_DAY_MIN;
+
+     case INPUT_COMPONENT_HOUR:
+      return INPUT_TIME_COMPONENT_HOUR_MIN;
+
+     case INPUT_COMPONENT_MINUTE:
+      return INPUT_TIME_COMPONENT_MINUTE_MIN;
+
+     case INPUT_COMPONENT_SECOND:
+      return INPUT_TIME_COMPONENT_SECOND_MIN;
+
+     case INPUT_COMPONENT_MILISECOND:
+      return INPUT_TIME_COMPONENT_MILISECOND_MIN;
+    }
+  }
+  function inputComponentGetMaximum(element, selectedComponent) {
+    if (element.hasAttribute("max")) {}
+    switch (selectedComponent) {
+     case INPUT_COMPONENT_YEAR:
+      return INPUT_DATE_YEAR_MAX;
+
+     case INPUT_COMPONENT_MONTH:
+      return INPUT_DATE_MONTH_MAX;
+
+     case INPUT_COMPONENT_DAY:
+      return INPUT_DATE_DAY_MAX;
+
+     case INPUT_COMPONENT_HOUR:
+      return INPUT_TIME_COMPONENT_HOUR_MAX;
+
+     case INPUT_COMPONENT_MINUTE:
+      return INPUT_TIME_COMPONENT_MINUTE_MAX;
+
+     case INPUT_COMPONENT_SECOND:
+      return INPUT_TIME_COMPONENT_SECOND_MAX;
+
+     case INPUT_COMPONENT_MILISECOND:
+      return INPUT_TIME_COMPONENT_MILISECOND_MAX;
+    }
+  }
   function initInputDom(testInput) {
-    var descriptor;
+    var descriptor, HTMLInputElementPrototype;
     if (HTMLInputElement && Object.isExtensible(HTMLInputElement.prototype)) {
-      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "type");
+      HTMLInputElementPrototype = HTMLInputElement.prototype;
+      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_ATTR_TYPE);
       if (descriptor === undefined) {
-        descriptor = Object.getOwnPropertyDescriptor(testInput, "type");
+        descriptor = Object.getOwnPropertyDescriptor(testInput, INPUT_ATTR_TYPE);
       }
       inputDomOriginalTypeGetter = descriptor.get;
       if (descriptor.configurable) {
-        Object.defineProperty(HTMLInputElement.prototype, "type", {
+        Object.defineProperty(HTMLInputElementPrototype, INPUT_ATTR_TYPE, {
           get: inputDomTypeGet
         });
       }
-      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE);
       if (descriptor.configurable) {
-        Object.defineProperty(HTMLInputElement.prototype, "value", {
+        Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUE, {
           get: inputDomValueGet,
           set: inputDomValueSet
         });
         inputDomOriginalValueGetter = descriptor.get;
         inputDomOriginalValueSetter = descriptor.set;
       }
-      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "valueAsNumber");
+      descriptor = Object.getOwnPropertyDescriptor(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER);
       if (descriptor === undefined || descriptor.configurable) {
-        Object.defineProperty(HTMLInputElement.prototype, "valueAsNumber", {
+        Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASNUMBER, {
           get: inputDomValueAsNumberGet,
           set: inputDomValueAsNumberSet
         });
@@ -460,14 +272,15 @@
           inputDomOriginalValueAsNumberSetter = descriptor.set;
         }
       }
-      Object.defineProperty(HTMLInputElement.prototype, "valueAsDate", {
+      Object.defineProperty(HTMLInputElementPrototype, INPUT_PROPERTY_VALUEASDATE, {
         get: inputDomValueAsDateGet,
         set: inputDomValueAsDateSet
       });
-      inputDomOriginalStepUp = HTMLInputElement.prototype.stepUp;
-      HTMLInputElement.prototype.stepUp = inputDomStepUp;
-      inputDomOriginalStepDown = HTMLInputElement.prototype.stepDown;
-      HTMLInputElement.prototype.stepDown = inputDomStepDown;
+      inputDomOriginalStepUp = HTMLInputElementPrototype.stepUp;
+      HTMLInputElementPrototype.stepUp = inputDomStepUp;
+      inputDomOriginalStepDown = HTMLInputElementPrototype.stepDown;
+      HTMLInputElementPrototype.stepDown = inputDomStepDown;
+      inputDomOriginalSetSelectionRange = HTMLInputElementPrototype.setSelectionRange;
     }
   }
   function inputDomException(code, message) {
@@ -475,11 +288,12 @@
   }
   function inputDomTypeGet() {
     var attr, type = inputDomOriginalTypeGetter.call(this);
-    if (type === "text") {
+    if (INPUT_TYPE_TEXT === type) {
       attr = this.getAttribute(INPUT_ATTR_TYPE);
       switch (attr) {
-       case "date":
-       case "time":
+       case INPUT_TYPE_DATE:
+       case INPUT_TYPE_DATETIME_LOCAL:
+       case INPUT_TYPE_TIME:
         return attr;
 
        default:
@@ -489,12 +303,14 @@
     return type;
   }
   function inputDomValueGet() {
-    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-    switch (inputType) {
-     case "date":
+    switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+     case INPUT_TYPE_DATE:
       return inputDateDomValueGet(this);
 
-     case "time":
+     case INPUT_TYPE_DATETIME_LOCAL:
+      return inputDatetimeLocalDomValueGet(this);
+
+     case INPUT_TYPE_TIME:
       return inputTimeDomValueGet(this);
 
      default:
@@ -502,12 +318,14 @@
     }
   }
   function inputDomValueSet(value) {
-    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-    switch (inputType) {
-     case "date":
+    switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+     case INPUT_TYPE_DATE:
       return inputDateDomValueSet(this, value);
 
-     case "time":
+     case INPUT_TYPE_DATETIME_LOCAL:
+      return inputDatetimeLocalDomValueSet(this, value);
+
+     case INPUT_TYPE_TIME:
       return inputTimeDomValueSet(this, value);
 
      default:
@@ -515,17 +333,17 @@
     }
   }
   function inputDomValueAsNumberGet() {
-    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-    switch (inputType) {
-     case "date":
-     case "time":
+    switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+     case INPUT_TYPE_DATE:
+     case INPUT_TYPE_DATETIME_LOCAL:
+     case INPUT_TYPE_TIME:
       return inputDomValueAsNumberGetFromDate.call(this);
 
      default:
       if (inputDomOriginalValueAsNumberGetter) {
         return inputDomOriginalValueAsNumberGetter.call(this);
       }
-      return NaN;
+      return 0/0;
     }
   }
   function inputDomValueAsNumberGetFromDate() {
@@ -533,19 +351,18 @@
     if (date) {
       return date.getTime();
     }
-    return NaN;
+    return 0/0;
   }
   function inputDomValueAsNumberSet(value) {
-    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-    switch (inputType) {
-     case "date":
-     case "time":
+    switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+     case INPUT_TYPE_DATE:
+     case INPUT_TYPE_DATETIME_LOCAL:
+     case INPUT_TYPE_TIME:
       inputDomValueAsNumberSetFromDate.call(this, value);
       break;
 
      default:
       inputDomOriginalValueSetter.call(this);
-      break;
     }
   }
   function inputDomValueAsNumberSetFromDate(value) {
@@ -555,12 +372,14 @@
     }
   }
   function inputDomValueAsDateGet() {
-    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
-    switch (inputType) {
-     case "date":
+    switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+     case INPUT_TYPE_DATE:
       return inputDateDomValueAsDateGet(this);
 
-     case "time":
+     case INPUT_TYPE_DATETIME_LOCAL:
+      return inputDatetimeLocalDomValueAsDateGet(this);
+
+     case INPUT_TYPE_TIME:
       return inputTimeDomValueAsDateGet(this);
 
      default:
@@ -568,13 +387,15 @@
     }
   }
   function inputDomValueAsDateSet(value) {
-    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
     if (value instanceof Date) {}
-    switch (inputType) {
-     case "date":
+    switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+     case INPUT_TYPE_DATE:
       return inputDateDomValueAsDateSet(this, value);
 
-     case "time":
+     case INPUT_TYPE_DATETIME_LOCAL:
+      return inputDatetimeLocalDomValueAsDateSet(this, value);
+
+     case INPUT_TYPE_TIME:
       return inputTimeDomValueAsDateSet(this, value);
 
      default:
@@ -582,13 +403,15 @@
     }
   }
   function inputDomStepUp(n) {
-    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
     n = n || 1;
-    switch (inputType) {
-     case "date":
+    switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+     case INPUT_TYPE_DATE:
       return inputDomStepUpOrDown(this, n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
 
-     case "time":
+     case INPUT_TYPE_DATETIME_LOCAL:
+      return inputDomStepUpOrDown(this, n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
+
+     case INPUT_TYPE_TIME:
       return inputDomStepUpOrDown(this, n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
 
      default:
@@ -596,13 +419,15 @@
     }
   }
   function inputDomStepDown(n) {
-    var inputType = this.getAttribute(INPUT_ATTR_TYPE);
     n = n || 1;
-    switch (inputType) {
-     case "date":
+    switch (this.getAttribute(INPUT_ATTR_TYPE)) {
+     case INPUT_TYPE_DATE:
       return inputDomStepUpOrDown(this, -n, INPUT_DATE_STEP_DEFAULT, INPUT_DATE_STEP_SCALE_FACTOR);
 
-     case "time":
+     case INPUT_TYPE_DATETIME_LOCAL:
+      return inputDomStepUpOrDown(this, -n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
+
+     case INPUT_TYPE_TIME:
       return inputDomStepUpOrDown(this, -n, INPUT_TIME_STEP_DEFAULT, INPUT_TIME_STEP_SCALE_FACTOR);
 
      default:
@@ -610,10 +435,9 @@
     }
   }
   function inputDomStepUpOrDown(element, n, defaultStep, stepScaleFactor) {
-    var allowedValueStep, delta, value;
-    allowedValueStep = inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor);
-    if (allowedValueStep === null) {
-      throw inputDomException(DOMException.INVALID_STATE_ERR);
+    var delta, value, allowedValueStep = inputDomGetAllowedValueStep(element, defaultStep, stepScaleFactor);
+    if (null === allowedValueStep) {
+      throw inputDomException(DOMEXCEPTION_INVALID_STATE_ERR);
     }
     value = element.valueAsNumber;
     delta = allowedValueStep * n;
@@ -624,11 +448,11 @@
     var step;
     if (element.hasAttribute("step")) {
       step = element.getAttribute("step");
-      if (step === "any") {
+      if ("any" === step) {
         return null;
       }
       step = parseInt(step, 10);
-      if (step < 1) {
+      if (1 > step) {
         step = defaultStep;
       }
     } else {
@@ -636,41 +460,41 @@
     }
     return step * stepScaleFactor;
   }
-  function initInputNormalization() {
-    window.addEventListener("submit", inputNormalizationOnSubmitNormalizeInput);
-    window.addEventListener("load", inputNormalizationOnLoadFormatInputElements);
+  function initInputNormalization(addEventListener) {
+    addEventListener("load", inputNormalizationOnLoadFormatInputElements);
+    addEventListener("submit", inputNormalizationOnSubmitNormalizeInput);
   }
   function inputNormalizationOnLoadFormatInputElements(event) {
-    var elements = event.target.getElementsByTagName("INPUT"), i;
+    var i, elements = event.target.getElementsByTagName("INPUT");
     for (i = 0; i < elements.length; i++) {
       switch (elements[i].getAttribute(INPUT_ATTR_TYPE)) {
-       case "date":
-        inputDateNormalizationOnLoadFormatInputDateElements(elements[i]);
+       case INPUT_TYPE_DATE:
+        inputDateNormalizationOnLoadFormatInputElements(elements[i]);
         break;
 
-       case "time":
+       case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalNormalizationOnLoadFormatInputElements(elements[i]);
+        break;
+
+       case INPUT_TYPE_TIME:
         inputTimeNormalizationOnLoadFormatInputElements(elements[i]);
-        break;
-
-       default:
-        break;
       }
     }
   }
   function inputNormalizationOnSubmitNormalizeInput(event) {
-    var elements = event.target.elements, i;
+    var i, elements = event.target.elements;
     for (i = 0; i < elements.length; i++) {
       switch (elements[i].getAttribute(INPUT_ATTR_TYPE)) {
-       case "date":
-        inputDateNormalizationOnSubmitNormalizeDateInput(elements[i]);
+       case INPUT_TYPE_DATE:
+        inputDateNormalizationOnSubmitNormalizeInput(elements[i]);
         break;
 
-       case "time":
+       case INPUT_TYPE_DATETIME_LOCAL:
+        inputDatetimeLocalNormalizationOnSubmitNormalizeInput(elements[i]);
+        break;
+
+       case INPUT_TYPE_TIME:
         inputTimeNormalizationOnSubmitNormalizeInput(elements[i]);
-        break;
-
-       default:
-        break;
       }
     }
   }
@@ -680,46 +504,30 @@
      case "Backspace":
      case "U+0008":
      case "Del":
-      inputDateClearDateComponent(element, selectionStart);
+      inputDateAccessibilityClearComponent(element, selectionStart);
       break;
 
      case "Tab":
      case "U+0009":
-      inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
-      if (event.altKey || event.ctrlKey || event.metaKey) {
-        return;
-      }
-      if (event.shiftKey) {
-        if (inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element)) !== 0) {
-          inputDateAccessibilitySelectPreviousDateComponent(element, selectionStart);
-        } else {
-          return;
-        }
-      } else {
-        if (inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element)) !== 2) {
-          inputDateAccessibilitySelectNextDateComponent(element, selectionStart);
-        } else {
-          return;
-        }
-      }
-      break;
+      inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
+      return;
 
      case "Left":
       inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
-      inputDateAccessibilitySelectPreviousDateComponent(element, selectionStart);
+      inputDateAccessibilitySelectPreviousComponent(element, selectionStart);
       break;
 
      case "Up":
-      inputDateAccessibilityIncreaseDateComponent(element, selectionStart, 1);
+      inputDateAccessibilityIncreaseComponent(element, selectionStart, 1);
       break;
 
      case "Right":
       inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
-      inputDateAccessibilitySelectNextDateComponent(element, selectionStart);
+      inputDateAccessibilitySelectNextComponent(element, selectionStart);
       break;
 
      case "Down":
-      inputDateAccessibilityIncreaseDateComponent(element, selectionStart, -1);
+      inputDateAccessibilityIncreaseComponent(element, selectionStart, -1);
       break;
 
      default:
@@ -727,39 +535,44 @@
     }
     event.preventDefault();
   }
-  function inputDateAccessibilityOnKeyPressHandleUserInput(element, event) {
-    if (event.charCode > 47 && event.charCode < 58) {
-      var selectionStart = element.selectionStart;
-      var selectNext = false;
-      var value = inputDomOriginalValueGetter.call(element), components = inputDateComponentsGet(element), componentOrder = inputDateFormatOrderGetter(element), componentSeparator = inputDateFormatSeparatorGetter(element), selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
-      switch (selectedComponent) {
-       case DATECOMPONENT_YEAR:
-        components.year = parseInt((components.year + event.key).substr(-6), 10);
-        break;
-
-       case DATECOMPONENT_MONTH:
-        components.month = inputAccessibilityComplementComponent(components.month, event.key, INPUT_DATE_MONTH_MIN, INPUT_DATE_MONTH_MAX, 0);
-        if (components.month > 0) {
-          selectNext = true;
-        }
-        break;
-
-       case DATECOMPONENT_DAY:
-        components.day = inputAccessibilityComplementComponent(components.day, event.key, INPUT_DATE_DAY_MIN, INPUT_DATE_DAY_MAX, 3);
-        if (components.day > 3) {
-          selectNext = true;
-        }
-        break;
-
-       default:
+  function inputDateAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart) {
+    inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart);
+    if (event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
+    if (event.shiftKey) {
+      if (0 !== inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element))) {
+        inputDateAccessibilitySelectPreviousComponent(element, selectionStart);
+      } else {
         return;
       }
-      value = inputDateComponentsSet(element, components.year, components.month, components.day);
-      var selection = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
-      if (selectNext) {
-        inputDateAccessibilitySelectNextDateComponent(element, selection[0], selection[1]);
+    } else {
+      if (2 !== inputAccessibilityGetSelectedComponentNumber(inputDomOriginalValueGetter.call(element), selectionStart, inputDateFormatSeparatorGetter(element))) {
+        inputDateAccessibilitySelectNextComponent(element, selectionStart);
       } else {
-        element.setSelectionRange.apply(element, selection);
+        return;
+      }
+    }
+    event.preventDefault();
+  }
+  function inputDateAccessibilityOnKeyPressHandleUserInput(element, event) {
+    var selectionStart, value, components, componentOrder, componentSeparator, selectedComponent, componentMin, componentMax, componentLimit;
+    if (47 < event.charCode && 58 > event.charCode) {
+      selectionStart = element.selectionStart;
+      value = inputDomOriginalValueGetter.call(element);
+      components = inputDateComponentsGet(element);
+      componentOrder = inputDateFormatOrderGetter(element);
+      componentSeparator = inputDateFormatSeparatorGetter(element);
+      selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+      componentMin = inputComponentGetMinimum(element, selectedComponent);
+      componentMax = inputComponentGetMaximum(element, selectedComponent);
+      componentLimit = componentMax / 10;
+      components[selectedComponent] = inputAccessibilityComplementComponent(components[selectedComponent], event.key, componentMin, componentMax, componentLimit);
+      value = inputDateComponentsSet(element, components);
+      if (components[selectedComponent] > componentLimit) {
+        inputDateAccessibilitySelectNextComponent(element, selectionStart);
+      } else {
+        inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
       }
     }
     event.preventDefault();
@@ -769,111 +582,186 @@
     value = inputDomOriginalValueGetter.call(element);
     componentSeparator = inputDateFormatSeparatorGetter(element);
     if (!value) {
-      value = inputDateComponentsSet(element, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
+      value = inputDateComponentsSet(element, {
+        yy: INPUT_DATE_YEAR_EMPTY,
+        mm: INPUT_DATE_MONTH_EMPTY,
+        dd: INPUT_DATE_DAY_EMPTY
+      });
       selectionStart = 0;
     } else {
       selectionStart = element.selectionStart;
     }
     componentRange = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
-    element.setSelectionRange.apply(element, componentRange);
+    inputDomOriginalSetSelectionRange.apply(element, componentRange);
     event.preventDefault();
   }
   function inputDateAccessibilityOnBlurHandleInputNormalization(element) {
     inputDateAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
   }
-  function inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
-    return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
-  }
-  function inputDateClearDateComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+  function inputDateAccessibilityClearComponent(element, selectionStart) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputDateComponentsGet(element), componentOrder = inputDateFormatOrderGetter(element), componentSeparator = inputDateFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
     switch (selectedComponent) {
-     case DATECOMPONENT_YEAR:
-      components.year = INPUT_DATE_YEAR_EMPTY;
+     case INPUT_COMPONENT_YEAR:
+      components.yy = INPUT_DATE_YEAR_EMPTY;
       break;
 
-     case DATECOMPONENT_MONTH:
-      components.month = INPUT_DATE_MONTH_EMPTY;
+     case INPUT_COMPONENT_MONTH:
+      components.mm = INPUT_DATE_MONTH_EMPTY;
       break;
 
-     case DATECOMPONENT_DAY:
-      components.day = INPUT_DATE_DAY_EMPTY;
+     case INPUT_COMPONENT_DAY:
+      components.dd = INPUT_DATE_DAY_EMPTY;
       break;
 
      default:
       return;
     }
-    value = inputDateComponentsSet(input, components.year, components.month, components.day);
-    input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+    value = inputDateComponentsSet(element, components);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
   }
-  function inputDateAccessibilityNormalizeSelectedComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
-    switch (selectedComponent) {
-     case DATECOMPONENT_YEAR:
-      if (components.year > INPUT_DATE_YEAR_MAX) {
-        components.year = INPUT_DATE_YEAR_MAX;
-      }
-      break;
-
-     case DATECOMPONENT_MONTH:
-      if (components.month > INPUT_DATE_MONTH_MAX) {
-        components.month = INPUT_DATE_MONTH_MAX;
-      }
-      break;
-
-     case DATECOMPONENT_DAY:
-      if (components.day > INPUT_DATE_DAY_MAX) {
-        components.day = INPUT_DATE_DAY_MAX;
-      }
-      break;
-
-     default:
-      return;
+  function inputDateAccessibilityNormalizeSelectedComponent(element, selectionStart) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputDateComponentsGet(element), componentOrder = inputDateFormatOrderGetter(element), componentSeparator = inputDateFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator), componentMax = inputComponentGetMaximum(element, selectedComponent);
+    if (components[selectedComponent] > componentMax) {
+      components[selectedComponent] = componentMax;
     }
-    inputDateComponentsSet(input, components.year, components.month, components.day);
+    inputDateComponentsSet(element, components);
   }
-  function inputDateAccessibilitySelectPreviousDateComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), componentSeparator = inputDateFormatSeparatorGetter(input), selection = inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator);
-    input.setSelectionRange(selection[0], selection[1]);
+  function inputDateAccessibilitySelectPreviousComponent(element, selectionStart) {
+    var value = inputDomOriginalValueGetter.call(element), componentSeparator = inputDateFormatSeparatorGetter(element), selection = inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator);
+    inputDomOriginalSetSelectionRange.apply(element, selection);
   }
-  function inputDateAccessibilitySelectNextDateComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), componentSeparator = inputDateFormatSeparatorGetter(input), selection = inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator);
-    input.setSelectionRange(selection[0], selection[1]);
+  function inputDateAccessibilitySelectNextComponent(element, selectionStart) {
+    var value = inputDomOriginalValueGetter.call(element), componentSeparator = inputDateFormatSeparatorGetter(element), selection = inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator);
+    inputDomOriginalSetSelectionRange.apply(element, selection);
   }
-  function inputDateAccessibilityIncreaseDateComponent(input, selectionStart, amount) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputDateComponentsGet(input), componentOrder = inputDateFormatOrderGetter(input), componentSeparator = inputDateFormatSeparatorGetter(input), selectedComponent = inputDateAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
-    switch (selectedComponent) {
-     case DATECOMPONENT_YEAR:
-      components.year = inputAccessibilityIncreaseComponent(components.year, amount, INPUT_DATE_YEAR_MIN, INPUT_DATE_YEAR_MAX);
-      break;
-
-     case DATECOMPONENT_MONTH:
-      components.month = inputAccessibilityIncreaseComponent(components.month, amount, INPUT_DATE_MONTH_MIN, INPUT_DATE_MONTH_MAX);
-      break;
-
-     case DATECOMPONENT_DAY:
-      components.day = inputAccessibilityIncreaseComponent(components.day, amount, INPUT_DATE_DAY_MIN, INPUT_DATE_DAY_MAX);
-      break;
-
-     default:
-      return;
+  function inputDateAccessibilityIncreaseComponent(element, selectionStart, amount) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputDateComponentsGet(element), componentOrder = inputDateFormatOrderGetter(element), componentSeparator = inputDateFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator), componentMin = inputComponentGetMinimum(element, selectedComponent), componentMax = inputComponentGetMaximum(element, selectedComponent);
+    components[selectedComponent] = inputAccessibilityIncreaseComponent(components[selectedComponent], amount, componentMin, componentMax);
+    value = inputDateComponentsSet(element, components);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  }
+  function initInputDate() {
+    inputDateValueFormatter = inputDateFuzzyRfc3339ValueFormatter;
+    inputDateFormatOrderGetter = inputDateRfc3339FormatOrder;
+    inputDateFormatSeparatorGetter = inputDateRfc3339FormatSeparator;
+    initInputDateLocalization();
+  }
+  function inputDateComponentsGet(input) {
+    if (input[INPUT_PROPERTY_COMPONENTS] === undefined) {
+      input[INPUT_PROPERTY_COMPONENTS] = inputDateComponentsFromValue(input.getAttribute(INPUT_PROPERTY_VALUE));
     }
-    value = inputDateComponentsSet(input, components.year, components.month, components.day);
-    input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+    return input[INPUT_PROPERTY_COMPONENTS];
   }
-  var INPUT_DATE_STEP_DEFAULT = 1;
-  var INPUT_DATE_STEP_SCALE_FACTOR = 864e5;
+  function inputDateComponentsSet(element, components) {
+    var formattedValue;
+    element[INPUT_PROPERTY_COMPONENTS] = {
+      yy: components[INPUT_COMPONENT_YEAR],
+      mm: components[INPUT_COMPONENT_MONTH],
+      dd: components[INPUT_COMPONENT_DAY]
+    };
+    formattedValue = inputDateValueFormatter(element[INPUT_PROPERTY_COMPONENTS], element);
+    inputDomOriginalValueSetter.call(element, formattedValue);
+    return formattedValue;
+  }
+  function inputDateFuzzyRfc3339ValueFormatter(components) {
+    var year, month, day;
+    if (components.yy === INPUT_DATE_YEAR_EMPTY) {
+      year = "yyyy";
+    } else {
+      if (9999 >= components.yy) {
+        year = ("000" + components.yy).slice(-4);
+      }
+    }
+    if (components.mm === INPUT_DATE_MONTH_EMPTY) {
+      month = "mm";
+    } else {
+      month = ("00" + (components.mm + 1)).slice(-2);
+    }
+    if (components.dd === INPUT_DATE_DAY_EMPTY) {
+      day = "dd";
+    } else {
+      day = ("00" + components.dd).slice(-2);
+    }
+    return year + "-" + month + "-" + day;
+  }
+  function inputDateRfc3339FormatOrder() {
+    return [ INPUT_COMPONENT_YEAR, INPUT_COMPONENT_MONTH, INPUT_COMPONENT_DAY ];
+  }
+  function inputDateRfc3339FormatSeparator() {
+    return [ "-" ];
+  }
+  function getDateFromRfc3339FullDateString(str) {
+    var date, dateComponents;
+    if (str && rfc3999FullDateRegExp.test(str)) {
+      dateComponents = str.split("-");
+      if (2757600914 > dateComponents.join("")) {
+        date = new Date(0);
+        date.setUTCFullYear(dateComponents[0], dateComponents[1] - 1, dateComponents[2]);
+        if (date.getUTCMonth() != dateComponents[1] - 1 || date.getUTCDate() != dateComponents[2]) {
+          return null;
+        }
+        return date;
+      }
+    }
+    return null;
+  }
+  function inputDateComponentsFromValue(value) {
+    var date;
+    if ("" !== value) {
+      date = getDateFromRfc3339FullDateString(value);
+    }
+    if (date) {
+      return {
+        yy: date.getUTCFullYear(),
+        mm: date.getUTCMonth(),
+        dd: date.getUTCDate()
+      };
+    } else {
+      return {
+        yy: INPUT_DATE_YEAR_EMPTY,
+        mm: INPUT_DATE_MONTH_EMPTY,
+        dd: INPUT_DATE_DAY_EMPTY
+      };
+    }
+  }
+  function inputDateGetRfc3339(input) {
+    var value, date = inputDateGetDate(input);
+    if (date) {
+      value = date.toISOString().replace("+0", "").replace("+", "");
+      value = value.substr(0, value.indexOf("T"));
+    } else {
+      value = "";
+    }
+    return value;
+  }
+  function inputDateGetDate(input) {
+    var dateComponents = inputDateComponentsGet(input), date = null;
+    if (dateComponents.yy !== INPUT_DATE_YEAR_EMPTY && dateComponents.mm !== INPUT_DATE_MONTH_EMPTY && dateComponents.dd !== INPUT_DATE_DAY_EMPTY) {
+      date = new Date(0);
+      date.setUTCFullYear(dateComponents.yy, dateComponents.mm, dateComponents.dd);
+    }
+    return date;
+  }
   function inputDateDomValueGet(element) {
     return inputDateGetRfc3339(element);
   }
   function inputDateDomValueSet(element, value) {
     var date;
-    if (value !== "") {
+    if ("" !== value) {
       date = getDateFromRfc3339FullDateString(value);
     }
     if (date) {
-      inputDateComponentsSet(element, date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+      inputDateComponentsSet(element, {
+        yy: date.getUTCFullYear(),
+        mm: date.getUTCMonth(),
+        dd: date.getUTCDate()
+      });
     } else {
-      inputDateComponentsSet(element, INPUT_DATE_YEAR_EMPTY, INPUT_DATE_MONTH_EMPTY, INPUT_DATE_DAY_EMPTY);
+      inputDateComponentsSet(element, {
+        yy: INPUT_DATE_YEAR_EMPTY,
+        mm: INPUT_DATE_MONTH_EMPTY,
+        dd: INPUT_DATE_DAY_EMPTY
+      });
     }
     return value;
   }
@@ -881,35 +769,40 @@
     return inputDateGetDate(element);
   }
   function inputDateDomValueAsDateSet(element, value) {
-    inputDateComponentsSet(element, value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
+    inputDateComponentsSet(element, {
+      yy: value.getUTCFullYear(),
+      mm: value.getUTCMonth(),
+      dd: value.getUTCDate()
+    });
   }
   function initInputDateLocalization() {
     inputDateValueFormatter = inputDateLocalizationValueFormatter;
     inputDateFormatOrderGetter = inputDateLocalizationFormatOrder;
     inputDateFormatSeparatorGetter = inputDateLocalizationFormatSeparator;
   }
-  function inputDateLocalizationValueFormatter(input, year, month, day) {
-    var separator = inputDateFormatSeparatorGetter(input), value;
-    if (year === INPUT_DATE_YEAR_EMPTY) {
+  function inputDateLocalizationValueFormatter(components, element) {
+    var year, month, day, value, lang, separator = inputDateFormatSeparatorGetter(element);
+    if (components.yy === INPUT_DATE_YEAR_EMPTY) {
       year = "yyyy";
     } else {
-      if (year <= 9999) {
-        year = ("000" + year).slice(-4);
+      if (9999 >= components.yy) {
+        year = ("000" + components.yy).slice(-4);
+      } else {
+        year = components.yy;
       }
     }
-    if (month === INPUT_DATE_MONTH_EMPTY) {
+    if (components.mm === INPUT_DATE_MONTH_EMPTY) {
       month = "mm";
     } else {
-      month = ("00" + (month + 1)).slice(-2);
+      month = ("00" + (components.mm + 1)).slice(-2);
     }
-    if (day === INPUT_DATE_DAY_EMPTY) {
+    if (components.dd === INPUT_DATE_DAY_EMPTY) {
       day = "dd";
     } else {
-      day = ("00" + day).slice(-2);
+      day = ("00" + components.dd).slice(-2);
     }
-    var lang;
-    if (input.hasAttribute("lang")) {
-      lang = input.getAttribute("lang").toLowerCase();
+    if (element.hasAttribute(INPUT_ATTR_LANG)) {
+      lang = element.getAttribute(INPUT_ATTR_LANG).toLowerCase();
     }
     switch (lang) {
      case "en":
@@ -925,37 +818,35 @@
 
      default:
       value = year + separator + month + separator + day;
-      break;
     }
     return value;
   }
   function inputDateLocalizationFormatOrder(input) {
     var lang, order;
-    if (input.hasAttribute("lang")) {
-      lang = input.getAttribute("lang").toLowerCase();
+    if (input.hasAttribute(INPUT_ATTR_LANG)) {
+      lang = input.getAttribute(INPUT_ATTR_LANG).toLowerCase();
     }
     switch (lang) {
      case "en":
      case "en-us":
-      order = [ DATECOMPONENT_MONTH, DATECOMPONENT_DAY, DATECOMPONENT_YEAR ];
+      order = [ INPUT_COMPONENT_MONTH, INPUT_COMPONENT_DAY, INPUT_COMPONENT_YEAR ];
       break;
 
      case "en-gb":
      case "de":
      case "nl":
-      order = [ DATECOMPONENT_DAY, DATECOMPONENT_MONTH, DATECOMPONENT_YEAR ];
+      order = [ INPUT_COMPONENT_DAY, INPUT_COMPONENT_MONTH, INPUT_COMPONENT_YEAR ];
       break;
 
      default:
-      order = [ DATECOMPONENT_YEAR, DATECOMPONENT_MONTH, DATECOMPONENT_DAY ];
-      break;
+      order = [ INPUT_COMPONENT_YEAR, INPUT_COMPONENT_MONTH, INPUT_COMPONENT_DAY ];
     }
     return order;
   }
   function inputDateLocalizationFormatSeparator(input) {
     var lang, separator;
-    if (input.hasAttribute("lang")) {
-      lang = input.getAttribute("lang").toLowerCase();
+    if (input.hasAttribute(INPUT_ATTR_LANG)) {
+      lang = input.getAttribute(INPUT_ATTR_LANG).toLowerCase();
     }
     switch (lang) {
      case "en":
@@ -971,16 +862,330 @@
 
      default:
       separator = "-";
-      break;
     }
     return [ separator ];
   }
-  function inputDateNormalizationOnLoadFormatInputDateElements(element) {
+  function inputDateNormalizationOnLoadFormatInputElements(element) {
     var components = inputDateComponentsGet(element);
-    inputDateComponentsSet(element, components.year, components.month, components.day);
+    inputDateComponentsSet(element, components);
   }
-  function inputDateNormalizationOnSubmitNormalizeDateInput(element) {
+  function inputDateNormalizationOnSubmitNormalizeInput(element) {
     inputDomOriginalValueSetter.call(element, inputDateGetRfc3339(element));
+  }
+  function inputDatetimeLocalAccessibilityOnKeydownHandleNavigation(element, event) {
+    var selectionStart = element.selectionStart;
+    switch (event.key) {
+     case "Backspace":
+     case "U+0008":
+     case "Del":
+      inputDatetimeLocalClearComponent(element, selectionStart);
+      break;
+
+     case "Tab":
+     case "U+0009":
+      inputDatetimeLocalAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
+      return;
+
+     case "Left":
+      inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selectionStart);
+      break;
+
+     case "Up":
+      inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, 1);
+      break;
+
+     case "Right":
+      inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart);
+      break;
+
+     case "Down":
+      inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, -1);
+      break;
+
+     default:
+      return;
+    }
+    event.preventDefault();
+  }
+  function inputDatetimeLocalAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart) {
+    if (event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    } else {
+      if (event.shiftKey) {
+        if (0 === selectionStart) {
+          inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
+          return;
+        }
+      } else {
+        if (element.selectionEnd === inputDomOriginalValueGetter.call(element).length) {
+          inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
+          return;
+        }
+      }
+    }
+    if (event.shiftKey) {
+      inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selectionStart);
+    } else {
+      inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart);
+    }
+    event.preventDefault();
+  }
+  function inputDatetimeLocalAccessibilityOnKeyPressHandleUserInput(element, event) {
+    var selectionStart, value, components, componentOrder, componentSeparator, selectedComponent, componentMin, componentMax, componentLimit;
+    if (47 < event.charCode && 58 > event.charCode) {
+      selectionStart = element.selectionStart;
+      value = inputDomOriginalValueGetter.call(element);
+      components = inputDateComponentsGet(element);
+      componentOrder = inputDateFormatOrderGetter(element);
+      componentSeparator = inputDateFormatSeparatorGetter(element);
+      selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+      componentMin = inputComponentGetMinimum(element, selectedComponent);
+      componentMax = inputComponentGetMaximum(element, selectedComponent);
+      componentLimit = componentMax / 10;
+      components[selectedComponent] = inputAccessibilityComplementComponent(components[selectedComponent], event.key, componentMin, componentMax, componentLimit);
+      value = inputDatetimeLocalComponentsSet(element, components);
+      if (components[selectedComponent] > componentLimit) {
+        inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart);
+      } else {
+        inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+      }
+    }
+    event.preventDefault();
+  }
+  function inputDatetimeLocalAccessibilityOnFocusHandleInputSelection(element, event) {
+    var componentRange, value, selectionStart, componentSeparator;
+    value = inputDomOriginalValueGetter.call(element);
+    componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element);
+    if (!value) {
+      value = inputDatetimeLocalComponentsSet(element, {
+        yy: INPUT_DATE_YEAR_EMPTY,
+        mm: INPUT_DATE_MONTH_EMPTY,
+        dd: INPUT_DATE_DAY_EMPTY,
+        hh: INPUT_TIME_COMPONENT_EMPTY,
+        ii: INPUT_TIME_COMPONENT_EMPTY,
+        ss: INPUT_TIME_COMPONENT_HIDDEN,
+        ms: INPUT_TIME_COMPONENT_HIDDEN
+      });
+      selectionStart = 0;
+    } else {
+      selectionStart = element.selectionStart;
+    }
+    componentRange = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
+    inputDomOriginalSetSelectionRange.apply(element, componentRange);
+    event.preventDefault();
+  }
+  function inputDatetimeLocalAccessibilityOnBlurHandleInputNormalization(element) {
+    inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
+  }
+  function inputDatetimeLocalClearComponent(element, selectionStart) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputDatetimeLocalComponentsGet(element), componentOrder = inputDatetimeLocalFormatOrderGetter(element), componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    switch (selectedComponent) {
+     case INPUT_COMPONENT_YEAR:
+      components.yy = INPUT_DATE_YEAR_EMPTY;
+      break;
+
+     case INPUT_COMPONENT_MONTH:
+      components.mm = INPUT_DATE_MONTH_EMPTY;
+      break;
+
+     case INPUT_COMPONENT_DAY:
+      components.dd = INPUT_DATE_DAY_EMPTY;
+      break;
+
+     case INPUT_COMPONENT_HOUR:
+      components.hh = INPUT_TIME_COMPONENT_EMPTY;
+      break;
+
+     case INPUT_COMPONENT_MINUTE:
+      components.ii = INPUT_TIME_COMPONENT_EMPTY;
+      break;
+
+     case INPUT_COMPONENT_SECOND:
+      components.ss = INPUT_TIME_COMPONENT_EMPTY;
+      break;
+
+     case INPUT_COMPONENT_MILISECOND:
+      components.ms = INPUT_TIME_COMPONENT_EMPTY;
+      break;
+
+     default:
+      return;
+    }
+    value = inputDatetimeLocalComponentsSet(element, components);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  }
+  function inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputDatetimeLocalComponentsGet(element), componentOrder = inputDatetimeLocalFormatOrderGetter(element), componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator), componentMax = inputComponentGetMaximum(element, selectedComponent);
+    if (components[selectedComponent] > componentMax) {
+      components[selectedComponent] = componentMax;
+    }
+    inputDatetimeLocalComponentsSet(element, components);
+  }
+  function inputDatetimeLocalAccessibilitySelectPreviousComponent(element, selectionStart) {
+    inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
+    var value = inputDomOriginalValueGetter.call(element), componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element), selection = inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator);
+    inputDomOriginalSetSelectionRange.apply(element, selection);
+  }
+  function inputDatetimeLocalAccessibilitySelectNextComponent(element, selectionStart) {
+    inputDatetimeLocalAccessibilityNormalizeSelectedComponent(element, selectionStart);
+    var value = inputDomOriginalValueGetter.call(element), componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element), selection = inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator);
+    inputDomOriginalSetSelectionRange.apply(element, selection);
+  }
+  function inputDatetimeLocalAccessibilityIncreaseComponent(element, selectionStart, amount) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputDatetimeLocalComponentsGet(element), componentOrder = inputDatetimeLocalFormatOrderGetter(element), componentSeparator = inputDatetimeLocalFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator), componentMin = inputComponentGetMinimum(element, selectedComponent), componentMax = inputComponentGetMaximum(element, selectedComponent);
+    components[selectedComponent] = inputAccessibilityIncreaseComponent(components[selectedComponent], amount, componentMin, componentMax);
+    value = inputDatetimeLocalComponentsSet(element, components);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  }
+  function initInputDatetimeLocal() {
+    inputDatetimeLocalValueFormatter = inputDatetimeLocalDefaultValueFormatter;
+    inputDatetimeLocalFormatOrderGetter = inputDatetimeLocalDefaultFormatOrder;
+    inputDatetimeLocalFormatSeparatorGetter = inputDatetimeLocalDefaultFormatSeparator;
+  }
+  function inputDatetimeLocalComponentsGet(input) {
+    if (input[INPUT_PROPERTY_COMPONENTS] === undefined) {
+      input[INPUT_PROPERTY_COMPONENTS] = inputDatetimeLocalComponentsFromValue(input.getAttribute(INPUT_PROPERTY_VALUE));
+    }
+    return input[INPUT_PROPERTY_COMPONENTS];
+  }
+  function inputDatetimeLocalComponentsSet(element, components) {
+    var formattedValue;
+    element[INPUT_PROPERTY_COMPONENTS] = {
+      yy: components[INPUT_COMPONENT_YEAR],
+      mm: components[INPUT_COMPONENT_MONTH],
+      dd: components[INPUT_COMPONENT_DAY],
+      hh: components[INPUT_COMPONENT_HOUR],
+      ii: components[INPUT_COMPONENT_MINUTE],
+      ss: components[INPUT_COMPONENT_SECOND],
+      ms: components[INPUT_COMPONENT_MILISECOND]
+    };
+    formattedValue = inputDatetimeLocalValueFormatter(element[INPUT_PROPERTY_COMPONENTS], element);
+    inputDomOriginalValueSetter.call(element, formattedValue);
+    return formattedValue;
+  }
+  function inputDatetimeLocalComponentsFromValue(value) {
+    var components;
+    if (value) {
+      components = inputDatetimeLocalValidValueStringToComponents(value);
+    }
+    if (components) {
+      return components;
+    } else {
+      return {
+        yy: INPUT_DATE_YEAR_EMPTY,
+        mm: INPUT_DATE_MONTH_EMPTY,
+        dd: INPUT_DATE_DAY_EMPTY,
+        hh: INPUT_TIME_COMPONENT_EMPTY,
+        ii: INPUT_TIME_COMPONENT_EMPTY,
+        ss: INPUT_TIME_COMPONENT_HIDDEN,
+        ms: INPUT_TIME_COMPONENT_HIDDEN
+      };
+    }
+  }
+  function inputDatetimeLocalValidValueStringToComponents(str) {
+    var date, time;
+    str = str.split("T");
+    if (2 === str.length) {
+      date = getDateFromRfc3339FullDateString(str[0]);
+      if (null === date) {
+        return null;
+      }
+      time = inputTimeValidTimeStringToComponents(str[1]);
+      if (null === time) {
+        return null;
+      }
+      return {
+        yy: date.getUTCFullYear(),
+        mm: date.getUTCMonth(),
+        dd: date.getUTCDate(),
+        hh: time.hh,
+        ii: time.ii,
+        ss: time.ss,
+        ms: time.ms
+      };
+    }
+    return null;
+  }
+  function inputDatetimeLocalGetRfc3339(element) {
+    var components = inputDatetimeLocalComponentsGet(element);
+    if (components.hh > INPUT_TIME_COMPONENT_EMPTY && components.ii > INPUT_TIME_COMPONENT_EMPTY) {
+      if (components.ss === INPUT_TIME_COMPONENT_EMPTY) {
+        components.ss = INPUT_TIME_COMPONENT_HIDDEN;
+      }
+      if (components.ms === INPUT_TIME_COMPONENT_EMPTY) {
+        components.ms = INPUT_TIME_COMPONENT_HIDDEN;
+      }
+      return inputDateFuzzyRfc3339ValueFormatter(components) + "T" + inputTimeDefaultValueFormatter(components);
+    } else {
+      return "";
+    }
+  }
+  function inputDatetimeLocalDefaultValueFormatter(components) {
+    return inputDateFuzzyRfc3339ValueFormatter(components) + " " + inputTimeDefaultValueFormatter(components);
+  }
+  function inputDatetimeLocalDefaultFormatOrder() {
+    return [ INPUT_COMPONENT_YEAR, INPUT_COMPONENT_MONTH, INPUT_COMPONENT_DAY, INPUT_COMPONENT_HOUR, INPUT_COMPONENT_MINUTE, INPUT_COMPONENT_SECOND, INPUT_COMPONENT_MILISECOND ];
+  }
+  function inputDatetimeLocalDefaultFormatSeparator() {
+    return [ "-", " ", ":", "." ];
+  }
+  function inputDatetimeLocalDomValueGet(element) {
+    return inputDatetimeLocalGetRfc3339(element);
+  }
+  function inputDatetimeLocalDomValueSet(element, value) {
+    var components;
+    if ("" !== value) {
+      components = inputDatetimeLocalValidValueStringToComponents(value + "");
+    }
+    if (components) {
+      inputDatetimeLocalComponentsSet(element, components);
+    } else {
+      inputDatetimeLocalComponentsSet(element, {
+        yy: INPUT_DATE_YEAR_EMPTY,
+        mm: INPUT_DATE_MONTH_EMPTY,
+        dd: INPUT_DATE_DAY_EMPTY,
+        hh: INPUT_TIME_COMPONENT_EMPTY,
+        ii: INPUT_TIME_COMPONENT_EMPTY,
+        ss: INPUT_TIME_COMPONENT_HIDDEN,
+        ms: INPUT_TIME_COMPONENT_HIDDEN
+      });
+    }
+    return value;
+  }
+  function inputDatetimeLocalDomValueAsDateGet(element) {
+    var components = inputDatetimeLocalComponentsGet(element), date = null;
+    if (components.hh !== INPUT_TIME_COMPONENT_EMPTY && components.ii !== INPUT_TIME_COMPONENT_EMPTY) {
+      date = inputDateGetDate(element);
+      if (date) {
+        date.setUTCHours(components.hh);
+        date.setUTCMinutes(components.ii);
+        if (components.ss > INPUT_TIME_COMPONENT_EMPTY) {
+          date.setUTCSeconds(components.ss);
+        }
+        if (components.ms > INPUT_TIME_COMPONENT_EMPTY) {
+          date.setUTCMilliseconds(components.ms);
+        }
+      }
+    }
+    return date;
+  }
+  function inputDatetimeLocalDomValueAsDateSet(element, value) {
+    inputDatetimeLocalComponentsSet(element, {
+      yy: value.getUTCFullYear(),
+      mm: value.getUTCMonth(),
+      dd: value.getUTCDate(),
+      hh: value.getUTCHours(),
+      ii: value.getUTCMinutes(),
+      ss: value.getUTCSeconds(),
+      ms: value.getUTCMilliseconds()
+    });
+  }
+  function inputDatetimeLocalNormalizationOnLoadFormatInputElements(element) {
+    var components = inputDatetimeLocalComponentsGet(element);
+    inputDatetimeLocalComponentsSet(element, components);
+  }
+  function inputDatetimeLocalNormalizationOnSubmitNormalizeInput(element) {
+    inputDomOriginalValueSetter.call(element, inputDatetimeLocalGetRfc3339(element));
   }
   function inputTimeAccessibilityOnKeydownHandleNavigation(element, event) {
     var selectionStart = element.selectionStart;
@@ -988,32 +1193,13 @@
      case "Backspace":
      case "U+0008":
      case "Del":
-      inputTimeClearComponent(element, selectionStart);
+      inputTimeAccessibilityClearComponent(element, selectionStart);
       break;
 
      case "Tab":
      case "U+0009":
-      if (event.altKey || event.ctrlKey || event.metaKey) {
-        return;
-      } else {
-        if (event.shiftKey) {
-          if (selectionStart === 0) {
-            inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
-            return;
-          }
-        } else {
-          if (element.selectionEnd === inputDomOriginalValueGetter.call(element).length) {
-            inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
-            return;
-          }
-        }
-      }
-      if (event.shiftKey) {
-        inputTimeAccessibilitySelectPreviousComponent(element, selectionStart);
-      } else {
-        inputTimeAccessibilitySelectNextComponent(element, selectionStart);
-      }
-      break;
+      inputTimeAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart);
+      return;
 
      case "Left":
       inputTimeAccessibilitySelectPreviousComponent(element, selectionStart);
@@ -1036,203 +1222,262 @@
     }
     event.preventDefault();
   }
-  function inputTimeAccessibilityOnKeyPressHandleUserInput(element, event) {
-    if (event.charCode > 47 && event.charCode < 58) {
-      var selectionStart = element.selectionStart, selectNext = false, value = inputDomOriginalValueGetter.call(element), components = inputTimeComponentsGet(element), componentOrder = inputTimeFormatOrderGetter(element), componentSeparator = inputTimeFormatSeparatorGetter(element), selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
-      switch (selectedComponent) {
-       case INPUT_TIME_COMPONENT_HOUR:
-        components.hour = inputAccessibilityComplementComponent(components.hour, event.key, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX, 2);
-        if (components.hour > 2) {
-          selectNext = true;
+  function inputTimeAccessibilityOnTabKeydownHandleNavigation(element, event, selectionStart) {
+    if (event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    } else {
+      if (event.shiftKey) {
+        if (0 === selectionStart) {
+          inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
+          return;
         }
-        break;
-
-       case INPUT_TIME_COMPONENT_MINUTE:
-        components.minute = inputAccessibilityComplementComponent(components.minute, event.key, INPUT_TIME_COMPONENT_MINUTE_MIN, INPUT_TIME_COMPONENT_MINUTE_MAX, 5);
-        if (components.minute > 5) {
-          selectNext = true;
-        }
-        break;
-
-       case INPUT_TIME_COMPONENT_SECOND:
-        components.second = inputAccessibilityComplementComponent(components.second, event.key, INPUT_TIME_COMPONENT_SECOND_MIN, INPUT_TIME_COMPONENT_SECOND_MAX, 5);
-        if (components.second > 5) {
-          selectNext = true;
-        }
-        break;
-
-       case INPUT_TIME_COMPONENT_MILISECOND:
-        components.milisecond = inputAccessibilityComplementComponent(components.second, event.key, INPUT_TIME_COMPONENT_MILISECOND_MIN, INPUT_TIME_COMPONENT_MILISECOND_MAX, 99);
-        if (components.milisecond > 99) {
-          selectNext = true;
-        }
-        break;
-
-       default:
-        return;
-      }
-      value = inputTimeComponentsSet(element, components.hour, components.minute, components.second, components.milisecond);
-      var selection = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
-      if (selectNext) {
-        inputTimeAccessibilitySelectNextComponent(element, selection[0]);
       } else {
-        element.setSelectionRange.apply(element, selection);
+        if (element.selectionEnd === inputDomOriginalValueGetter.call(element).length) {
+          inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
+          return;
+        }
+      }
+    }
+    if (event.shiftKey) {
+      inputTimeAccessibilitySelectPreviousComponent(element, selectionStart);
+    } else {
+      inputTimeAccessibilitySelectNextComponent(element, selectionStart);
+    }
+    event.preventDefault();
+  }
+  function inputTimeAccessibilityOnKeyPressHandleUserInput(element, event) {
+    var selectionStart, value, components, componentOrder, componentSeparator, selectedComponent, componentMin, componentMax, componentLimit;
+    if (47 < event.charCode && 58 > event.charCode) {
+      selectionStart = element.selectionStart;
+      value = inputDomOriginalValueGetter.call(element);
+      components = inputTimeComponentsGet(element);
+      componentOrder = inputTimeFormatOrderGetter(element);
+      componentSeparator = inputTimeFormatSeparatorGetter(element);
+      selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+      componentMin = inputComponentGetMinimum(element, selectedComponent);
+      componentMax = inputComponentGetMaximum(element, selectedComponent);
+      componentLimit = componentMax / 10;
+      components[selectedComponent] = inputAccessibilityComplementComponent(components[selectedComponent], event.key, componentMin, componentMax, componentLimit);
+      value = inputTimeComponentsSet(element, components);
+      if (components[selectedComponent] > componentLimit) {
+        inputTimeAccessibilitySelectNextComponent(element, selectionStart);
+      } else {
+        inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
       }
     }
     event.preventDefault();
   }
   function inputTimeAccessibilityOnFocusHandleInputSelection(element, event) {
-    var componentRange, value, selectionStart, componentSeparator;
+    var value, selectionStart, componentSeparator;
     value = inputDomOriginalValueGetter.call(element);
     componentSeparator = inputTimeFormatSeparatorGetter(element);
     if (!value) {
-      value = inputTimeComponentsSet(element, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_HIDDEN, INPUT_TIME_COMPONENT_HIDDEN);
+      value = inputTimeComponentsSet(element, {
+        hh: INPUT_TIME_COMPONENT_EMPTY,
+        ii: INPUT_TIME_COMPONENT_EMPTY,
+        ss: INPUT_TIME_COMPONENT_HIDDEN,
+        ms: INPUT_TIME_COMPONENT_HIDDEN
+      });
       selectionStart = 0;
     } else {
       selectionStart = element.selectionStart;
     }
-    componentRange = inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator);
-    element.setSelectionRange.apply(element, componentRange);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
     event.preventDefault();
   }
   function inputTimeAccessibilityOnBlurHandleInputNormalization(element) {
     inputTimeAccessibilityNormalizeSelectedComponent(element, element.selectionStart);
   }
-  function inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator) {
-    return componentOrder[inputAccessibilityGetSelectedComponentNumber(value, selectionStart, componentSeparator)];
+  function inputTimeAccessibilityClearComponent(element, selectionStart) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputTimeComponentsGet(element), componentOrder = inputTimeFormatOrderGetter(element), componentSeparator = inputTimeFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
+    components[selectedComponent] = INPUT_TIME_COMPONENT_EMPTY;
+    value = inputTimeComponentsSet(element, components);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
   }
-  function inputTimeClearComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
-    switch (selectedComponent) {
-     case INPUT_TIME_COMPONENT_HOUR:
-      components.hour = INPUT_TIME_COMPONENT_EMPTY;
-      break;
-
-     case INPUT_TIME_COMPONENT_MINUTE:
-      components.minute = INPUT_TIME_COMPONENT_EMPTY;
-      break;
-
-     case INPUT_TIME_COMPONENT_SECOND:
-      components.second = INPUT_TIME_COMPONENT_EMPTY;
-      break;
-
-     case INPUT_TIME_COMPONENT_MILISECOND:
-      components.milisecond = INPUT_TIME_COMPONENT_EMPTY;
-      break;
-
-     default:
-      return;
+  function inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputTimeComponentsGet(element), componentOrder = inputTimeFormatOrderGetter(element), componentSeparator = inputTimeFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator), componentMax = inputComponentGetMaximum(element, selectedComponent);
+    if (components[selectedComponent] > componentMax) {
+      components[selectedComponent] = componentMax;
     }
-    value = inputTimeComponentsSet(input, components.hour, components.minute, components.second, components.milisecond);
-    input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
-  }
-  function inputTimeAccessibilityNormalizeSelectedComponent(input, selectionStart) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
-    switch (selectedComponent) {
-     case INPUT_TIME_COMPONENT_HOUR:
-      if (components.hour > INPUT_TIME_COMPONENT_HOUR_MAX) {
-        components.hour = INPUT_TIME_COMPONENT_HOUR_MAX;
-      }
-      break;
-
-     case INPUT_TIME_COMPONENT_MINUTE:
-      if (components.minute > INPUT_TIME_COMPONENT_MINUTE_MAX) {
-        components.minute = INPUT_TIME_COMPONENT_MINUTE_MAX;
-      }
-      break;
-
-     case INPUT_TIME_COMPONENT_SECOND:
-      if (components.second > INPUT_TIME_COMPONENT_SECOND_MAX) {
-        components.second = INPUT_TIME_COMPONENT_SECOND_MAX;
-      }
-      break;
-
-     case INPUT_TIME_COMPONENT_MILISECOND:
-      if (components.milisecond > INPUT_TIME_COMPONENT_MILISECOND_MAX) {
-        components.milisecond = INPUT_TIME_COMPONENT_MILISECOND_MAX;
-      }
-      break;
-
-     default:
-      return;
-    }
-    inputTimeComponentsSet(input, components.hour, components.minute, components.second, components.milisecond);
+    inputTimeComponentsSet(element, components);
   }
   function inputTimeAccessibilitySelectPreviousComponent(element, selectionStart) {
     inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
-    var value = inputDomOriginalValueGetter.call(element), componentSeparator = inputTimeFormatSeparatorGetter(element), selection = inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator);
-    element.setSelectionRange(selection[0], selection[1]);
+    var value = inputDomOriginalValueGetter.call(element), componentSeparator = inputTimeFormatSeparatorGetter(element);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetPreviousComponentRange(value, selectionStart, componentSeparator));
   }
   function inputTimeAccessibilitySelectNextComponent(element, selectionStart) {
     inputTimeAccessibilityNormalizeSelectedComponent(element, selectionStart);
-    var value = inputDomOriginalValueGetter.call(element), componentSeparator = inputTimeFormatSeparatorGetter(element), selection = inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator);
-    element.setSelectionRange(selection[0], selection[1]);
+    var value = inputDomOriginalValueGetter.call(element), componentSeparator = inputTimeFormatSeparatorGetter(element);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetNextComponentRange(value, selectionStart, componentSeparator));
   }
-  function inputTimeAccessibilityIncreaseComponent(input, selectionStart, amount) {
-    var value = inputDomOriginalValueGetter.call(input), components = inputTimeComponentsGet(input), componentOrder = inputTimeFormatOrderGetter(input), componentSeparator = inputTimeFormatSeparatorGetter(input), selectedComponent = inputTimeAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator);
-    switch (selectedComponent) {
-     case INPUT_TIME_COMPONENT_HOUR:
-      components.hour = inputAccessibilityIncreaseComponent(components.hour, amount, INPUT_TIME_COMPONENT_HOUR_MIN, INPUT_TIME_COMPONENT_HOUR_MAX);
-      break;
-
-     case INPUT_TIME_COMPONENT_MINUTE:
-      components.minute = inputAccessibilityIncreaseComponent(components.minute, amount, INPUT_TIME_COMPONENT_MINUTE_MIN, INPUT_TIME_COMPONENT_MINUTE_MAX);
-      break;
-
-     case INPUT_TIME_COMPONENT_SECOND:
-      components.second = inputAccessibilityIncreaseComponent(components.second, amount, INPUT_TIME_COMPONENT_SECOND_MIN, INPUT_TIME_COMPONENT_SECOND_MAX);
-      break;
-
-     case INPUT_TIME_COMPONENT_MILISECOND:
-      components.milisecond = inputAccessibilityIncreaseComponent(components.milisecond, amount, INPUT_TIME_COMPONENT_MILISECOND_MIN, INPUT_TIME_COMPONENT_MILISECOND_MAX);
-      break;
-
-     default:
-      return;
+  function inputTimeAccessibilityIncreaseComponent(element, selectionStart, amount) {
+    var value = inputDomOriginalValueGetter.call(element), components = inputTimeComponentsGet(element), componentOrder = inputTimeFormatOrderGetter(element), componentSeparator = inputTimeFormatSeparatorGetter(element), selectedComponent = inputAccessibilityGetSelectedComponent(value, selectionStart, componentOrder, componentSeparator), componentMin = inputComponentGetMinimum(element, selectedComponent), componentMax = inputComponentGetMaximum(element, selectedComponent);
+    components[selectedComponent] = inputAccessibilityIncreaseComponent(components[selectedComponent], amount, componentMin, componentMax);
+    value = inputTimeComponentsSet(element, components);
+    inputDomOriginalSetSelectionRange.apply(element, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+  }
+  function initInputTime() {
+    inputTimeValueFormatter = inputTimeDefaultValueFormatter;
+    inputTimeFormatOrderGetter = inputTimeDefaultFormatOrder;
+    inputTimeFormatSeparatorGetter = inputTimeDefaultFormatSeparator;
+  }
+  function inputTimeComponentsGet(input) {
+    if (input[INPUT_PROPERTY_COMPONENTS] === undefined) {
+      input[INPUT_PROPERTY_COMPONENTS] = inputTimeComponentsFromValue(input.getAttribute(INPUT_PROPERTY_VALUE));
     }
-    value = inputTimeComponentsSet(input, components.hour, components.minute, components.second, components.milisecond);
-    input.setSelectionRange.apply(input, inputAccessibilityGetComponentRange(value, selectionStart, componentSeparator));
+    return input[INPUT_PROPERTY_COMPONENTS];
   }
-  var INPUT_TIME_STEP_DEFAULT = 60;
-  var INPUT_TIME_STEP_SCALE_FACTOR = 1e3;
+  function inputTimeComponentsSet(element, components) {
+    var formattedValue;
+    element[INPUT_PROPERTY_COMPONENTS] = {
+      hh: components[INPUT_COMPONENT_HOUR],
+      ii: components[INPUT_COMPONENT_MINUTE],
+      ss: components[INPUT_COMPONENT_SECOND],
+      ms: components[INPUT_COMPONENT_MILISECOND]
+    };
+    formattedValue = inputTimeValueFormatter(element[INPUT_PROPERTY_COMPONENTS], element);
+    inputDomOriginalValueSetter.call(element, formattedValue);
+    return formattedValue;
+  }
+  function inputTimeComponentsFromValue(value) {
+    var components;
+    if ("" !== value) {
+      components = inputTimeValidTimeStringToComponents(value);
+    }
+    if (components) {
+      return components;
+    } else {
+      return {
+        hh: INPUT_TIME_COMPONENT_EMPTY,
+        ii: INPUT_TIME_COMPONENT_EMPTY,
+        ss: INPUT_TIME_COMPONENT_HIDDEN,
+        ms: INPUT_TIME_COMPONENT_HIDDEN
+      };
+    }
+  }
+  function inputTimeValidTimeStringToComponents(str) {
+    var components;
+    if (str && inputTimeValidTimeStringRegExp.test(str)) {
+      components = str.split(/[:.]/);
+      if (components[2] === undefined) {
+        components[2] = INPUT_TIME_COMPONENT_HIDDEN;
+      }
+      if (components[3] === undefined) {
+        components[3] = INPUT_TIME_COMPONENT_HIDDEN;
+      } else {
+        components[3] = (components[3] + "000").slice(0, 3);
+      }
+      return {
+        hh: parseInt(components[0], 10),
+        ii: parseInt(components[1], 10),
+        ss: parseInt(components[2], 10),
+        ms: parseInt(components[3], 10)
+      };
+    }
+    return null;
+  }
+  function inputTimeGetRfc3339(element) {
+    var components = inputTimeComponentsGet(element);
+    if (components.hh > INPUT_TIME_COMPONENT_EMPTY && components.ii > INPUT_TIME_COMPONENT_EMPTY) {
+      if (components.ss === INPUT_TIME_COMPONENT_EMPTY) {
+        components.ss = INPUT_TIME_COMPONENT_HIDDEN;
+      }
+      if (components.ms === INPUT_TIME_COMPONENT_EMPTY) {
+        components.ms = INPUT_TIME_COMPONENT_HIDDEN;
+      }
+      return inputTimeDefaultValueFormatter(components);
+    } else {
+      return "";
+    }
+  }
+  function inputTimeDefaultValueFormatter(components) {
+    var formatted;
+    if (components.hh === INPUT_TIME_COMPONENT_EMPTY) {
+      formatted = "--";
+    } else {
+      formatted = ("00" + components.hh).slice(-2);
+    }
+    formatted += ":";
+    if (components.ii === INPUT_TIME_COMPONENT_EMPTY) {
+      formatted += "--";
+    } else {
+      formatted += ("00" + components.ii).slice(-2);
+    }
+    if (components.ss !== INPUT_TIME_COMPONENT_HIDDEN) {
+      formatted += ":";
+      if (components.ss === INPUT_TIME_COMPONENT_EMPTY) {
+        formatted += "--";
+      } else {
+        formatted += ("00" + components.ss).slice(-2);
+      }
+      if (components.ms !== INPUT_TIME_COMPONENT_HIDDEN) {
+        formatted += ".";
+        if (components.ms === INPUT_TIME_COMPONENT_EMPTY) {
+          formatted += "---";
+        } else {
+          formatted += ("000" + components.ms).slice(-3);
+        }
+      }
+    }
+    return formatted;
+  }
+  function inputTimeDefaultFormatOrder() {
+    return [ INPUT_COMPONENT_HOUR, INPUT_COMPONENT_MINUTE, INPUT_COMPONENT_SECOND, INPUT_COMPONENT_MILISECOND ];
+  }
+  function inputTimeDefaultFormatSeparator() {
+    return [ ":", "." ];
+  }
   function inputTimeDomValueGet(element) {
     return inputTimeGetRfc3339(element);
   }
   function inputTimeDomValueSet(element, value) {
     var components;
-    if (value !== "") {
+    if ("" !== value) {
       components = inputTimeValidTimeStringToComponents(value);
     }
     if (components) {
-      inputTimeComponentsSet(element, components.hour, components.minute, components.second, components.milisecond);
+      inputTimeComponentsSet(element, components);
     } else {
-      inputTimeComponentsSet(element, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY, INPUT_TIME_COMPONENT_EMPTY);
+      inputTimeComponentsSet(element, {
+        hh: INPUT_TIME_COMPONENT_EMPTY,
+        ii: INPUT_TIME_COMPONENT_EMPTY,
+        ss: INPUT_TIME_COMPONENT_EMPTY,
+        ms: INPUT_TIME_COMPONENT_EMPTY
+      });
     }
     return value;
   }
   function inputTimeDomValueAsDateGet(element) {
     var components = inputTimeComponentsGet(element), date = null;
-    if (components.hour !== INPUT_TIME_COMPONENT_EMPTY && components.minute !== INPUT_TIME_COMPONENT_EMPTY) {
+    if (components.hh !== INPUT_TIME_COMPONENT_EMPTY && components.ii !== INPUT_TIME_COMPONENT_EMPTY) {
       date = new Date(0);
-      date.setUTCHours(components.hour);
-      date.setUTCMinutes(components.minute);
-      if (components.second > INPUT_TIME_COMPONENT_EMPTY) {
-        date.setUTCSeconds(components.second);
+      date.setUTCHours(components.hh);
+      date.setUTCMinutes(components.ii);
+      if (components.ss > INPUT_TIME_COMPONENT_EMPTY) {
+        date.setUTCSeconds(components.ss);
       }
-      if (components.milisecond > INPUT_TIME_COMPONENT_EMPTY) {
-        date.setUTCMilliseconds(components.milisecond);
+      if (components.ms > INPUT_TIME_COMPONENT_EMPTY) {
+        date.setUTCMilliseconds(components.ms);
       }
     }
     return date;
   }
   function inputTimeDomValueAsDateSet(element, value) {
-    inputTimeComponentsSet(element, value.getUTCHours(), value.getUTCMinutes(), value.getUTCSeconds(), value.getUTCMilliseconds());
+    inputTimeComponentsSet(element, {
+      hh: value.getUTCHours(),
+      ii: value.getUTCMinutes(),
+      ss: value.getUTCSeconds(),
+      ms: value.getUTCMilliseconds()
+    });
   }
   function inputTimeNormalizationOnLoadFormatInputElements(element) {
     var components = inputTimeComponentsGet(element);
-    inputTimeComponentsSet(element, components.hour, components.minute, components.second, components.milisecond);
+    inputTimeComponentsSet(element, components);
   }
   function inputTimeNormalizationOnSubmitNormalizeInput(element) {
     inputDomOriginalValueSetter.call(element, inputTimeGetRfc3339(element));
   }
-})(window, document);
+  var inputDomOriginalTypeGetter, inputDomOriginalValueGetter, inputDomOriginalValueSetter, inputDomOriginalValueAsNumberGetter, inputDomOriginalValueAsNumberSetter, inputDomOriginalStepUp, inputDomOriginalStepDown, inputDomOriginalSetSelectionRange, inputDateValueFormatter, inputDateFormatOrderGetter, inputDateFormatSeparatorGetter, inputDatetimeLocalValueFormatter, inputDatetimeLocalFormatOrderGetter, inputDatetimeLocalFormatSeparatorGetter, inputTimeValueFormatter, inputTimeFormatOrderGetter, inputTimeFormatSeparatorGetter, INPUT_ATTR_TYPE = "type", INPUT_ATTR_LANG = "lang", INPUT_TYPE_TEXT = "text", INPUT_TYPE_DATE = "date", INPUT_TYPE_DATETIME_LOCAL = "datetime-local", INPUT_TYPE_TIME = "time", INPUT_PROPERTY_VALUE = "value", INPUT_PROPERTY_VALUEASDATE = "valueAsDate", INPUT_PROPERTY_VALUEASNUMBER = "valueAsNumber", INPUT_PROPERTY_COMPONENTS = "__polyformfillInputComponents", DOMEXCEPTION_INVALID_STATE_ERR = 11, INPUT_COMPONENT_YEAR = "yy", INPUT_COMPONENT_MONTH = "mm", INPUT_COMPONENT_DAY = "dd", INPUT_DATE_YEAR_EMPTY = 0, INPUT_DATE_MONTH_EMPTY = -1, INPUT_DATE_DAY_EMPTY = 0, INPUT_DATE_YEAR_MIN = 1, INPUT_DATE_YEAR_MAX = 275760, INPUT_DATE_MONTH_MIN = 0, INPUT_DATE_MONTH_MAX = 11, INPUT_DATE_DAY_MIN = 1, INPUT_DATE_DAY_MAX = 31, rfc3999FullDateRegExp = /^([0-9]{4,})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/, INPUT_DATE_STEP_DEFAULT = 1, INPUT_DATE_STEP_SCALE_FACTOR = 864e5, INPUT_COMPONENT_HOUR = "hh", INPUT_COMPONENT_MINUTE = "ii", INPUT_COMPONENT_SECOND = "ss", INPUT_COMPONENT_MILISECOND = "ms", INPUT_TIME_COMPONENT_EMPTY = -1, INPUT_TIME_COMPONENT_HIDDEN = -2, INPUT_TIME_COMPONENT_HOUR_MIN = 0, INPUT_TIME_COMPONENT_HOUR_MAX = 23, INPUT_TIME_COMPONENT_MINUTE_MIN = 0, INPUT_TIME_COMPONENT_MINUTE_MAX = 59, INPUT_TIME_COMPONENT_SECOND_MIN = 0, INPUT_TIME_COMPONENT_SECOND_MAX = 59, INPUT_TIME_COMPONENT_MILISECOND_MIN = 0, INPUT_TIME_COMPONENT_MILISECOND_MAX = 999, inputTimeValidTimeStringRegExp = /^(([0-1][0-9])|(2[0-3])):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/, INPUT_TIME_STEP_DEFAULT = 60, INPUT_TIME_STEP_SCALE_FACTOR = 1e3;
+  init();
+}(window, document);

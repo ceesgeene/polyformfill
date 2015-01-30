@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * @file
@@ -7,7 +7,7 @@
 
 function inputTimeNormalizationOnLoadFormatInputElements(element) {
   var components = inputTimeComponentsGet(element);
-  inputTimeComponentsSet(element, components.hour, components.minute, components.second, components.milisecond);
+  inputTimeComponentsSet(element, components);
 }
 
 function inputTimeNormalizationOnSubmitNormalizeInput(element) {

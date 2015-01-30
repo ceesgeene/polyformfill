@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Examples of polyformfill for input[type=datetime-local]</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="../polyformfill.min.js"></script>
+</head>
+<body>
+
+<form method="POST">
+
+  <p>
+    <label for="example-datetime-local-1">Datetime-local 1</label>
+    <input id="example-datetime-local-1" type="datetime-local" name="example-datetime-local">
+  </p>
+
+  <p>
+    <label for="example-datetime-local-2">Datetime-local 2</label>
+    <input id="example-datetime-local-2" type="datetime-local" name="example-datetime-local-2" value="1010-10-10T10:10:10.101">
+  </p>
+
+  <p>
+    <label for="example-datetime-local-3">Datetime-local 3</label>
+    <input id="example-datetime-local-3" type="datetime-local" name="example-datetime-local-3" value="1010-10-10T10:10:10" step="1">
+  </p>
+
+  <p>
+    <label for="example-datetime-local-4">Datetime-local 4</label>
+    <input id="example-datetime-local-4" type="datetime-local" name="example-datetime-local-4" step="3600">
+  </p>
+
+  <p>
+    <label for="example-datetime-local-5">Datetime-local 5</label>
+    <input id="example-datetime-local-5" type="datetime-local" name="example-datetime-local-5" step="any" value="1010-10-10T10:10:10.101">
+  </p>
+
+  <p>
+    <label for="example-datetime-local-6">Datetime-local 6</label>
+    <input id="example-datetime-local-6" type="datetime-local" name="example-datetime-local-6" step=".01" value="1010-10-10T10:10:10.10">
+  </p>
+
+  <p>
+    <button type="submit">Submit</button>
+  </p>
+</form>
+
+</body>
+</html>
